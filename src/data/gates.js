@@ -133,11 +133,34 @@ def find_key(rack, target):
 
 idx = find_key(rack, target)
 print(idx, "found in", reads, "reads")`),
+  g('rotate','E',80,'speed','Shifting the shift','Array rotation by reversal',
+    ['The guard rota is a list of names, and every Monday the bank rotates it by k places: the last k move to the front.',
+     'Dax: “Pop the last one, stick it on the front. Do that k times.”',
+     '“That is k passes over the list. I want one, and I want it done on the list itself, not on a copy.”'],
+    'Write rotate(nums, k) that rotates the list right by k positions in place with O(1) extra memory. Stretch: handle k larger than the list length without doing extra work.',
+    'Reverse the whole list. Then reverse the first k. Then reverse the rest. Draw it once and it stops being magic.',
+`nums = [1, 2, 3, 4, 5, 6, 7]
+rotate(nums, 3)
+print(nums)   # [5, 6, 7, 1, 2, 3, 4]`),
   g('merge','E',80,'logic','Two watch logs','Merging sorted sequences',
     ['Dax and Marguerite each logged guard sightings by timestamp. Two sorted lists.',
      '“One timeline. Do not sort the whole thing again, you already have two sorted halves.”'],
     'Write merge(a, b) combining two sorted lists into one sorted list in O(n + m).',
     'A finger on each list. Take the smaller, advance that finger. When one runs out, dump the other.'),
+  g('firstbad','E',80,'speed','When the camera went blind','Binary search on a yes/no boundary',
+    ['The lobby camera runs firmware, versions 1 through n. Some version introduced the blind spot. Every version after it has the blind spot too.',
+     'Checking one version means Dax climbs the pole with a laptop. He has agreed to climb it a small number of times.',
+     '“Find the first bad version. Every climb you save is a climb he does not complain about.”'],
+    'Write first_bad_version(n, is_bad) where is_bad(v) is an expensive function that returns True from the first bad version onward. Return that version with as few calls to is_bad as possible. Stretch: how many calls for n = 1,000,000,000?',
+    'Good versions form a prefix, bad ones a suffix. Probe the middle: bad means the boundary is at or before it, good means it is after. Same halving as the key rack.',
+`climbs = 0
+def is_bad(v):
+    global climbs
+    climbs += 1
+    return v >= 1_702
+
+print(first_bad_version(5_000, is_bad), "after", climbs, "climbs")
+# 1702 after 13 climbs`),
   g('window','D',90,'speed','The camera blind spot','Sliding window',
     ['A string of camera states across the lobby, one character per second: X for covered, . for blind.',
      '“Longest run of seconds with no repeated camera ID. That is our walk.”'],
@@ -148,11 +171,25 @@ print(idx, "found in", reads, "reads")`),
      '“Answer each question instantly. Do the work once.”'],
     'Build a prefix-sum array and answer range-sum queries in O(1) each.',
     'sum(i..j) is total(0..j) minus total(0..i-1). Precompute the totals.'),
+  g('minsub','D',90,'speed','Enough cash in the window','Sliding window over sums',
+    ['Hourly cash deliveries to the branch, all positive. The buyer wants at least a certain amount on the floor when the crew walks in.',
+     '“Shortest stretch of consecutive hours whose deliveries reach the target. If no stretch does, say zero. One pass.”'],
+    'Write min_subarray_len(target, nums) returning the length of the shortest contiguous run with sum at least target, or 0 if none. Stretch: why does the window trick break if deliveries can be negative?',
+    'Extend the right edge until the sum reaches the target, then pull the left edge in while it still does. Record the shortest window each time it qualifies.',
+`min_subarray_len(7, [2, 3, 1, 2, 4, 3])   # 2  (the 4 and the 3)
+min_subarray_len(11, [1, 1, 1, 1])        # 0`),
   g('kadane','D',100,'logic','The best week','Kadane\'s algorithm',
     ['Daily deposits, some negative. The buyer wants the single contiguous stretch of days with the highest total.',
      '“Find the stretch. In one pass, or I hand this to Dax.”'],
     'Write max_subarray(nums) returning the maximum sum of a contiguous subarray.',
     'At each day, either extend the current run or start fresh here. Keep the best you have ever seen.'),
+  g('product','D',100,'memory','Everyone\'s cut but yours','Prefix and suffix products',
+    ['Five launderers in a chain, each taking a multiplier on what passes through. Any one of them might be a plant.',
+     '“For each launderer, tell me what a bundle is worth going through everyone except them. No division, one of the multipliers is zero and I am not explaining that to the buyer.”'],
+    'Write product_except_self(nums) returning a list where position i holds the product of every element except nums[i]. No division, O(n). Stretch: use O(1) extra memory beyond the output list.',
+    'Running products from the left give everything before i. Running products from the right give everything after. Multiply the two; the running-totals gate had the same shape.',
+`product_except_self([1, 2, 3, 4])    # [24, 12, 8, 6]
+product_except_self([2, 0, 3])       # [0, 6, 0]`),
   g('twoptr','D',100,'speed','The getaway','Two pointers on sorted data',
     ['The van is idling. You have a sorted list of intersection distances and need two that are exactly the fuel range apart.',
      '“Four minutes. No nested loops.”'],
@@ -163,6 +200,37 @@ print(idx, "found in", reads, "reads")`),
      '“Prove it loops without writing down every checkpoint you visit.”'],
     'Implement a singly linked list, reverse it, and detect a cycle in O(1) extra memory.',
     'Two runners on the track, one twice as fast. If there is a loop, the fast one laps the slow one.'),
+  g('rotsearch','D',100,'logic','The rack was moved','Binary search on rotated data',
+    ['Maintenance rehung the Halden key rack. Still sorted, still no gaps, but they started hanging from the middle: the smallest key is now somewhere along the wall and the numbers wrap around.',
+     'Dax: “So we walk it again.”',
+     '“We do not walk it again. It is still sorted in two pieces. Find the key in log n reads.”'],
+    'Write search_rotated(nums, target) for a sorted list of distinct values rotated at an unknown pivot. Return the index or -1 in O(log n). Stretch: why does the same approach fail once duplicates are allowed?',
+    'Cut the range in half. One half is always properly sorted; check whether the target belongs in that half and keep it or discard it accordingly.',
+`search_rotated([4, 5, 6, 7, 0, 1, 2], 0)   # 4
+search_rotated([4, 5, 6, 7, 0, 1, 2], 3)   # -1`),
+  g('mergell','D',100,'speed','Two chains, one route','Linked list merging & the slow-fast pointer',
+    ['Dax and Marguerite each recorded a chain of checkpoints by time, as linked lists this time. No indexes, only next pointers.',
+     '“One chain, still in order. Reuse the nodes, we are not buying more memory. Then tell me which checkpoint sits in the middle without counting them first.”'],
+    'Write merge_lists(a, b) merging two sorted singly linked lists into one sorted list, reusing the existing nodes. Stretch: write middle_node(head) returning the middle node in one pass.',
+    'Start from a dummy head. Compare the two front nodes, attach the smaller, advance that list. For the middle: one pointer moving one step, another moving two.',
+`class ListNode:
+    def __init__(self, val, next=None):
+        self.val, self.next = val, next
+
+def from_list(xs):
+    head = None
+    for x in reversed(xs):
+        head = ListNode(x, head)
+    return head
+
+def to_list(node):
+    out = []
+    while node:
+        out.append(node.val); node = node.next
+    return out
+
+to_list(merge_lists(from_list([1, 2, 4]), from_list([1, 3, 4])))   # [1, 1, 2, 3, 4, 4]
+middle_node(from_list([1, 2, 3, 4, 5])).val                        # 3`),
   g('tree','C',120,'logic','The org chart','Binary trees & traversal',
     ['Who reports to whom at the bank is a tree. You need to read it in three different orders and know how deep it goes.',
      '“Pre, in, post. And the height. Recursion is allowed, panic is not.”'],
@@ -173,6 +241,11 @@ print(idx, "found in", reads, "reads")`),
      '“Insert. Find. Validate that nobody corrupted the ordering. Then give me the k-th smallest box.”'],
     'Implement BST insert, search, is_valid_bst, and kth_smallest.',
     'Inorder traversal of a BST visits keys in sorted order. Almost everything falls out of that fact.'),
+  g('lca','C',140,'logic','The common handler','Lowest common ancestor',
+    ['Two tellers on the org chart. Both have been paid. Marguerite wants the lowest manager who oversees both, because that manager signed off.',
+     '“Lowest one. Not the CEO, everyone reports to the CEO. Then do it faster on the deposit-box tree, where the ordering tells you which way to go.”'],
+    'Write lowest_common_ancestor(root, p, q) for a binary tree, returning the deepest node that has both p and q beneath it (a node counts as its own ancestor). Then write the O(h) version for a BST. Stretch: write is_symmetric(root), which uses the same shape of recursion on two subtrees at once.',
+    'Ask each subtree whether it found p or q. If both sides report a find, this node is the answer; if only one does, pass that result up. In a BST, compare the values to pick a side.'),
 ]},
 { name:'Arc III — The job', sub:'Underground. Three nights. No signal.', gates:[
   g('sewers','C',140,'logic','The sewer map','Breadth-first search on a grid',
