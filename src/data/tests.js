@@ -623,4 +623,147 @@ check("exist([['a', 'a']], 'aaa')", lambda: exist([["a", "a"]], "aaa"), False)
 check("exist([['a', 'b'], ['c', 'd']], 'ad') diagonals do not touch", lambda: exist([["a", "b"], ["c", "d"]], "ad"), False)
 `,
 
+// ─── Arc IV — The escape ───────────────────────────────────────────────────────
+bipartite: `
+check("is_bipartite([[1, 3], [0, 2], [1, 3], [0, 2]])", True)
+check("is_bipartite([[1, 2, 3], [0, 2], [0, 1, 3], [0, 2]]) triangle", lambda: is_bipartite([[1, 2, 3], [0, 2], [0, 1, 3], [0, 2]]), False)
+check("is_bipartite([[], [], []]) no edges", lambda: is_bipartite([[], [], []]), True)
+check("is_bipartite([[1], [0], [3], [2]]) two components", lambda: is_bipartite([[1], [0], [3], [2]]), True)
+check("is_bipartite([[1], [0], [3, 4], [2, 4], [2, 3]]) odd cycle in second component", lambda: is_bipartite([[1], [0], [3, 4], [2, 4], [2, 3]]), False)
+check("is_bipartite([[1, 2], [0, 3], [0, 3], [1, 2]]) square", lambda: is_bipartite([[1, 2], [0, 3], [0, 3], [1, 2]]), True)
+check("is_bipartite([[1], [0, 2], [1, 3], [2, 4], [3]]) path", lambda: is_bipartite([[1], [0, 2], [1, 3], [2, 4], [3]]), True)
+`,
+routes: `
+_t_e = [(0, 1, 4), (0, 2, 1), (2, 1, 2), (1, 3, 1), (2, 3, 5), (3, 4, 3), (4, 5, 2)]
+check("cheapest_route(6, edges, 0, [4])", lambda: cheapest_route(6, _t_e, 0, [4]), 7)
+check("cheapest_route(6, edges, 0, [4, 5])", lambda: cheapest_route(6, _t_e, 0, [4, 5]), 7)
+check("cheapest_route(6, edges, 0, [5, 3, 2]) nearest of three", lambda: cheapest_route(6, _t_e, 0, [5, 3, 2]), 1)
+check("cheapest_route(6, edges, 0, [0]) already there", lambda: cheapest_route(6, _t_e, 0, [0]), 0)
+check("cheapest_route(7, edges, 0, [6]) unreachable", lambda: cheapest_route(7, _t_e, 0, [6]), -1)
+check("cheapest_route(6, edges, 5, [0]) undirected", lambda: cheapest_route(6, _t_e, 5, [0]), 9)
+check("cheapest_route(3, [(0, 1, 10), (0, 2, 1), (2, 1, 1)], 0, [1]) direct road is not cheapest", lambda: cheapest_route(3, [(0, 1, 10), (0, 2, 1), (2, 1, 1)], 0, [1]), 2)
+`,
+union: `
+_t_u = UnionFind(6)
+check("union(0, 1) first time", lambda: _t_u.union(0, 1), True)
+check("union(1, 2)", lambda: _t_u.union(1, 2), True)
+check("union(0, 2) already joined", lambda: _t_u.union(0, 2), False)
+check("connected(0, 2)", lambda: _t_u.connected(0, 2), True)
+check("connected(0, 3)", lambda: _t_u.connected(0, 3), False)
+check("find(0) == find(2)", lambda: _t_u.find(0) == _t_u.find(2), True)
+check("find(3) == find(4)", lambda: _t_u.find(3) == _t_u.find(4), False)
+check("count_networks(6, [(0, 1), (1, 2), (3, 4)])", 3)
+check("count_networks(4, [])", 4)
+check("count_networks(5, [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]) one ring", lambda: count_networks(5, [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]), 1)
+check("count_networks(1, [])", 1)
+`,
+mst: `
+_t_e = [(0, 1, 4), (0, 2, 3), (1, 2, 1), (1, 3, 2), (2, 3, 4), (3, 4, 2), (4, 5, 6)]
+check("min_wiring_cost(6, edges)", lambda: min_wiring_cost(6, _t_e), 14)
+check("min_wiring_cost(3, [(0, 1, 5)]) disconnected", lambda: min_wiring_cost(3, [(0, 1, 5)]), -1)
+check("min_wiring_cost(1, [])", 0)
+check("min_wiring_cost(2, [(0, 1, 7), (0, 1, 3)]) parallel lines", lambda: min_wiring_cost(2, [(0, 1, 7), (0, 1, 3)]), 3)
+check("min_wiring_cost(4, [(0, 1, 1), (1, 2, 1), (2, 3, 1), (0, 3, 1), (0, 2, 10)])", 3)
+check("min_wiring_cost(4, [(0, 1, 1), (1, 2, 2), (2, 0, 3), (2, 3, 4), (3, 1, 5)])", 7)
+`,
+bellman: `
+check("bellman_ford(4, [(0, 1, 4), (0, 2, 5), (1, 2, -3), (2, 3, 4)], 0)", [0, 4, 1, 5])
+check("bellman_ford(4, [(0, 1, 4), (0, 2, 5), (1, 2, -3), (2, 3, 4), (3, 1, -2)], 0) negative cycle", lambda: bellman_ford(4, [(0, 1, 4), (0, 2, 5), (1, 2, -3), (2, 3, 4), (3, 1, -2)], 0), None)
+check("bellman_ford(3, [(1, 2, -1), (2, 1, -1)], 0) unreachable negative cycle is harmless", lambda: bellman_ford(3, [(1, 2, -1), (2, 1, -1)], 0), [0, float('inf'), float('inf')])
+check("bellman_ford(1, [], 0)", [0])
+check("bellman_ford(3, [(0, 1, 2), (1, 2, 2), (0, 2, 5)], 0)", [0, 2, 4])
+check("bellman_ford(3, [(0, 1, 5), (1, 2, -5), (0, 2, 1)], 0) negative edge, no cycle", lambda: bellman_ford(3, [(0, 1, 5), (1, 2, -5), (0, 2, 1)], 0), [0, 5, 0])
+check("bellman_ford(3, [(0, 1, 1), (1, 0, 1)], 2) source isolated", lambda: bellman_ford(3, [(0, 1, 1), (1, 0, 1)], 2), [float('inf'), float('inf'), 0])
+`,
+stairs: `
+check("climb_stairs(0)", 1)
+check("climb_stairs(1)", 1)
+check("climb_stairs(2)", 2)
+check("climb_stairs(3)", 3)
+check("climb_stairs(10)", 89)
+check("climb_stairs(100)", 573147844013817084101)
+`,
+robber: `
+check("rob([1, 2, 3, 1])", 4)
+check("rob([2, 7, 9, 3, 1])", 12)
+check("rob([])", 0)
+check("rob([5])", 5)
+check("rob([2, 1])", 2)
+check("rob([2, 1, 1, 2])", 4)
+check("rob([6, 3, 10, 8, 2, 10, 3, 5, 10, 5, 3])", 39)
+`,
+jump: `
+check("can_jump([2, 3, 1, 1, 4])", True)
+check("can_jump([3, 2, 1, 0, 4])", False)
+check("can_jump([0])", True)
+check("can_jump([0, 1])", False)
+check("can_jump([1, 0])", True)
+check("can_jump([2, 0, 0])", True)
+check("can_jump([1, 1, 0, 1])", False)
+check("can_jump([5, 0, 0, 0, 0, 0])", True)
+`,
+paths: `
+check("unique_paths(3, 7)", 28)
+check("unique_paths(3, 2)", 3)
+check("unique_paths(1, 1)", 1)
+check("unique_paths(1, 9)", 1)
+check("unique_paths(10, 10)", 48620)
+check("unique_paths_with_obstacles([[0, 0, 0], [0, 1, 0], [0, 0, 0]])", 2)
+check("unique_paths_with_obstacles([[0, 1], [0, 0]])", 1)
+check("unique_paths_with_obstacles([[0, 0], [0, 0]])", 2)
+check("unique_paths_with_obstacles([[1]]) start blocked", lambda: unique_paths_with_obstacles([[1]]), 0)
+check("unique_paths_with_obstacles([[0, 0], [1, 1], [0, 0]]) wall", lambda: unique_paths_with_obstacles([[0, 0], [1, 1], [0, 0]]), 0)
+`,
+coins: `
+check("coin_change([1, 2, 5], 11)", 3)
+check("coin_change([2], 3)", -1)
+check("coin_change([1], 0)", 0)
+check("coin_change([1], 2)", 2)
+check("coin_change([1, 3, 4], 6) greedy would say 3", lambda: coin_change([1, 3, 4], 6), 2)
+check("coin_change([186, 419, 83, 408], 6249)", 20)
+check("coin_change([5, 10], 3)", -1)
+`,
+minpath: `
+check("min_path_sum([[1, 3, 1], [1, 5, 1], [4, 2, 1]])", 7)
+check("min_path_sum([[1, 2, 3], [4, 5, 6]])", 12)
+check("min_path_sum([[5]])", 5)
+check("min_path_sum([[1, 2], [1, 1]])", 3)
+check("min_path_sum([[9, 1, 1], [9, 9, 1], [9, 9, 1]]) hug the top", lambda: min_path_sum([[9, 1, 1], [9, 9, 1], [9, 9, 1]]), 13)
+check("min_path_sum([[1], [2], [3]]) single column", lambda: min_path_sum([[1], [2], [3]]), 6)
+`,
+decode: `
+check("num_decodings('12')", 2)
+check("num_decodings('226')", 3)
+check("num_decodings('0')", 0)
+check("num_decodings('06')", 0)
+check("num_decodings('10')", 1)
+check("num_decodings('27')", 1)
+check("num_decodings('100')", 0)
+check("num_decodings('1')", 1)
+check("num_decodings('11106')", 2)
+check("num_decodings('111111111111111111111111111111111111111111111')", 1836311903)
+`,
+lis: `
+check("longest_increasing([10, 9, 2, 5, 3, 7, 101, 18])", 4)
+check("longest_increasing([0, 1, 0, 3, 2, 3])", 4)
+check("longest_increasing([7, 7, 7, 7]) strictly increasing", lambda: longest_increasing([7, 7, 7, 7]), 1)
+check("longest_increasing([])", 0)
+check("longest_increasing([5])", 1)
+check("longest_increasing([5, 4, 3, 2, 1])", 1)
+check("longest_increasing([1, 2, 3, 4, 5])", 5)
+check("longest_increasing([3, 1, 2])", 2)
+check("longest_increasing(range(2000) + range(1000)) large", lambda: longest_increasing(list(range(2000)) + list(range(1000))), 2000)
+`,
+wordbreak: `
+check("word_break('vaultdoor', ['vault', 'door'])", True)
+check("word_break('cashvancash', ['cash', 'van'])", True)
+check("word_break('guardsandog', ['guards', 'dog', 'sand', 'and', 'guard'])", False)
+check("word_break('', ['a'])", True)
+check("word_break('a', ['b'])", False)
+check("word_break('applepenapple', ['apple', 'pen'])", True)
+check("word_break('catsandog', ['cats', 'dog', 'sand', 'and', 'cat'])", False)
+_t_long = 'a' * 90 + 'b'
+check("word_break('a' * 90 + 'b', ['a', 'aa', 'aaa', 'aaaa', 'aaaaa']) must not blow up", lambda: word_break(_t_long, ['a', 'aa', 'aaa', 'aaaa', 'aaaaa']), False)
+`,
+
 }
