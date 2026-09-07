@@ -258,6 +258,36 @@ middle_node(from_list([1, 2, 3, 4, 5])).val                        # 3`),
      '“How many compartments? And how big is the largest?”'],
     'Count connected regions in a grid and find the largest one.',
     'When you find an unvisited open cell, sink the whole compartment recursively before you move on.'),
+  g('oranges','C',140,'logic','The gas spreads','Multi-source breadth-first search',
+    ['Night two. The bank vents tear gas into the tunnels from several grates at once. Each minute it spreads to every open cell touching a gassed one.',
+     'Dax: “Run a search from each grate, take the smallest time for every cell.”',
+     '“Or start them all at once. How many minutes until the whole tunnel is gassed, and is there a cell it never reaches? That is where I am standing.”'],
+    'Write minutes_to_fill(grid) for a grid of 0 (rock), 1 (open tunnel), 2 (gas source). Gas spreads to 4-adjacent open cells once per minute. Return the minutes until every open cell is gassed, or -1 if some cell is never reached. Stretch: return the coordinates of the last cell reached.',
+    'Load every source into the queue before you start, all at distance zero. Then breadth-first search as usual; each layer is one minute.',
+`grid = [
+  [2, 1, 1],
+  [1, 1, 0],
+  [0, 1, 1],
+]
+minutes_to_fill(grid)   # 4
+
+minutes_to_fill([[2, 1, 1], [0, 1, 1], [1, 0, 1]])   # -1  (bottom-left is cut off)`),
+  g('clone','B',160,'memory','Copy the wiring','Graph deep copy with a visited map',
+    ['The alarm wiring is a mesh: junction boxes, each listing the boxes it connects to. Marguerite wants to test cuts on a copy before touching the real one.',
+     '“An exact copy. Same shape, new boxes. If two wires lead to the same box, they must lead to the same copy of it, or your test lies to us.”'],
+    'Write clone_graph(node) returning a deep copy of a connected undirected graph. Each Node has val and a list neighbors. Every node must be copied exactly once. Stretch: write it iteratively with a queue.',
+    'A dictionary from original node to its copy. When you reach a node already in the dictionary, reuse its copy instead of making another; that is what preserves the shape.',
+`class Node:
+    def __init__(self, val, neighbors=None):
+        self.val = val
+        self.neighbors = neighbors if neighbors is not None else []
+
+a, b, c = Node(1), Node(2), Node(3)
+a.neighbors = [b, c]; b.neighbors = [a, c]; c.neighbors = [a, b]
+
+copy = clone_graph(a)
+print(copy.val, [n.val for n in copy.neighbors])   # 1 [2, 3]
+print(copy is a, copy.neighbors[0] is b)           # False False`),
   g('topo','B',160,'logic','Order of operations','Topological sort',
     ['Cut power before the cameras, cameras before the lock, lock before the door. Forty tasks, dozens of dependencies.',
      '“Give me an order that breaks nothing. Tell me if the plan contradicts itself.”'],
@@ -268,16 +298,38 @@ middle_node(from_list([1, 2, 3, 4, 5])).val                        # 3`),
      '“Shifts overlap in ways that make no sense. Merge them first, then find the hole.”'],
     'Merge overlapping intervals and return the largest uncovered gap.',
     'Sort by start. After that, each interval only needs comparing with the last one you kept.'),
+  g('letters','B',160,'logic','The keypad','Recursive enumeration',
+    ['Dax watched the branch manager punch a code into an old phone-style keypad: 2 is ABC, 3 is DEF, and so on up to 9. He saw the digits. He did not see the letters.',
+     '“Every word those digits could spell. All of them, I will do the guessing. And do not write nine nested loops, the code might be ten digits tomorrow.”'],
+    'Write letter_combinations(digits) returning every string the digit sequence could spell on a phone keypad, for digits 2–9. Empty input returns an empty list. Stretch: count the combinations without generating them.',
+    'One digit at a time. For every partial word you have so far, extend it with each letter of the next digit. Recursion does this naturally; a growing list does it too.'),
   g('heap','B',160,'memory','What fits in the bag','Heaps & top-k',
     ['Ten thousand items in the vault, each with a value. The bag holds twenty.',
      '“The twenty most valuable. Then keep that answer current as Dax keeps finding things.”'],
     'Find the k largest values using a heap, then implement a running top-k as items stream in.',
     'A min-heap of size k: if a new item beats the smallest thing in it, swap them. Python has heapq.'),
+  g('counting','B',160,'speed','Badges by clearance','Counting sort & bucket sort',
+    ['A hundred thousand staff badges, each with a clearance level from 0 to 9. Marguerite wants them sorted by level, and the badge order within a level must not change.',
+     '“The keys are tiny and there are a lot of them. Comparing badges to each other is a waste. Count.”'],
+    'Write counting_sort(nums, max_value) that sorts non-negative integers in O(n + k) and is stable. Then write bucket_sort(values) for floats in [0, 1). Stretch: why can neither replace a comparison sort for arbitrary integers?',
+    'Count how many of each value there are. Running totals of the counts tell you where each value\'s block starts in the output; place items in original order into their block.'),
+  g('meetings','B',160,'memory','Bodies on the floor','Heaps for overlapping intervals',
+    ['The guard timetable again, but this time the question is not the gap. It is the crowd.',
+     '“At the worst moment of the night, how many guards are on the floor at once? That is how many bodies we walk past. Sort the shifts, then keep the ones still running.”'],
+    'Write max_concurrent(intervals) returning the maximum number of intervals overlapping at any moment (a shift ending at t and another starting at t do not overlap). Stretch: solve it again by sweeping sorted start and end times separately.',
+    'Sort by start. A min-heap holds the end times of shifts still in progress; before adding a shift, pop every end time that is at or before its start. The heap\'s largest size is the answer.',
+`max_concurrent([[0, 30], [5, 10], [15, 20]])   # 2
+max_concurrent([[7, 10], [2, 4]])              # 1`),
   g('sorts','B',180,'logic','Sorting the take','Merge sort & quicksort',
     ['Every serial number, unsorted, and the buyer wants them ordered. sorted() is not available because you need to explain how it works to a jury.',
      '“Two ways. One that never has a bad night, one that is usually faster.”'],
     'Implement merge sort and quicksort. Compare their worst cases and explain when Python\'s built-in sort uses which idea.',
     'Merge sort: split, sort halves, merge. Quicksort: pick a pivot, partition around it, recurse. Where does each spend its time?'),
+  g('quickselect','B',180,'speed','The twentieth most valuable','Quickselect',
+    ['Ten thousand items, and Dax only wants to know one thing: the value of the item that would be twentieth if the vault were sorted. Not the top twenty, just the line.',
+     '“You know where the partition step puts the pivot. Use that and only chase the side that matters. No heap, no full sort.”'],
+    'Write kth_largest(nums, k) returning the k-th largest value in average O(n) time using quickselect. Stretch: what is the worst case, and why does choosing a random pivot make it rare?',
+    'Partition around a pivot exactly as in quicksort. The pivot lands at its final sorted position; if that is position k you are done, otherwise recurse only into the side containing k.'),
   g('perms','B',180,'logic','Every route through the floor','Recursion & permutations',
     ['Five rooms, any order. Marguerite wants every possible order so she can rule them out one by one.',
      '“All of them. Then only the ones that start in the lobby.”'],
@@ -288,6 +340,27 @@ middle_node(from_list([1, 2, 3, 4, 5])).val                        # 3`),
      '“Enumerate every valid code. There are fewer than you think.”'],
     'Generate every code that satisfies the constraints, pruning dead branches early. Then solve N-Queens with the same skeleton.',
     'Build one digit at a time. If the rule fails now, nothing you add later can fix it. Undo and try the next digit.'),
+  g('task','A',220,'speed','The crew\'s rota','Greedy scheduling with a heap',
+    ['Night three has a list of jobs by type: drill, drill, listen, drill, cut. Two jobs of the same type need n quiet slots between them or the sensors notice the rhythm.',
+     '“Fewest total slots, idle ones included. Always do whatever you have the most of left, because that is what will strand you at the end.”'],
+    'Write least_interval(tasks, n) where tasks is a list of single-character job types and n is the required cooldown between two of the same type. Return the minimum number of time slots, counting idle slots. Stretch: derive the closed-form answer from the most frequent type alone.',
+    'A max-heap of remaining counts. Each round, take up to n+1 different types, run them, put the survivors back. Rounds that come up short are padded with idle slots.',
+`least_interval(["A", "A", "A", "B", "B", "B"], 2)   # 8   A B _ A B _ A B
+least_interval(["A", "A", "A", "B", "B", "B"], 0)   # 6`),
+  g('wordsearch','A',240,'logic','The word in the grid','Backtracking on a grid',
+    ['The inner door has no keypad. It has a grid of letters, and the passphrase must be traced with a finger through touching cells, never stepping on a cell twice.',
+     'Dax wants to try every path. Marguerite wants him to stop talking.',
+     '“Tell me whether the word is in there before he wears the finish off. Start anywhere. Stop the moment a letter fails to match.”'],
+    'Write exist(board, word) returning True if word can be traced through horizontally or vertically adjacent cells with no cell reused. Stretch: given a list of many words, what structure would let you search for all of them in one traversal?',
+    'From each cell matching the first letter, recurse on the neighbours for the next letter. Mark the cell as used on the way in and unmark it on the way out.',
+`board = [
+  ["A", "B", "C", "E"],
+  ["S", "F", "C", "S"],
+  ["A", "D", "E", "E"],
+]
+exist(board, "ABCCED")   # True
+exist(board, "SEE")      # True
+exist(board, "ABCB")     # False`),
 ]},
 { name:'Arc IV — The escape', sub:'The city is a graph and every edge has a price.', gates:[
   g('routes','A',220,'speed','Every road out of the city','Dijkstra\'s algorithm',
