@@ -174,3 +174,20 @@
   .opt:disabled{cursor:default}
   .why{margin:0;color:#ff8a8a}
   .why.ok{color:var(--ok)}
+
+  /* ── Trace step ────────────────────────────────────────────────────────── */
+  .trace{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+  @media (max-width:700px){.trace{grid-template-columns:1fr}}
+  .trace-code{padding:10px 0}
+  .trace-code div{padding:0 14px;white-space:pre}
+  .trace-code .ln{display:inline-block;width:2.2em;color:var(--faint);user-select:none}
+  .trace-code .hl{background:rgba(63,169,255,.18);box-shadow:inset 3px 0 0 var(--glow)}
+  .trace-side{display:grid;gap:10px;align-content:start}
+  .state{display:grid;gap:4px;border:1px solid var(--faint);padding:10px 12px;background:rgba(5,10,22,.5)}
+  .var{display:grid;grid-template-columns:90px 1fr;gap:10px;font-size:15px}
+  .var span{color:var(--dim)}
+  .var.ask code{color:var(--glow);font-weight:700}
+  .ans{display:grid;gap:6px}
+  .ans label{color:var(--dim);font-size:15px}
+  .ans input{background:#050a16;color:var(--ink);border:1px solid var(--faint);padding:8px 10px;font:inherit;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14px}
+  .ans input:focus{outline:none;border-color:var(--edge);box-shadow:0 0 0 2px rgba(63,169,255,.25)}

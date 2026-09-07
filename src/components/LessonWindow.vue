@@ -3,8 +3,9 @@ import { computed } from 'vue'
 import { useStore } from '../store.js'
 import StepExplain from './StepExplain.vue'
 import StepSpot from './StepSpot.vue'
+import StepTrace from './StepTrace.vue'
 const s = useStore()
-const STEP_COMPONENTS = { explain: StepExplain, spot: StepSpot }
+const STEP_COMPONENTS = { explain: StepExplain, spot: StepSpot, trace: StepTrace }
 const comp = computed(() => STEP_COMPONENTS[s.activeStep.value?.type] ?? null)
 const last = computed(() => s.stepIndex.value === s.activeNode.value.steps.length - 1)
 const kicker = { explain: 'Marguerite explains', trace: 'Trace it by hand', spot: 'Spot the pattern', blank: 'Fill the blanks', mini: 'Mini mission' }
