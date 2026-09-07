@@ -95,7 +95,7 @@
   .quest .algo{color:var(--dim);margin-top:-8px}
   .story{font-size:18px;display:grid;gap:10px}
   .story p{margin:0}
-  .story .voice{color:#a9c6f2;border-left:2px solid var(--violet);padding-left:12px}
+  .story .voice,.mission .voice{color:#a9c6f2;border-left:2px solid var(--violet);padding-left:12px}
   .mission{border:1px dashed rgba(63,169,255,.45);padding:14px 16px;background:rgba(63,169,255,.05)}
   .mission h4{margin:0 0 6px;color:var(--glow);font-size:16px;letter-spacing:.04em}
   .mission p{margin:0 0 10px}
