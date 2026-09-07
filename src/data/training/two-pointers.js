@@ -6,13 +6,13 @@ export default node('two-pointers', {
   steps: [
     explain([
       'The fence sent a sorted list of serials and a number. Marguerite wants two serials that add up to it.',
-      'Dax: "Check every pair. Done."',
-      '"Ten thousand serials. That is fifty million pairs. Sit down."',
+      'Dax: “Check every pair. Done.”',
+      '“Ten thousand serials. That is fifty million pairs. Sit down.”',
     ], { move: 'brute force' }),
     explain([
-      '"The list is sorted. Put one hand on the smallest and one on the largest. Add them."',
-      '"Too big? The big hand moves left. Too small? The small hand moves right. Every move throws away a whole row of pairs we never have to check."',
-      '"Two hands, one pass. That is the whole trick, and you will use it in a dozen shapes."',
+      '“The list is sorted. Put one hand on the smallest and one on the largest. Add them.”',
+      '“Too big? The big hand moves left. Too small? The small hand moves right. Every move throws away a whole row of pairs we never have to check.”',
+      '“Two hands, one pass. That is the whole trick, and you will use it in a dozen shapes.”',
     ], { move: 'name the waste', code:
 `def pair_sum_sorted(nums, target):
     i, j = 0, len(nums) - 1
@@ -49,7 +49,7 @@ export default node('two-pointers', {
     spot('A sorted list of timestamps. Find whether any two are exactly one hour apart. Which pattern?',
       ['Two pointers walking inward or in step', 'A stack', 'Count every timestamp in a dictionary', 'Try every pair'],
       0, 'Sorted input plus a condition on a pair: two hands. Here both move the same direction, but it is the same idea.'),
-    blank('"Finish it. A passphrase reads the same both ways or the fence does not answer. Letters only, already lowercase."',
+    blank('“Finish it. A passphrase reads the same both ways or the fence does not answer. Letters only, already lowercase.”',
 `def is_mirror(s):
     i, j = 0, len(s) - 1
     while ___:
