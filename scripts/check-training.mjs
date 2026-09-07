@@ -1,4 +1,4 @@
-﻿// Validates training content: schema, prerequisites, gate refs, step mix, trace and spot sanity.
+// Validates training content: schema, prerequisites, gate refs, step mix, trace and spot sanity.
 import { NODES, NODE_BY_ID } from '../src/data/training/index.js'
 import { GATES } from '../src/data/index.js'
 import { MOVES } from '../src/data/training/node.js'
@@ -6,14 +6,14 @@ import { MOVES } from '../src/data/training/node.js'
 const XP = { F: [40, 60], E: [60, 80], D: [90, 100], C: [120, 140], B: [160, 180], A: [200, 240], S: [280, 400] }
 const gateIds = new Set(GATES.map(g => g.id))
 let errors = 0
-const fail = m => { console.error('âœ—', m); errors++ }
+const fail = m => { console.error('✗', m); errors++ }
 
 const seen = new Set()
 for (const n of NODES) {
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(n.id)) fail(`${n.id}: id must be lowercase kebab-case`)
   if (seen.has(n.id)) fail(`duplicate id ${n.id}`); seen.add(n.id)
   if (!XP[n.tier]) fail(`${n.id}: bad tier ${n.tier}`)
-  else if (n.xp < XP[n.tier][0] || n.xp > XP[n.tier][1]) fail(`${n.id}: xp ${n.xp} outside ${XP[n.tier].join('â€“')} for tier ${n.tier}`)
+  else if (n.xp < XP[n.tier][0] || n.xp > XP[n.tier][1]) fail(`${n.id}: xp ${n.xp} outside ${XP[n.tier].join('–')} for tier ${n.tier}`)
   for (const f of ['title', 'algo']) if (!n[f]) fail(`${n.id}: missing ${f}`)
   if (!Array.isArray(n.requires)) fail(`${n.id}: requires must be an array`)
   else for (const r of n.requires) if (!NODE_BY_ID[r]) fail(`${n.id}: requires unknown node ${r}`)
@@ -31,7 +31,7 @@ for (const n of NODES) {
     const at = `${n.id}[${i}] ${s.type}`
     switch (s.type) {
       case 'explain':
-        if (!Array.isArray(s.lines) || s.lines.length < 2 || s.lines.length > 5) fail(`${at}: 2â€“5 lines`)
+        if (!Array.isArray(s.lines) || s.lines.length < 2 || s.lines.length > 5) fail(`${at}: 2–5 lines`)
         if (s.move && !MOVES.includes(s.move)) fail(`${at}: unknown move ${s.move}`)
         break
       case 'trace': {
@@ -47,7 +47,7 @@ for (const n of NODES) {
       }
       case 'spot':
         if (!s.problem || !s.why) fail(`${at}: needs problem and why`)
-        if (!Array.isArray(s.options) || s.options.length < 3 || s.options.length > 4) fail(`${at}: 3â€“4 options`)
+        if (!Array.isArray(s.options) || s.options.length < 3 || s.options.length > 4) fail(`${at}: 3–4 options`)
         if (!(Number.isInteger(s.answer) && s.answer >= 0 && s.answer < (s.options || []).length)) fail(`${at}: answer out of range`)
         break
       case 'blank':
@@ -79,5 +79,5 @@ const visit = (id, path = []) => {
 }
 for (const n of NODES) visit(n.id)
 
-console.log(errors ? `${errors} problem(s)` : `âœ“ ${NODES.length} training nodes look good`)
+console.log(errors ? `${errors} problem(s)` : `✓ ${NODES.length} training nodes look good`)
 process.exit(errors ? 1 : 0)
