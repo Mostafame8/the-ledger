@@ -402,4 +402,225 @@ check("lca_bst(bst, 3, 5)", lambda: _t_lca_bst(_t_s, 3, 5), 4)
 check("lca_bst(bst, 0, 5)", lambda: _t_lca_bst(_t_s, 0, 5), 2)
 `,
 
+// ─── Arc III — The job ─────────────────────────────────────────────────────────
+sewers: `
+_t_g = [
+    [0, 0, 1, 0],
+    [1, 0, 1, 0],
+    [0, 0, 0, 0],
+    [0, 1, 1, 0],
+]
+check("shortest_path(grid, (0, 0), (0, 3))", lambda: shortest_path(_t_g, (0, 0), (0, 3)), 7)
+check("shortest_path(grid, (0, 0), (3, 3))", lambda: shortest_path(_t_g, (0, 0), (3, 3)), 6)
+check("shortest_path(grid, (0, 0), (0, 0))", lambda: shortest_path(_t_g, (0, 0), (0, 0)), 0)
+check("shortest_path([[0, 1], [1, 0]], (0, 0), (1, 1)) is cut off", lambda: shortest_path([[0, 1], [1, 0]], (0, 0), (1, 1)), -1)
+check("shortest_path([[0, 0, 0]], (0, 0), (0, 2))", lambda: shortest_path([[0, 0, 0]], (0, 0), (0, 2)), 2)
+check("shortest_path(grid, (2, 0), (0, 3))", lambda: shortest_path(_t_g, (2, 0), (0, 3)), 5)
+`,
+islands: `
+_t_g = [
+    [1, 1, 0, 0, 0],
+    [1, 1, 0, 0, 1],
+    [0, 0, 0, 1, 1],
+    [0, 0, 0, 0, 0],
+    [1, 0, 1, 0, 1],
+]
+check("count_regions(grid)", lambda: count_regions(_t_g), 5)
+check("largest_region(grid)", lambda: largest_region(_t_g), 4)
+check("count_regions([[0]])", lambda: count_regions([[0]]), 0)
+check("largest_region([[0, 0]])", lambda: largest_region([[0, 0]]), 0)
+check("count_regions([[1]])", lambda: count_regions([[1]]), 1)
+check("count_regions(3x3 of air)", lambda: count_regions([[1] * 3 for _ in range(3)]), 1)
+check("largest_region(3x3 of air)", lambda: largest_region([[1] * 3 for _ in range(3)]), 9)
+check("count_regions(diagonal cells do not touch)", lambda: count_regions([[1, 0], [0, 1]]), 2)
+`,
+oranges: `
+check("minutes_to_fill([[2, 1, 1], [1, 1, 0], [0, 1, 1]])", 4)
+check("minutes_to_fill([[2, 1, 1], [0, 1, 1], [1, 0, 1]])", -1)
+check("minutes_to_fill([[0, 2]])", 0)
+check("minutes_to_fill([[2, 1, 1], [1, 1, 1], [0, 1, 2]]) two sources", lambda: minutes_to_fill([[2, 1, 1], [1, 1, 1], [0, 1, 2]]), 2)
+check("minutes_to_fill([[1]]) no source", lambda: minutes_to_fill([[1]]), -1)
+check("minutes_to_fill([[0]])", 0)
+check("minutes_to_fill([[2, 0, 1]]) walled off", lambda: minutes_to_fill([[2, 0, 1]]), -1)
+`,
+clone: `
+if 'Node' not in globals():
+    class Node:
+        def __init__(self, val, neighbors=None):
+            self.val = val
+            self.neighbors = neighbors if neighbors is not None else []
+def _t_graph(adj):
+    nodes = {v: Node(v) for v in adj}
+    for v, ns in adj.items():
+        nodes[v].neighbors = [nodes[u] for u in ns]
+    return nodes
+def _t_reach(start):
+    seen, q = {id(start): start}, [start]
+    while q:
+        n = q.pop()
+        for m in n.neighbors:
+            if id(m) not in seen:
+                seen[id(m)] = m
+                q.append(m)
+    return list(seen.values())
+def _t_shape(start):
+    return sorted((n.val, sorted(m.val for m in n.neighbors)) for n in _t_reach(start))
+_t_adj = {1: [2, 4], 2: [1, 3], 3: [2, 4], 4: [1, 3]}
+_t_orig = _t_graph(_t_adj)
+_t_copy = clone_graph(_t_orig[1])
+check("clone_graph(square 1-2-3-4) has the same shape", lambda: _t_shape(_t_copy), [(1, [2, 4]), (2, [1, 3]), (3, [2, 4]), (4, [1, 3])])
+check("the copy contains no original node", lambda: any(id(n) in {id(o) for o in _t_orig.values()} for n in _t_reach(_t_copy)), False)
+check("each node copied exactly once", lambda: len(_t_reach(_t_copy)), 4)
+check("original left intact", lambda: _t_shape(_t_orig[1]), [(1, [2, 4]), (2, [1, 3]), (3, [2, 4]), (4, [1, 3])])
+check("clone_graph(single node) -> (val, neighbours, is a new object)", lambda: (lambda o, c: (c.val, list(c.neighbors), c is not o))(Node(1), clone_graph(Node(1))), (1, [], True))
+check("clone_graph(None)", lambda: clone_graph(None), None)
+`,
+topo: `
+def _t_valid(n, edges):
+    order = list(task_order(n, edges))
+    pos = {t: i for i, t in enumerate(order)}
+    return sorted(order) == list(range(n)) and all(pos[a] < pos[b] for a, b in edges)
+check("task_order(4, [(0, 1), (1, 2), (0, 3), (3, 2)]) is a valid order", lambda: _t_valid(4, [(0, 1), (1, 2), (0, 3), (3, 2)]), True)
+check("task_order(6, [(5, 2), (5, 0), (4, 0), (4, 1), (2, 3), (3, 1)]) is a valid order", lambda: _t_valid(6, [(5, 2), (5, 0), (4, 0), (4, 1), (2, 3), (3, 1)]), True)
+check("task_order(3, []) lists every task", lambda: sorted(task_order(3, [])), [0, 1, 2])
+check("task_order(1, [])", lambda: list(task_order(1, [])), [0])
+check("task_order(2, [(0, 1), (1, 0)]) contradiction", lambda: list(task_order(2, [(0, 1), (1, 0)])), [])
+check("task_order(4, [(0, 1), (1, 2), (2, 1), (2, 3)]) hidden cycle", lambda: list(task_order(4, [(0, 1), (1, 2), (2, 1), (2, 3)])), [])
+`,
+timetable: `
+def _t_m(iv):
+    return [list(i) for i in merge_intervals(iv)]
+check("merge_intervals([[1, 3], [2, 6], [8, 10], [15, 18]])", lambda: _t_m([[1, 3], [2, 6], [8, 10], [15, 18]]), [[1, 6], [8, 10], [15, 18]])
+check("merge_intervals([[1, 4], [4, 5]]) touching shifts merge", lambda: _t_m([[1, 4], [4, 5]]), [[1, 5]])
+check("merge_intervals([[5, 7], [1, 3]]) sorted by start", lambda: _t_m([[5, 7], [1, 3]]), [[1, 3], [5, 7]])
+check("merge_intervals([[1, 10], [2, 3], [4, 5]])", lambda: _t_m([[1, 10], [2, 3], [4, 5]]), [[1, 10]])
+check("merge_intervals([])", lambda: _t_m([]), [])
+check("largest_gap([[1, 3], [2, 6], [8, 10], [15, 18]])", 5)
+check("largest_gap([[1, 4], [4, 5]])", 0)
+check("largest_gap([[0, 2]])", 0)
+check("largest_gap([[5, 7], [1, 3]])", 2)
+check("largest_gap([[22, 23], [0, 1], [10, 12]])", 10)
+`,
+letters: `
+check("sorted(letter_combinations('23'))", ['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf'])
+check("letter_combinations('')", [])
+check("sorted(letter_combinations('2'))", ['a', 'b', 'c'])
+check("len(letter_combinations('79'))", 16)
+check("len(letter_combinations('234'))", 27)
+check("sorted(letter_combinations('9'))", ['w', 'x', 'y', 'z'])
+`,
+heap: `
+def _t_stream(k, xs):
+    t = TopK(k)
+    out = []
+    for x in xs:
+        t.add(x)
+        out.append(list(t.top()))
+    return out
+check("k_largest([3, 1, 5, 12, 2, 11], 3)", [12, 11, 5])
+check("k_largest([1, 1, 1], 2)", [1, 1])
+check("k_largest([4], 1)", [4])
+check("k_largest([5, 3, 9, 1], 4)", [9, 5, 3, 1])
+check("k_largest(list(range(1000)), 3)", [999, 998, 997])
+check("TopK(2): top() after each of add(5), add(1), add(9), add(3), add(7)", lambda: _t_stream(2, [5, 1, 9, 3, 7]), [[5], [5, 1], [9, 5], [9, 5], [9, 7]])
+check("TopK(3): top() after adding 4, 4, 4, 4", lambda: _t_stream(3, [4, 4, 4, 4])[-1], [4, 4, 4])
+`,
+counting: `
+check("counting_sort([4, 2, 2, 8, 3, 3, 1], 8)", [1, 2, 2, 3, 3, 4, 8])
+check("counting_sort([], 5)", [])
+check("counting_sort([0, 0, 0], 0)", [0, 0, 0])
+check("counting_sort([9, 0, 9, 0], 9)", [0, 0, 9, 9])
+check("counting_sort([3, 7, 3, 7, 1], 7)", [1, 3, 3, 7, 7])
+check("bucket_sort([0.42, 0.32, 0.23, 0.52, 0.25, 0.47, 0.51])", [0.23, 0.25, 0.32, 0.42, 0.47, 0.51, 0.52])
+check("bucket_sort([])", [])
+check("bucket_sort([0.5])", [0.5])
+check("bucket_sort([0.9, 0.1, 0.1, 0.0])", [0.0, 0.1, 0.1, 0.9])
+`,
+meetings: `
+check("max_concurrent([[0, 30], [5, 10], [15, 20]])", 2)
+check("max_concurrent([[7, 10], [2, 4]])", 1)
+check("max_concurrent([])", 0)
+check("max_concurrent([[1, 5], [2, 6], [3, 7], [4, 8]])", 4)
+check("max_concurrent([[1, 3], [3, 5], [5, 7]]) touching shifts do not overlap", lambda: max_concurrent([[1, 3], [3, 5], [5, 7]]), 1)
+check("max_concurrent([[1, 10], [2, 3], [4, 5], [6, 7]])", 2)
+check("max_concurrent([[6, 7], [2, 4], [8, 12]])", 1)
+`,
+sorts: `
+def sorted(*args, **kwargs):
+    raise RuntimeError("sorted() is not available tonight; the jury is watching")
+import random as _t_random
+_t_xs = list(range(300))
+_t_random.shuffle(_t_xs)
+check("merge_sort([5, 2, 4, 6, 1, 3])", [1, 2, 3, 4, 5, 6])
+check("merge_sort([])", [])
+check("merge_sort([1])", [1])
+check("merge_sort([3, 3, 1, 2, 2])", [1, 2, 2, 3, 3])
+check("merge_sort(shuffled 0..299)", lambda: merge_sort(list(_t_xs)), list(range(300)))
+check("quick_sort([5, 2, 4, 6, 1, 3])", [1, 2, 3, 4, 5, 6])
+check("quick_sort([])", [])
+check("quick_sort([1])", [1])
+check("quick_sort([3, 3, 1, 2, 2])", [1, 2, 2, 3, 3])
+check("quick_sort(shuffled 0..299)", lambda: quick_sort(list(_t_xs)), list(range(300)))
+check("quick_sort(already sorted 0..299)", lambda: quick_sort(list(range(300))), list(range(300)))
+`,
+quickselect: `
+import random as _t_random
+_t_xs = list(range(500))
+_t_random.shuffle(_t_xs)
+check("kth_largest([3, 2, 1, 5, 6, 4], 2)", 5)
+check("kth_largest([3, 2, 3, 1, 2, 4, 5, 5, 6], 4)", 4)
+check("kth_largest([1], 1)", 1)
+check("kth_largest([7, 7, 7], 2)", 7)
+check("kth_largest([2, 1], 1)", 2)
+check("kth_largest([2, 1], 2)", 1)
+check("kth_largest(shuffled 0..499, 17)", lambda: kth_largest(list(_t_xs), 17), 483)
+check("kth_largest(shuffled 0..499, 500)", lambda: kth_largest(list(_t_xs), 500), 0)
+`,
+perms: `
+check("sorted(list(p) for p in permutations([1, 2, 3]))", [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]])
+check("len(permutations([1, 2, 3, 4]))", 24)
+check("[list(p) for p in permutations([7])]", [[7]])
+check("sorted(list(p) for p in permutations(['a', 'b']))", [['a', 'b'], ['b', 'a']])
+check("sorted(sorted(s) for s in subsets([1, 2, 3]))", [[], [1], [1, 2], [1, 2, 3], [1, 3], [2], [2, 3], [3]])
+check("len(subsets([1, 2, 3, 4]))", 16)
+check("[list(s) for s in subsets([])]", [[]])
+check("sorted(sorted(s) for s in subsets([5]))", [[], [5]])
+`,
+safe: `
+from itertools import permutations as _t_perm
+_t_primes = {2, 3, 5, 7, 11, 13, 17}
+_t_expected = sorted("".join(p) for p in _t_perm("0123456789", 6) if all(int(p[i]) + int(p[i + 1]) in _t_primes for i in range(5)))
+check("len(safe_codes())", len(_t_expected))
+check("every safe code is valid and none is missing", lambda: sorted(safe_codes()) == _t_expected, True)
+check("safe_codes() has no repeats", lambda: len(set(safe_codes())) == len(list(safe_codes())), True)
+check("n_queens(1)", 1)
+check("n_queens(4)", 2)
+check("n_queens(5)", 10)
+check("n_queens(6)", 4)
+check("n_queens(8)", 92)
+`,
+task: `
+check("least_interval(['A', 'A', 'A', 'B', 'B', 'B'], 2)", 8)
+check("least_interval(['A', 'A', 'A', 'B', 'B', 'B'], 0)", 6)
+check("least_interval(['A', 'A', 'A', 'B', 'B', 'B'], 50)", 104)
+check("least_interval(['A', 'C', 'A', 'B', 'D', 'B'], 1)", 6)
+check("least_interval(['A'], 3)", 1)
+check("least_interval(['A', 'A'], 3)", 5)
+check("least_interval(['A', 'A', 'A', 'A', 'B', 'C', 'D', 'E', 'F', 'G'], 2)", 10)
+`,
+wordsearch: `
+_t_board = [
+    ["A", "B", "C", "E"],
+    ["S", "F", "C", "S"],
+    ["A", "D", "E", "E"],
+]
+check("exist(board, 'ABCCED')", lambda: exist(_t_board, "ABCCED"), True)
+check("exist(board, 'SEE')", lambda: exist(_t_board, "SEE"), True)
+check("exist(board, 'ABCB') would reuse a cell", lambda: exist(_t_board, "ABCB"), False)
+check("exist([['a']], 'a')", lambda: exist([["a"]], "a"), True)
+check("exist([['a', 'b'], ['c', 'd']], 'abdc')", lambda: exist([["a", "b"], ["c", "d"]], "abdc"), True)
+check("exist([['a', 'a']], 'aaa')", lambda: exist([["a", "a"]], "aaa"), False)
+check("exist([['a', 'b'], ['c', 'd']], 'ad') diagonals do not touch", lambda: exist([["a", "b"], ["c", "d"]], "ad"), False)
+`,
+
 }
