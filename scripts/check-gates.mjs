@@ -14,6 +14,8 @@ for (const arc of ARCS) {
     for (const f of ['title','algo','mission','hint']) if (!g[f]) fail(`${g.id}: missing ${f}`)
     if (!Array.isArray(g.story) || g.story.length < 2) fail(`${g.id}: story needs 2+ lines`)
     if (g.story && !g.story.some(l => l.startsWith('“'))) fail(`${g.id}: story has no spoken line`)
+    if (!g.tests) fail(`${g.id}: no tests in src/data/tests.js`)
+    else if (!g.tests.includes('check(')) fail(`${g.id}: tests never call check()`)
   }
 }
 console.log(errors ? `${errors} problem(s)` : `✓ ${ids.size} gates across ${ARCS.length} arcs look good`)

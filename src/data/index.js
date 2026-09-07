@@ -1,6 +1,8 @@
 import { ARCS_DATA } from './gates.js'
+import { TESTS } from './tests.js'
 
-export const ARCS = ARCS_DATA
+// Each gate carries its Python tests (a string run after the learner's code; see src/harness.py).
+export const ARCS = ARCS_DATA.map(a => ({ ...a, gates: a.gates.map(g => ({ ...g, tests: TESTS[g.id] })) }))
 export const GATES = ARCS.flatMap(a => a.gates)
 export const XP_PER_LEVEL = 200
 

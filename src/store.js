@@ -1,5 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import { ARCS, GATES, XP_PER_LEVEL, titleFor } from './data/index.js'
+import { runTests, runtime, warm } from './runner.js'
 
 const KEY = 'ledger-save-v2'
 const fresh = () => ({ name: 'Hunter', xp: 0, stats: { logic: 0, speed: 0, memory: 0 } })
@@ -31,8 +32,19 @@ const arcProgress = arc => arc.gates.filter(g => isDone(g.id)).length
 const defaultTab = () => { const i = ARCS.findIndex(a => a.gates.some(g => !isDone(g.id))); return i === -1 ? ARCS.length - 1 : i }
 const tab = ref(Number.isInteger(saved.tab) && saved.tab >= 0 && saved.tab < ARCS.length ? saved.tab : defaultTab())
 const setTab = i => { tab.value = i }
-const open = g => { if (!isLocked(g)) active.value = GATES.indexOf(g) }
+const open = g => { if (isLocked(g)) return; active.value = GATES.indexOf(g); run.value = null; if (g.tests) warm() }
 const close = () => { active.value = null }
+
+// Last test run for the open gate: null | { status: 'running' } | { status: 'done', passed, results, stdout, error }
+const run = ref(null)
+async function test(g) {
+  if (run.value?.status === 'running') return
+  run.value = { status: 'running' }
+  const r = await runTests(notes.value[g.id] || '', g.tests)
+  const passed = !r.error && r.results.length > 0 && r.results.every(t => t.ok)
+  run.value = { status: 'done', passed, ...r }
+  if (passed) clear(g)
+}
 
 function clear(g) {
   if (isDone(g.id)) return
@@ -52,5 +64,6 @@ window.addEventListener('keydown', e => { if (e.key === 'Escape') close() })
 
 export function useStore() {
   return { player, cleared, notes, active, flash, gate, level, xpInLevel, xpPct, xpPerLevel: XP_PER_LEVEL,
-    clearedCount, title, statList, isDone, isLocked, arcOpen, arcProgress, tab, setTab, open, close, clear, reset }
+    clearedCount, title, statList, isDone, isLocked, arcOpen, arcProgress, tab, setTab, open, close, clear, reset,
+    run, runtime, test }
 }
