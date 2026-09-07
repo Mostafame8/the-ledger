@@ -1,5 +1,6 @@
 <script setup>
 import { useStore } from '../store.js'
+import { editorKeydown } from '../editor.js'
 const s = useStore()
 </script>
 
@@ -20,8 +21,9 @@ const s = useStore()
         </div>
         <details v-if="s.gate.value.hint"><summary>Marguerite's note (hint)</summary><p>{{ s.gate.value.hint }}</p></details>
         <label>
-          <div style="color:var(--dim);margin-bottom:6px">Your solution (saved locally)</div>
-          <textarea v-model="s.notes.value[s.gate.value.id]" spellcheck="false" placeholder="# paste your Python here"></textarea>
+          <div class="editor-label">Your solution (saved locally) <small>Tab / Shift+Tab indent · Enter keeps indent</small></div>
+          <textarea class="editor" v-model="s.notes.value[s.gate.value.id]" spellcheck="false" autocapitalize="off" autocomplete="off"
+            wrap="off" placeholder="# write your Python here" @keydown="editorKeydown"></textarea>
         </label>
         <div class="row">
           <button v-if="!s.isDone(s.gate.value.id)" class="btn" @click="s.clear(s.gate.value)">Report gate cleared</button>

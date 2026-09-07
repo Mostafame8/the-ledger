@@ -1,5 +1,5 @@
 import { ref, computed, watch } from 'vue'
-import { GATES, XP_PER_LEVEL, titleFor } from './data/index.js'
+import { ARCS, GATES, XP_PER_LEVEL, titleFor } from './data/index.js'
 
 const KEY = 'ledger-save-v2'
 const fresh = () => ({ name: 'Hunter', xp: 0, stats: { logic: 0, speed: 0, memory: 0 } })
@@ -25,6 +25,12 @@ const statList = computed(() => ['logic', 'speed', 'memory']
 const isDone = id => cleared.value.includes(id)
 const isLocked = g => { const i = GATES.indexOf(g); return i > 0 && !isDone(GATES[i - 1].id) }
 const arcOpen = arc => !isLocked(arc.gates[0])
+const arcProgress = arc => arc.gates.filter(g => isDone(g.id)).length
+
+// Selected arc tab. Defaults to the arc holding the next uncleared gate.
+const defaultTab = () => { const i = ARCS.findIndex(a => a.gates.some(g => !isDone(g.id))); return i === -1 ? ARCS.length - 1 : i }
+const tab = ref(Number.isInteger(saved.tab) && saved.tab >= 0 && saved.tab < ARCS.length ? saved.tab : defaultTab())
+const setTab = i => { tab.value = i }
 const open = g => { if (!isLocked(g)) active.value = GATES.indexOf(g) }
 const close = () => { active.value = null }
 
@@ -38,13 +44,13 @@ function clear(g) {
 }
 function reset() {
   if (!confirm('Wipe the save and start the heist over?')) return
-  player.value = fresh(); cleared.value = []; notes.value = {}; active.value = null
+  player.value = fresh(); cleared.value = []; notes.value = {}; active.value = null; tab.value = 0
 }
 
-watch([player, cleared, notes], () => save({ player: player.value, cleared: cleared.value, notes: notes.value }), { deep: true })
+watch([player, cleared, notes, tab], () => save({ player: player.value, cleared: cleared.value, notes: notes.value, tab: tab.value }), { deep: true })
 window.addEventListener('keydown', e => { if (e.key === 'Escape') close() })
 
 export function useStore() {
   return { player, cleared, notes, active, flash, gate, level, xpInLevel, xpPct, xpPerLevel: XP_PER_LEVEL,
-    clearedCount, title, statList, isDone, isLocked, arcOpen, open, close, clear, reset }
+    clearedCount, title, statList, isDone, isLocked, arcOpen, arcProgress, tab, setTab, open, close, clear, reset }
 }

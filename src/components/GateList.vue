@@ -1,25 +1,35 @@
 <script setup>
+import { computed } from 'vue'
 import { ARCS } from '../data/index.js'
 import { useStore } from '../store.js'
 const s = useStore()
+const arc = computed(() => ARCS[s.tab.value])
+// 'Arc II — Casing the bank' -> ['Arc II', 'Casing the bank']
+const parts = name => name.split(' — ')
 </script>
 
 <template>
   <main class="sys gates">
     <div class="sys-title"><i></i> Gates detected</div>
     <div class="body">
-      <template v-for="arc in ARCS" :key="arc.name">
-        <div class="arc" :class="{ sealed: !s.arcOpen(arc) }">
-          <span>{{ arc.name }}</span><small>{{ arc.sub }}</small>
-        </div>
-        <button v-for="g in arc.gates" :key="g.id" class="gate" :disabled="s.isLocked(g)" @click="s.open(g)">
-          <div class="rank" :class="g.rank">{{ g.rank }}</div>
-          <div><h3>{{ g.title }}</h3><p>{{ g.algo }}</p></div>
-          <span class="tag" :class="{ done: s.isDone(g.id), locked: s.isLocked(g) }">
-            {{ s.isDone(g.id) ? 'cleared' : s.isLocked(g) ? 'sealed' : '+' + g.xp + ' xp' }}
-          </span>
+      <nav class="tabs" role="tablist" aria-label="Arcs">
+        <button v-for="(a, i) in ARCS" :key="a.name" role="tab" class="tab"
+          :class="{ active: i === s.tab.value, sealed: !s.arcOpen(a) }"
+          :aria-selected="i === s.tab.value" :title="a.name" @click="s.setTab(i)">
+          <b>{{ parts(a.name)[0] }}</b>
+          <small>{{ s.arcProgress(a) }} / {{ a.gates.length }}</small>
         </button>
-      </template>
+      </nav>
+      <div class="arc" :class="{ sealed: !s.arcOpen(arc) }">
+        <span>{{ parts(arc.name)[1] }}</span><small>{{ arc.sub }}</small>
+      </div>
+      <button v-for="g in arc.gates" :key="g.id" class="gate" :disabled="s.isLocked(g)" @click="s.open(g)">
+        <div class="rank" :class="g.rank">{{ g.rank }}</div>
+        <div><h3>{{ g.title }}</h3><p>{{ g.algo }}</p></div>
+        <span class="tag" :class="{ done: s.isDone(g.id), locked: s.isLocked(g) }">
+          {{ s.isDone(g.id) ? 'cleared' : s.isLocked(g) ? 'sealed' : '+' + g.xp + ' xp' }}
+        </span>
+      </button>
     </div>
   </main>
 </template>

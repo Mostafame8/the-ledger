@@ -56,6 +56,15 @@
   .reset:hover{border-color:var(--dim);color:var(--ink)}
 
   .gates .body{padding:0 0 8px}
+  .tabs{display:flex;overflow-x:auto;border-bottom:1px solid rgba(63,169,255,.22);background:rgba(5,10,22,.35)}
+  .tab{flex:1;min-width:max-content;display:grid;gap:1px;justify-items:center;padding:11px 14px 9px;
+    background:none;border:0;border-bottom:2px solid transparent;color:var(--dim);font:inherit;cursor:pointer;letter-spacing:.05em}
+  .tab b{font-weight:700;font-size:16px}
+  .tab small{font-size:13px;opacity:.85}
+  .tab:hover{color:var(--ink);background:rgba(63,169,255,.06)}
+  .tab.active{color:var(--glow);border-bottom-color:var(--glow);text-shadow:0 0 10px rgba(127,212,255,.5);background:rgba(63,169,255,.08)}
+  .tab.sealed:not(.active){opacity:.55}
+  .tab:focus-visible{outline:2px solid var(--glow);outline-offset:-2px}
   .arc{padding:18px 18px 6px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;
     color:var(--glow);font-weight:700;font-size:18px;border-bottom:1px solid rgba(63,169,255,.22)}
   .arc small{color:var(--dim);font-weight:500;font-size:14px}
@@ -91,7 +100,10 @@
   .mission h4{margin:0 0 6px;color:var(--glow);font-size:16px;letter-spacing:.04em}
   .mission p{margin:0 0 10px}
   pre{margin:0;padding:14px;background:#050a16;border:1px solid var(--faint);overflow:auto;font-size:14px;line-height:1.5}
-  textarea{width:100%;min-height:150px;background:#050a16;color:var(--ink);border:1px solid var(--faint);padding:12px;font-size:14px;resize:vertical}
+  .editor-label{color:var(--dim);margin-bottom:6px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+  .editor-label small{font-size:13px;color:var(--faint)}
+  textarea{width:100%;min-height:220px;background:#050a16;color:var(--ink);border:1px solid var(--faint);padding:12px;font-size:14px;resize:vertical;
+    line-height:1.55;tab-size:4;white-space:pre;overflow:auto}
   textarea:focus{outline:none;border-color:var(--edge);box-shadow:0 0 0 2px rgba(63,169,255,.25)}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .btn{background:rgba(63,169,255,.14);border:1px solid var(--edge);color:var(--glow);padding:10px 18px;font:inherit;font-weight:600;font-size:16px;cursor:pointer;letter-spacing:.04em}
