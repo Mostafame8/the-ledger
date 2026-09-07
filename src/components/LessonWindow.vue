@@ -4,8 +4,9 @@ import { useStore } from '../store.js'
 import StepExplain from './StepExplain.vue'
 import StepSpot from './StepSpot.vue'
 import StepTrace from './StepTrace.vue'
+import StepCode from './StepCode.vue'
 const s = useStore()
-const STEP_COMPONENTS = { explain: StepExplain, spot: StepSpot, trace: StepTrace }
+const STEP_COMPONENTS = { explain: StepExplain, spot: StepSpot, trace: StepTrace, blank: StepCode, mini: StepCode }
 const comp = computed(() => STEP_COMPONENTS[s.activeStep.value?.type] ?? null)
 const last = computed(() => s.stepIndex.value === s.activeNode.value.steps.length - 1)
 const kicker = { explain: 'Marguerite explains', trace: 'Trace it by hand', spot: 'Spot the pattern', blank: 'Fill the blanks', mini: 'Mini mission' }
@@ -24,8 +25,7 @@ const kicker = { explain: 'Marguerite explains', trace: 'Trace it by hand', spot
         <div class="dots" aria-hidden="true">
           <i v-for="(st, i) in s.activeNode.value.steps" :key="i" :class="{ done: i < s.stepIndex.value, now: i === s.stepIndex.value }"></i>
         </div>
-        <component v-if="comp" :is="comp" :key="s.activeNode.value.id + '/' + s.stepIndex.value" :step="s.activeStep.value" />
-        <p v-else class="dim">This step type is not built yet.</p>
+        <component :is="comp" :key="s.activeNode.value.id + '/' + s.stepIndex.value" :step="s.activeStep.value" />
         <div class="row">
           <button class="btn ghost" :disabled="s.stepIndex.value === 0" @click="s.back">Back</button>
           <button class="btn" :disabled="!s.satisfied.value" @click="s.next">{{ last ? 'Finish lesson' : 'Next' }}</button>

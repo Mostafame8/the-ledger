@@ -191,3 +191,7 @@
   .ans label{color:var(--dim);font-size:15px}
   .ans input{background:#050a16;color:var(--ink);border:1px solid var(--faint);padding:8px 10px;font:inherit;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14px}
   .ans input:focus{outline:none;border-color:var(--edge);box-shadow:0 0 0 2px rgba(63,169,255,.25)}
+
+  /* ── Code steps ────────────────────────────────────────────────────────── */
+  .lesson textarea{min-height:180px}
+  .lesson .mission code{color:var(--glow)}
