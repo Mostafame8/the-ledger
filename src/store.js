@@ -1,0 +1,50 @@
+import { ref, computed, watch } from 'vue'
+import { GATES, XP_PER_LEVEL, titleFor } from './data/index.js'
+
+const KEY = 'ledger-save-v2'
+const fresh = () => ({ name: 'Hunter', xp: 0, stats: { logic: 0, speed: 0, memory: 0 } })
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {} } catch { return {} } }
+const save = d => { try { localStorage.setItem(KEY, JSON.stringify(d)) } catch {} }
+
+const saved = load()
+const player = ref(saved.player || fresh())
+const cleared = ref(saved.cleared || [])
+const notes = ref(saved.notes || {})
+const active = ref(null)
+const flash = ref(false)
+
+const gate = computed(() => active.value === null ? null : GATES[active.value])
+const level = computed(() => Math.floor(player.value.xp / XP_PER_LEVEL))
+const xpInLevel = computed(() => player.value.xp % XP_PER_LEVEL)
+const xpPct = computed(() => xpInLevel.value / XP_PER_LEVEL * 100)
+const clearedCount = computed(() => cleared.value.length)
+const title = computed(() => titleFor(clearedCount.value))
+const statList = computed(() => ['logic', 'speed', 'memory']
+  .map(k => ({ key: k, label: k[0].toUpperCase() + k.slice(1), value: player.value.stats[k] })))
+
+const isDone = id => cleared.value.includes(id)
+const isLocked = g => { const i = GATES.indexOf(g); return i > 0 && !isDone(GATES[i - 1].id) }
+const arcOpen = arc => !isLocked(arc.gates[0])
+const open = g => { if (!isLocked(g)) active.value = GATES.indexOf(g) }
+const close = () => { active.value = null }
+
+function clear(g) {
+  if (isDone(g.id)) return
+  const before = level.value
+  cleared.value.push(g.id)
+  player.value.xp += g.xp
+  player.value.stats[g.stat] += 1
+  if (level.value > before) { flash.value = true; setTimeout(() => { flash.value = false }, 1900) }
+}
+function reset() {
+  if (!confirm('Wipe the save and start the heist over?')) return
+  player.value = fresh(); cleared.value = []; notes.value = {}; active.value = null
+}
+
+watch([player, cleared, notes], () => save({ player: player.value, cleared: cleared.value, notes: notes.value }), { deep: true })
+window.addEventListener('keydown', e => { if (e.key === 'Escape') close() })
+
+export function useStore() {
+  return { player, cleared, notes, active, flash, gate, level, xpInLevel, xpPct, xpPerLevel: XP_PER_LEVEL,
+    clearedCount, title, statList, isDone, isLocked, arcOpen, open, close, clear, reset }
+}
