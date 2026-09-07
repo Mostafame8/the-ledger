@@ -158,3 +158,19 @@
   .node.cleared{border-color:rgba(94,240,176,.45)}
   .node.cleared h3{color:var(--ok)}
   .node:disabled{cursor:not-allowed;opacity:.45}
+
+  /* ── Lesson window ─────────────────────────────────────────────────────── */
+  .lesson .move{margin-left:8px;padding:1px 8px;border:1px solid var(--violet);color:#c9b8ff;font-size:13px;letter-spacing:.04em}
+  .dots{display:flex;gap:6px}
+  .dots i{width:14px;height:4px;background:var(--faint)}
+  .dots i.done{background:var(--ok)}
+  .dots i.now{background:var(--glow);box-shadow:0 0 8px var(--glow)}
+  .opts{display:grid;gap:8px}
+  .opt{text-align:left;padding:10px 14px;background:rgba(5,10,22,.5);border:1px solid var(--faint);color:var(--ink);font:inherit;cursor:pointer}
+  .opt:hover:not(:disabled){border-color:var(--edge);background:rgba(63,169,255,.08)}
+  .opt:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+  .opt.right{border-color:var(--ok);color:var(--ok)}
+  .opt.wrong{border-color:#ff8a8a;color:#ff8a8a}
+  .opt:disabled{cursor:default}
+  .why{margin:0;color:#ff8a8a}
+  .why.ok{color:var(--ok)}

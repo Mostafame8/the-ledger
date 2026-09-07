@@ -6,6 +6,7 @@ import StatusWindow from './components/StatusWindow.vue'
 import GateList from './components/GateList.vue'
 import QuestWindow from './components/QuestWindow.vue'
 import SkillTree from './components/SkillTree.vue'
+import LessonWindow from './components/LessonWindow.vue'
 const s = useStore()
 </script>
 
@@ -23,6 +24,7 @@ const s = useStore()
     </template>
     <template v-else>
       <SkillTree />
+      <LessonWindow v-if="s.activeNode.value" />
     </template>
     <div v-if="s.flash.value" class="levelup"><div>{{ s.flash.value }}</div></div>
   </div>
