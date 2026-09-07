@@ -16,6 +16,6 @@ const s = useStore()
     <StatusWindow />
     <GateList />
     <QuestWindow v-if="s.gate.value" />
-    <div v-if="s.flash.value" class="levelup"><div>Level {{ s.level.value }}</div></div>
+    <div v-if="s.flash.value" class="levelup"><div>{{ s.flash.value }}</div></div>
   </div>
 </template>
