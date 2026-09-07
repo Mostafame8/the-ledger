@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "node scripts/check-gates.mjs",
-    "test": "node scripts/test-solutions.mjs"
+    "test": "node --test tests/ && node scripts/test-solutions.mjs"
   },
   "dependencies": { "vue": "^3.4.21" },
   "devDependencies": { "@vitejs/plugin-vue": "^5.0.4", "vite": "^5.2.0" }
