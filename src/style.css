@@ -77,8 +77,8 @@
   .gate:disabled{cursor:not-allowed;opacity:.4}
   .rank{width:46px;height:46px;display:grid;place-items:center;font-weight:700;font-size:21px;
     border:1px solid currentColor;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
-  .rank.F{color:#6f8db0}.rank.E{color:#8fb3d9}.rank.D{color:#5ec2ff}.rank.C{color:#3fa9ff}
-  .rank.B{color:#9d7bff}.rank.A{color:#c56bff}.rank.S{color:#ffb454;text-shadow:0 0 10px rgba(255,180,84,.6)}
+  .rank.F,.rank-letter.F{color:#6f8db0}.rank.E,.rank-letter.E{color:#8fb3d9}.rank.D,.rank-letter.D{color:#5ec2ff}.rank.C,.rank-letter.C{color:#3fa9ff}
+  .rank.B,.rank-letter.B{color:#9d7bff}.rank.A,.rank-letter.A{color:#c56bff}.rank.S,.rank-letter.S{color:#ffb454;text-shadow:0 0 10px rgba(255,180,84,.6)}
   .gate h3{margin:0;font-size:19px;font-weight:600}
   .gate p{margin:1px 0 0;color:var(--dim);font-size:15px}
   .tag{color:var(--dim);font-size:14px;white-space:nowrap}
@@ -139,9 +139,6 @@
   .mode button+button{border-left:1px solid var(--faint)}
   .mode button.active{color:var(--glow);background:rgba(63,169,255,.12);text-shadow:0 0 10px rgba(127,212,255,.5)}
   .mode button:focus-visible{outline:2px solid var(--glow);outline-offset:-2px}
-  .rank-letter.F{color:#6f8db0}.rank-letter.E{color:#8fb3d9}.rank-letter.D{color:#5ec2ff}.rank-letter.C{color:#3fa9ff}
-  .rank-letter.B{color:#9d7bff}.rank-letter.A{color:#c56bff}.rank-letter.S{color:#ffb454}
-
   /* ── Skill tree ────────────────────────────────────────────────────────── */
   .tree-body{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px;padding:18px}
   .links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
