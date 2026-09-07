@@ -1,6 +1,7 @@
 <script setup>
 import { useStore } from '../store.js'
 import { editorKeydown } from '../editor.js'
+import TestResults from './TestResults.vue'
 const s = useStore()
 const onKey = e => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (s.gate.value.tests) s.test(s.gate.value); return }
@@ -46,22 +47,7 @@ const runLabel = () => {
           </template>
           <button class="btn ghost" @click="s.close">Close window</button>
         </div>
-        <div v-if="s.run.value?.status === 'done'" class="tests" aria-live="polite">
-          <div class="tests-head" :class="{ ok: s.run.value.passed }">
-            {{ s.run.value.passed ? 'Every check passed. Gate cleared.'
-              : s.run.value.error && !s.run.value.results.length ? 'Your code did not run.'
-              : `${s.run.value.results.filter(t => !t.ok).length} of ${s.run.value.results.length} checks failed.` }}
-          </div>
-          <pre v-if="s.run.value.error" class="err">{{ s.run.value.error }}</pre>
-          <div v-for="(t, i) in s.run.value.results" :key="i" class="t" :class="t.ok ? 'ok' : 'bad'">
-            <b>{{ t.ok ? '✓' : '✗' }}</b>
-            <div>
-              <code>{{ t.label }}</code>
-              <div v-if="!t.ok" class="diff"><span>got</span><code>{{ t.got }}</code><span>want</span><code>{{ t.want }}</code></div>
-            </div>
-          </div>
-          <details v-if="s.run.value.stdout"><summary>Printed output</summary><pre>{{ s.run.value.stdout }}</pre></details>
-        </div>
+        <TestResults v-if="s.run.value?.status === 'done'" :run="s.run.value" success="Every check passed. Gate cleared." />
       </div>
     </section>
   </div>
