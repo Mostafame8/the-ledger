@@ -766,4 +766,191 @@ _t_long = 'a' * 90 + 'b'
 check("word_break('a' * 90 + 'b', ['a', 'aa', 'aaa', 'aaaa', 'aaaaa']) must not blow up", lambda: word_break(_t_long, ['a', 'aa', 'aaa', 'aaaa', 'aaaaa']), False)
 `,
 
+// ─── Arc V — The Ledger ────────────────────────────────────────────────────────
+knap: `
+check("knapsack([1, 3, 4, 5], [1, 4, 5, 7], 7)", 9)
+check("knapsack([10, 20, 30], [60, 100, 120], 50)", 220)
+check("knapsack([5], [10], 4) nothing fits", lambda: knapsack([5], [10], 4), 0)
+check("knapsack([], [], 10)", 0)
+check("knapsack([2, 2, 2], [3, 3, 3], 4) each item once", lambda: knapsack([2, 2, 2], [3, 3, 3], 4), 6)
+check("knapsack([1, 2, 3], [10, 15, 40], 6) take everything", lambda: knapsack([1, 2, 3], [10, 15, 40], 6), 65)
+check("knapsack([4, 5, 1], [1, 2, 3], 4)", 3)
+`,
+rain: `
+check("trap([0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1])", 6)
+check("trap([4, 2, 0, 3, 2, 5])", 9)
+check("trap([])", 0)
+check("trap([3])", 0)
+check("trap([1, 2, 3, 4]) monotone holds nothing", lambda: trap([1, 2, 3, 4]), 0)
+check("trap([5, 0, 5])", 5)
+check("trap([2, 0, 2, 0, 2])", 4)
+check("trap([5, 4, 1, 2])", 1)
+`,
+edit: `
+check("edit_distance('horse', 'ros')", 3)
+check("edit_distance('intention', 'execution')", 5)
+check("edit_distance('', 'abc')", 3)
+check("edit_distance('abc', '')", 3)
+check("edit_distance('same', 'same')", 0)
+check("edit_distance('kitten', 'sitting')", 3)
+check("edit_distance('a', 'b')", 1)
+check("edit_distance('ab', 'ba')", 2)
+`,
+deque: `
+check("max_sliding_window([1, 3, -1, -3, 5, 3, 6, 7], 3)", [3, 3, 5, 5, 6, 7])
+check("max_sliding_window([1], 1)", [1])
+check("max_sliding_window([1, -1], 1)", [1, -1])
+check("max_sliding_window([9, 8, 7, 6], 2) decreasing", lambda: max_sliding_window([9, 8, 7, 6], 2), [9, 8, 7])
+check("max_sliding_window([1, 2, 3, 4], 2) increasing", lambda: max_sliding_window([1, 2, 3, 4], 2), [2, 3, 4])
+check("max_sliding_window([4, 4, 4], 2) duplicates", lambda: max_sliding_window([4, 4, 4], 2), [4, 4])
+check("max_sliding_window([1, 3, 1, 2, 0, 5], 3)", [3, 3, 2, 5])
+check("max_sliding_window([7, 2, 4], 3) whole list", lambda: max_sliding_window([7, 2, 4], 3), [7])
+`,
+lcs: `
+check("lcs('abcde', 'ace')", 3)
+check("lcs('abc', 'abc')", 3)
+check("lcs('abc', 'def')", 0)
+check("lcs('', 'abc')", 0)
+check("lcs('AGGTAB', 'GXTXAYB')", 4)
+check("lcs('abcba', 'abcbcba')", 5)
+check("lcs('aaaa', 'aa')", 2)
+`,
+lru: `
+_t_c = LRUCache(2)
+_t_c.put(1, 1)
+_t_c.put(2, 2)
+check("get(1)", lambda: _t_c.get(1), 1)
+_t_c.put(3, 3)
+check("get(2) evicted", lambda: _t_c.get(2), -1)
+_t_c.put(4, 4)
+check("get(1) evicted", lambda: _t_c.get(1), -1)
+check("get(3)", lambda: _t_c.get(3), 3)
+check("get(4)", lambda: _t_c.get(4), 4)
+_t_c2 = LRUCache(2)
+_t_c2.put(1, 1)
+_t_c2.put(2, 2)
+_t_c2.put(1, 10)
+_t_c2.put(3, 3)
+check("put on existing key refreshes it and updates value", lambda: (_t_c2.get(1), _t_c2.get(2)), (10, -1))
+_t_c3 = LRUCache(1)
+_t_c3.put(5, 5)
+_t_c3.put(6, 6)
+check("capacity 1", lambda: (_t_c3.get(5), _t_c3.get(6)), (-1, 6))
+check("get on empty cache", lambda: LRUCache(3).get(0), -1)
+`,
+trie: `
+_t_t = Trie()
+for _t_w in ["vault", "van", "vanish", "vane", "door", "dog"]:
+    _t_t.insert(_t_w)
+check("search('van')", lambda: _t_t.search("van"), True)
+check("search('va') prefix only", lambda: _t_t.search("va"), False)
+check("search('vanished') too long", lambda: _t_t.search("vanished"), False)
+check("starts_with('va')", lambda: _t_t.starts_with("va"), True)
+check("starts_with('vaults')", lambda: _t_t.starts_with("vaults"), False)
+check("starts_with('x')", lambda: _t_t.starts_with("x"), False)
+check("words_with_prefix('van')", lambda: _t_t.words_with_prefix("van"), ["van", "vane", "vanish"])
+check("words_with_prefix('do')", lambda: _t_t.words_with_prefix("do"), ["dog", "door"])
+check("words_with_prefix('') everything", lambda: _t_t.words_with_prefix(""), ["dog", "door", "van", "vane", "vanish", "vault"])
+check("words_with_prefix('z')", lambda: _t_t.words_with_prefix("z"), [])
+`,
+kmp: `
+check("find_all('abababab', 'abab')", [0, 2, 4])
+check("find_all('aaaaa', 'aa')", [0, 1, 2, 3])
+check("find_all('hello', 'xyz')", [])
+check("find_all('abc', 'abcd') pattern longer than text", lambda: find_all("abc", "abcd"), [])
+check("find_all('mississippi', 'issi')", [1, 4])
+check("find_all('aabaacaadaabaaba', 'aaba')", [0, 9, 12])
+check("find_all('abcabcabd', 'abcabd') needs the failure table", lambda: find_all("abcabcabd", "abcabd"), [3])
+check("find_all('x', 'x')", [0])
+`,
+palsub: `
+check("longest_palindrome('babad') in ('bab', 'aba')", lambda: longest_palindrome("babad") in ("bab", "aba"), True)
+check("longest_palindrome('cbbd')", "bb")
+check("longest_palindrome('a')", "a")
+check("longest_palindrome('')", "")
+check("longest_palindrome('racecar')", "racecar")
+check("longest_palindrome('forgeeksskeegfor')", "geeksskeeg")
+check("longest_palindrome('abacdfgdcaba')", "aba")
+check("longest_palindrome('aaaa')", "aaaa")
+check("len(longest_palindrome('abcd')) no repeats", lambda: len(longest_palindrome("abcd")), 1)
+`,
+ladder: `
+check("ladder_length('hit', 'cog', ['hot', 'dot', 'dog', 'lot', 'log', 'cog'])", 5)
+check("ladder_length('hit', 'cog', ['hot', 'dot', 'dog', 'lot', 'log'])", 0)
+check("ladder_length('a', 'c', ['a', 'b', 'c'])", 2)
+check("ladder_length('hot', 'dog', ['hot', 'dog']) no bridge", lambda: ladder_length("hot", "dog", ["hot", "dog"]), 0)
+check("ladder_length('hot', 'dog', ['hot', 'dot', 'dog'])", 3)
+check("ladder_length('lost', 'cost', ['most', 'fist', 'lost', 'cost', 'fish'])", 2)
+check("ladder_length('talk', 'tail', ['talk', 'tons', 'fall', 'tail', 'gale', 'hall', 'negs'])", 0)
+`,
+alien: `
+check("alien_order(['wrt', 'wrf', 'er', 'ett', 'rftt'])", "wertf")
+check("alien_order(['z', 'x', 'z']) contradiction", lambda: alien_order(["z", "x", "z"]), "")
+check("alien_order(['z', 'x'])", "zx")
+check("alien_order(['abc', 'ab']) prefix after longer word", lambda: alien_order(["abc", "ab"]), "")
+check("alien_order(['z', 'z'])", "z")
+check("sorted(alien_order(['ab', 'cd'])) letters all present", lambda: sorted(alien_order(["ab", "cd"])), ["a", "b", "c", "d"])
+check("alien_order(['ab', 'cd']).index('a') < .index('c')", lambda: alien_order(["ab", "cd"]).index("a") < alien_order(["ab", "cd"]).index("c"), True)
+check("alien_order(['ba', 'bc', 'ac', 'cab'])", "bac")
+`,
+median: `
+check("find_median_sorted_arrays([1, 3], [2])", 2)
+check("find_median_sorted_arrays([1, 2], [3, 4])", 2.5)
+check("find_median_sorted_arrays([], [1])", 1)
+check("find_median_sorted_arrays([2], [])", 2)
+check("find_median_sorted_arrays([1, 2, 3, 4, 5], [6, 7, 8, 9, 10])", 5.5)
+check("find_median_sorted_arrays([1, 1], [1, 1])", 1)
+check("find_median_sorted_arrays([100], [1, 2, 3, 4, 5, 6, 7])", 4.5)
+check("find_median_sorted_arrays([1, 2], [-1, 3])", 1.5)
+`,
+regex: `
+check("is_match('aa', 'a')", False)
+check("is_match('aa', 'a*')", True)
+check("is_match('ab', '.*')", True)
+check("is_match('aab', 'c*a*b')", True)
+check("is_match('mississippi', 'mis*is*p*.')", False)
+check("is_match('', 'a*')", True)
+check("is_match('', '')", True)
+check("is_match('a', '')", False)
+check("is_match('ab', '.*c')", False)
+check("is_match('aaa', 'a*a')", True)
+check("is_match('aaa', 'ab*a*c*a')", True)
+check("is_match('abcd', 'd*')", False)
+`,
+balloons: `
+check("max_coins([3, 1, 5, 8])", 167)
+check("max_coins([1, 5])", 10)
+check("max_coins([7])", 7)
+check("max_coins([])", 0)
+check("max_coins([1, 2, 3])", 12)
+check("max_coins([9, 76, 64, 21, 97, 60])", 1086136)
+`,
+ledger: `
+def _t_ok(result, values, target):
+    if result is None:
+        return None
+    if list(result) != sorted(set(result)) or any(i < 0 or i >= len(values) for i in result):
+        return "bad indices"
+    return sum(values[i] for i in result) == target
+check("subset_sum([3, 34, 4, 12, 5, 2], 9) sums to 9", lambda: _t_ok(subset_sum([3, 34, 4, 12, 5, 2], 9), [3, 34, 4, 12, 5, 2], 9), True)
+check("subset_sum([3, 34, 4, 12, 5, 2], 30) impossible", lambda: subset_sum([3, 34, 4, 12, 5, 2], 30), None)
+check("subset_sum([5], 5)", [0])
+check("subset_sum([5], 6)", None)
+check("subset_sum([1, 2, 3], 0) empty subset", lambda: subset_sum([1, 2, 3], 0), [])
+check("subset_sum([2, 4, 6], 7) parity", lambda: subset_sum([2, 4, 6], 7), None)
+check("subset_sum([1, 2, 3, 4, 5], 15) take all", lambda: subset_sum([1, 2, 3, 4, 5], 15), [0, 1, 2, 3, 4])
+check("subset_sum([7, 3, 2, 5, 8], 14) sums to 14", lambda: _t_ok(subset_sum([7, 3, 2, 5, 8], 14), [7, 3, 2, 5, 8], 14), True)
+check("subset_sum([4, 4, 4], 8) picks two", lambda: _t_ok(subset_sum([4, 4, 4], 8), [4, 4, 4], 8), True)
+`,
+epilogue: `
+check("split_array([7, 2, 5, 10, 8], 2)", 18)
+check("split_array([1, 2, 3, 4, 5], 2)", 9)
+check("split_array([1, 4, 4], 3)", 4)
+check("split_array([10], 1)", 10)
+check("split_array([1, 1, 1, 1], 4) one each", lambda: split_array([1, 1, 1, 1], 4), 1)
+check("split_array([1, 1, 1, 1], 1) one courier carries all", lambda: split_array([1, 1, 1, 1], 1), 4)
+check("split_array([2, 3, 1, 2, 4, 3], 5)", 4)
+check("split_array([5, 1, 1, 1, 1, 1], 2) heavy first page", lambda: split_array([5, 1, 1, 1, 1, 1], 2), 5)
+`,
+
 }
