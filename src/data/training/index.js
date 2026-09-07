@@ -1,7 +1,16 @@
 // Training content in display order. Add a node file, import it, append it here.
 import method from './method.js'
+import loops from './loops.js'
+import arraysInPlace from './arrays-in-place.js'
+import grids from './grids.js'
 import twoPointers from './two-pointers.js'
+import strings from './strings.js'
+import digitArrays from './digit-arrays.js'
+import hashMaps from './hash-maps.js'
+import frequency from './frequency.js'
+import bits from './bits.js'
+import sets from './sets.js'
 export { TIERS } from './progress.js'
 
-export const NODES = [method, twoPointers]
+export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
