@@ -15,7 +15,11 @@ import stacks from './stacks.js'
 import binarySearch from './binary-search.js'
 import rotation from './rotation.js'
 import merging from './merging.js'
+import slidingWindow from './sliding-window.js'
+import prefixSums from './prefix-sums.js'
+import linkedLists from './linked-lists.js'
+import trees from './trees.js'
 export { TIERS } from './progress.js'
 
-export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets, tracking, stacks, binarySearch, rotation, merging]
+export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets, tracking, stacks, binarySearch, rotation, merging, slidingWindow, prefixSums, linkedLists, trees]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
