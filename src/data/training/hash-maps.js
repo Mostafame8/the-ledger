@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('hash-maps', {
   tier: 'F', xp: 50, requires: ['loops'], gates: ['twosum', 'anagram', 'firstuniq'],
+  tools: ['tool-dict'],
   title: 'The index card box', algo: 'Dictionaries for lookup',
   steps: [
     explain([

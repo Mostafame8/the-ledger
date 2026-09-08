@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('grids', {
   tier: 'F', xp: 40, requires: ['loops'], gates: ['transpose'],
+  tools: ['tool-table'],
   title: 'The teller floor', algo: 'Nested loops over a grid',
   steps: [
     explain([

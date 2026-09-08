@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('trees', {
   tier: 'D', xp: 100, requires: ['linked-lists'], gates: ['tree', 'bst', 'lca'],
+  tools: ['tool-tree-node', 'tool-recursion'],
   title: 'The chart on the wall', algo: 'Binary trees and recursion',
   steps: [
     explain([

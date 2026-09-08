@@ -9,6 +9,7 @@ const s = useStore()
 const STEP_COMPONENTS = { explain: StepExplain, spot: StepSpot, trace: StepTrace, blank: StepCode, mini: StepCode }
 const comp = computed(() => STEP_COMPONENTS[s.activeStep.value?.type] ?? null)
 const last = computed(() => s.stepIndex.value === s.activeNode.value.steps.length - 1)
+const isTool = computed(() => !s.activeNode.value?.tier)
 const kicker = { explain: 'Marguerite explains', trace: 'Trace it by hand', spot: 'Spot the pattern', blank: 'Fill the blanks', mini: 'Mini mission' }
 </script>
 
@@ -28,7 +29,7 @@ const kicker = { explain: 'Marguerite explains', trace: 'Trace it by hand', spot
         <component :is="comp" :key="s.activeNode.value.id + '/' + s.stepIndex.value" :step="s.activeStep.value" />
         <div class="row">
           <button class="btn ghost" :disabled="s.stepIndex.value === 0" @click="s.back">Back</button>
-          <button class="btn" :disabled="!s.satisfied.value" @click="s.next">{{ last ? 'Finish lesson' : 'Next' }}</button>
+          <button class="btn" :disabled="!s.satisfied.value" @click="s.next">{{ last ? (isTool ? 'Unlock tool' : 'Finish lesson') : 'Next' }}</button>
           <button class="btn ghost" @click="s.closeNode">Close</button>
           <span v-if="!s.satisfied.value" class="dim">Answer to continue.</span>
         </div>

@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('linked-lists', {
   tier: 'D', xp: 100, requires: ['two-pointers'], gates: ['linked', 'mergell'],
+  tools: ['tool-linked-node'],
   title: 'The dead-drop chain', algo: 'Linked lists and the slow-fast pointer',
   steps: [
     explain([

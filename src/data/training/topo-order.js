@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('topo-order', {
   tier: 'B', xp: 170, requires: ['graphs'], gates: ['topo', 'alien'],
+  tools: ['tool-graph', 'tool-queue'],
   title: 'The cards nobody waits on', algo: 'Topological ordering',
   steps: [
     explain([

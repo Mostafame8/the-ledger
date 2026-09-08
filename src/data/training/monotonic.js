@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('monotonic', {
   tier: 'S', xp: 300, requires: ['stacks', 'sliding-window'], gates: ['deque', 'rain'],
+  tools: ['tool-stack'],
   title: 'The tallest thing still standing', algo: 'Monotonic stack',
   steps: [
     explain([

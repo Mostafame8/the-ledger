@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('strings', {
   tier: 'F', xp: 40, requires: ['loops'], gates: ['reverse', 'palin'],
+  tools: ['tool-string'],
   title: 'The passphrase note', algo: 'Scanning a string',
   steps: [
     explain([

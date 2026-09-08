@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('search-the-answer', {
   tier: 'S', xp: 340, requires: ['binary-search', 'greedy'], gates: ['epilogue', 'median'],
+  tools: [],
   title: 'Guess the load', algo: 'Binary search on the answer',
   steps: [
     explain([

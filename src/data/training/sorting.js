@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('sorting', {
   tier: 'B', xp: 180, requires: ['merging'], gates: ['counting', 'sorts', 'quickselect'],
+  tools: ['tool-list'],
   title: 'Serials on the table', algo: 'Insertion sort and partitioning',
   steps: [
     explain([

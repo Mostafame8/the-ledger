@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('grid-bfs', {
   tier: 'C', xp: 120, requires: ['stacks', 'grids'], gates: ['sewers', 'oranges'],
+  tools: ['tool-table', 'tool-queue'],
   title: 'The flooded tunnel map', algo: 'Breadth-first search on a grid',
   steps: [
     explain([

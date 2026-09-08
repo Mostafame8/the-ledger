@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('flood-fill', {
   tier: 'C', xp: 130, requires: ['grid-bfs'], gates: ['islands'],
+  tools: ['tool-table', 'tool-stack'],
   title: 'Ink on the floor plan', algo: 'Flood fill',
   steps: [
     explain([

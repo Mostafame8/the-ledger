@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('backtracking', {
   tier: 'A', xp: 200, requires: ['enumeration', 'flood-fill'], gates: ['safe', 'wordsearch'],
+  tools: ['tool-recursion', 'tool-list'],
   title: 'Try it, back out, try the next', algo: 'Backtracking',
   steps: [
     explain([

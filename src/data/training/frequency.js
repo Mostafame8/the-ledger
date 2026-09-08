@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('frequency', {
   tier: 'F', xp: 50, requires: ['hash-maps'], gates: ['anagram', 'firstuniq', 'majority'],
+  tools: ['tool-dict'],
   title: 'The badge letters', algo: 'Counting with a dictionary',
   steps: [
     explain([

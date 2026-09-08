@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('weighted-graphs', {
   tier: 'A', xp: 220, requires: ['graphs', 'heaps'], gates: ['routes', 'bellman', 'mst'],
+  tools: ['tool-graph', 'tool-heap'],
   title: 'The price of every cordon', algo: 'Dijkstra on a weighted graph',
   steps: [
     explain([

@@ -10,7 +10,7 @@ import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { GATES } from '../src/data/index.js'
-import { NODES } from '../src/data/training/index.js'
+import { NODES, TOOLS } from '../src/data/training/index.js'
 
 const PYTHON = process.env.PYTHON || 'python'
 const root = new URL('..', import.meta.url)
@@ -33,6 +33,7 @@ const trainingSolutions = loadSolutions(new URL('scripts/solutions/training/', r
 const only = process.argv.slice(2)
 const gates = only.length ? GATES.filter(g => only.includes(g.id)) : GATES
 const nodes = only.length ? NODES.filter(n => only.includes(n.id)) : NODES
+const tools = only.length ? TOOLS.filter(t => only.includes(t.id)) : TOOLS
 const tmp = mkdtempSync(join(tmpdir(), 'ledger-'))
 let failures = 0, checks = 0, drills = 0
 
@@ -56,7 +57,7 @@ for (const g of gates) {
   prove(g.id, sol, g.tests)
 }
 
-for (const n of nodes) {
+for (const n of [...nodes, ...tools]) {
   n.steps.forEach((s, i) => {
     if (!s.tests) return
     drills++

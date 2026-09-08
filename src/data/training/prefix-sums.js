@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('prefix-sums', {
   tier: 'D', xp: 90, requires: ['loops'], gates: ['prefix', 'product', 'kadane'],
+  tools: ['tool-list'],
   title: 'The margin column', algo: 'Prefix sums',
   steps: [
     explain([

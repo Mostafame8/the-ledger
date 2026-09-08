@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('merging', {
   tier: 'E', xp: 70, requires: ['two-pointers'], gates: ['merge', 'mergell'],
+  tools: ['tool-list'],
   title: 'Two informants, one timeline', algo: 'Merging sorted lists',
   steps: [
     explain([

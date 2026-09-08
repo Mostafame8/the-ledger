@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('two-pointers', {
   tier: 'F', xp: 60, requires: ['arrays-in-place'], gates: ['palin', 'squares', 'rmdup', 'twoptr'],
+  tools: ['tool-list', 'tool-string'],
   title: 'Two hands on the rope', algo: 'Two pointers',
   steps: [
     explain([

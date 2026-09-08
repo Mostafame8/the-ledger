@@ -4,6 +4,9 @@ export const MOVES = ['restate', 'examples', 'brute force', 'name the waste', 'p
 
 export const node = (id, fields) => ({ id, ...fields })
 
+// Armoury tool: a data-structure drill unlocked independently of the rank ladder.
+export const tool = (id, fields) => ({ id, ...fields })
+
 // explain(lines, { move?, code? })   read, then Next
 export const explain = (lines, opts = {}) => ({ type: 'explain', lines, ...opts })
 // trace(code, input, frames)         frames: [{ line, state, ask, note }]

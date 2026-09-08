@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { NODES } from '../data/training/index.js'
+import { NODES, TOOLS } from '../data/training/index.js'
 import { useStore } from '../store.js'
 const s = useStore()
 const rankPct = computed(() => {
@@ -49,6 +49,10 @@ const rankPct = computed(() => {
           <span>{{ s.trainingXp.value }} total</span>
         </div>
         <div class="titles">Lessons trained: <b>{{ s.nodesCleared.value }} / {{ NODES.length }}</b></div>
+        <div class="kit-head">Kit: <b>{{ s.toolsCleared.value }} / {{ TOOLS.length }}</b> &middot; <b>{{ s.kitXp.value }} kit xp</b></div>
+        <div class="kit-grid">
+          <div v-for="t in TOOLS" :key="t.id" class="kit-tile" :class="{ lit: s.nodeState(t.id) === 'cleared' }" :title="t.algo + ' — ' + t.title">{{ t.algo }}</div>
+        </div>
       </template>
 
       <button class="reset" @click="s.reset">Wipe save</button>

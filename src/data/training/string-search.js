@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('string-search', {
   tier: 'S', xp: 320, requires: ['strings', 'tracking'], gates: ['kmp', 'palsub'],
+  tools: ['tool-list', 'tool-string'],
   title: 'A word already half heard', algo: 'Prefix tables',
   steps: [
     explain([

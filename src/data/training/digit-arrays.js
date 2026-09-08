@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('digit-arrays', {
   tier: 'F', xp: 50, requires: ['loops'], gates: ['plusone'],
+  tools: ['tool-list'],
   title: 'The locker counter', algo: 'Digits as a list',
   steps: [
     explain([

@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('interval-dp', {
   tier: 'S', xp: 360, requires: ['dp-grid'], gates: ['balloons'],
+  tools: ['tool-table'],
   title: 'Which one goes last', algo: 'Tables over ranges',
   steps: [
     explain([

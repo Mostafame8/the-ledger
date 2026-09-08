@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('rotation', {
   tier: 'E', xp: 60, requires: ['arrays-in-place'], gates: ['rotate'],
+  tools: ['tool-list'],
   title: 'The rota, shifted', algo: 'Rotation by reversal',
   steps: [
     explain([

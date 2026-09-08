@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('binary-search', {
   tier: 'E', xp: 80, requires: ['tracking'], gates: ['halden', 'firstbad', 'rotsearch'],
+  tools: ['tool-list'],
   title: 'The numbered boxes', algo: 'Binary search',
   steps: [
     explain([

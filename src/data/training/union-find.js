@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('union-find', {
   tier: 'A', xp: 220, requires: ['graphs'], gates: ['union', 'mst'],
+  tools: ['tool-list'],
   title: 'One crew or two', algo: 'Union-find',
   steps: [
     explain([

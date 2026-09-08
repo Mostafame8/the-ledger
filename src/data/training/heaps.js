@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('heaps', {
   tier: 'B', xp: 170, requires: ['tracking'], gates: ['heap', 'meetings', 'task'],
+  tools: ['tool-heap'],
   title: 'The short list', algo: 'Heaps',
   steps: [
     explain([

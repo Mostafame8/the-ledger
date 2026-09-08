@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('stacks', {
   tier: 'E', xp: 70, requires: ['arrays-in-place'], gates: ['parens'],
+  tools: ['tool-stack'],
   title: 'The latch on the server cage', algo: 'Stacks',
   steps: [
     explain([

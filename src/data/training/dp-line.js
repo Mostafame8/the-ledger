@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('dp-line', {
   tier: 'A', xp: 220, requires: ['recursion'], gates: ['stairs', 'robber', 'decode'],
+  tools: ['tool-list'],
   title: 'The fire escape', algo: 'Building a table along a line',
   steps: [
     explain([
