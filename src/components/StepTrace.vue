@@ -12,6 +12,7 @@ const wrong = ref(false)
 const done = computed(() => k.value >= total)
 const frame = computed(() => props.step.frames[Math.min(k.value, total - 1)])
 const lines = computed(() => props.step.code.split('\n'))
+const label = k => k === 'returns' ? 'return value' : k
 const shown = computed(() => Object.entries(frame.value.state)
   .map(([name, v]) => ({ name, text: name === frame.value.ask && !done.value ? '?' : pyLiteral(v) })))
 
@@ -37,11 +38,11 @@ function submit() {
       <div class="dim">Stop {{ Math.min(k + 1, total) }} of {{ total }} · after line {{ frame.line }}</div>
       <div class="state">
         <div v-for="v in shown" :key="v.name" class="var" :class="{ ask: v.name === frame.ask && !done }">
-          <span>{{ v.name }}</span><code>{{ v.text }}</code>
+          <span>{{ label(v.name) }}</span><code>{{ v.text }}</code>
         </div>
       </div>
       <form v-if="!done" class="ans" @submit.prevent="submit">
-        <label>Value of <code>{{ frame.ask }}</code></label>
+        <label>Value of <code>{{ label(frame.ask) }}</code></label>
         <input v-model="typed" autocomplete="off" spellcheck="false" autofocus placeholder="e.g. 3, 'ab', [1, 2], True, None">
         <button class="btn" type="submit">Check</button>
       </form>

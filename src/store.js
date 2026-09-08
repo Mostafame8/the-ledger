@@ -72,15 +72,15 @@ function next() {
   const n = activeNode.value
   if (!n || !satisfied.value) return
   const rec = training.value.nodes[n.id]
-  if (rec.step + 1 >= n.steps.length) { finishNode(n); return }
-  rec.step += 1
+  if ((rec.step ?? 0) + 1 >= n.steps.length) { finishNode(n); return }
+  rec.step = (rec.step ?? 0) + 1
   enterStep()
 }
 function back() {
   const n = activeNode.value
   const rec = n && training.value.nodes[n.id]
-  if (!rec || rec.step === 0) return
-  rec.step -= 1
+  if (!rec || (rec.step ?? 0) === 0) return
+  rec.step = (rec.step ?? 0) - 1
   enterStep()
 }
 function finishNode(n) {

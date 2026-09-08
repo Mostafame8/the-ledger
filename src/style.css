@@ -141,8 +141,9 @@
   .mode button:focus-visible{outline:2px solid var(--glow);outline-offset:-2px}
   /* ── Skill tree ────────────────────────────────────────────────────────── */
   .tree .body{padding:0 0 8px}
-  .lesson .needs{display:block;margin-top:2px;color:var(--faint);font-size:13px}
-  .lesson .needs b{color:var(--dim);font-weight:500}
+  .lesson-row .needs{display:block;margin-top:2px;color:var(--faint);font-size:13px}
+  .lesson-row .needs b{color:var(--dim);font-weight:500}
+  .gate:disabled .needs b{color:var(--ink);opacity:.9}
 
   /* ── Lesson window ─────────────────────────────────────────────────────── */
   .lesson .move{margin-left:8px;padding:1px 8px;border:1px solid var(--violet);color:#c9b8ff;font-size:13px;letter-spacing:.04em}

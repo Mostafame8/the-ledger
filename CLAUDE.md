@@ -35,14 +35,15 @@ Use the `g(...)` helper in gates.js:
 
 ## Training node schema
 Use `node(id, {...})` and the step constructors from `src/data/training/node.js`:
-- `tier` F–D for now, `xp` in the tier's range (F 40–60, E 60–80, D 90–100), `requires` node ids, `gates` gate ids it prepares.
+- `tier` F–S, `xp` in the tier's range (F 40–60, E 60–80, D 90–100, C 120–140, B 160–180, A 200–240, S 280–400), `requires` node ids, `gates` gate ids it prepares.
 - `title` is a scene name, `algo` the plain technique name.
 - Steps in order: `explain(lines, {move?, code?})`, `trace(code, input, frames)`, `spot(problem, options, answer, why)`, `blank(intro, template, tests)`, `mini(mission, hint, tests)`.
 - Every technique node has at least one trace, spot, blank, and mini. `method` has explain and spot only.
 - Trace frames: `{ line, state, ask, note }`; `line` is 1-based into `code`; `ask` names a key of `state`; values are JS literals or `{ py: '(1, 3)' }` for tuples.
 - Drill `tests` use the same `check()` dialect as gates. Add a reference block per drill in `scripts/solutions/training/<node-id>.py`.
 - Content order in a lesson: two explain steps (Dax's brute force, then the waste named or the pattern shown, with a code block), then trace, spot, blank, mini.
-- Exception to the `algo`-only rule: `spot` options and the `method` lesson may name techniques in prose, because recognising the technique is the point of those steps.
+- Exception to the `algo`-only rule: `spot` options, a spot's `problem` and `why`, the `method` lesson, mandated function names, and unavoidable interpreter vocabulary (e.g. Python's own error text) may name techniques. Explain lines, missions, and hints may not.
+- The lesson list is tier tabs (populated tiers only) with one row per lesson ordered by prerequisite depth; locked rows show `needs: <titles>`. No drawn links.
 
 ## The story (keep it consistent)
 - Setting: a contemporary city, a heist on Halden Bank, and a book of payments called the Ledger.

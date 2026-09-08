@@ -40,11 +40,11 @@ const label = n => ({ cleared: 'trained', locked: 'sealed', open: '+' + n.xp + '
           <small>{{ s.tierProgress(t).done }} / {{ s.tierProgress(t).total }}</small>
         </button>
       </nav>
-      <div class="arc">
+      <div class="arc" :class="{ sealed: sealed(s.trainingTab.value) }">
         <span>Tier <span class="rank-letter" :class="s.trainingTab.value">{{ s.trainingTab.value }}</span></span>
         <small v-if="BLURBS[s.trainingTab.value]">{{ BLURBS[s.trainingTab.value] }}</small>
       </div>
-      <button v-for="n in rows" :key="n.id" class="gate lesson"
+      <button v-for="n in rows" :key="n.id" class="gate lesson-row"
         :disabled="s.nodeState(n.id) === 'locked'" @click="s.openNode(n.id)">
         <div class="rank" :class="n.tier">{{ n.tier }}</div>
         <div>

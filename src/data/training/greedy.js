@@ -63,14 +63,14 @@ check("min_coins_greedy(41, [25, 10, 5, 1])", 4)
 check("min_coins_greedy(1, [25, 10, 5, 1])", 1)
 check("min_coins_greedy(63, [25, 10, 5, 1])", 6)
 check("min_coins_greedy(100, [25, 10, 5, 1])", 4)`),
-    mini('Write max_non_overlapping(intervals) returning how many of the intervals can be kept if no two of the kept ones may overlap. Each interval is a [start, end] pair with 0 <= start <= end. Touching does not count as overlapping: one may start exactly when another ends. An empty list gives 0.',
-      'Sort by the end time and walk the list once, holding the time you are free again. Nothing needs to be reconsidered, so there is no table and no second pass.',
-`check("max_non_overlapping([[1, 3], [2, 4], [3, 5]])", 2)
-check("max_non_overlapping([[1, 2], [2, 3], [3, 4]])", 3)
-check("max_non_overlapping([[1, 10], [2, 3], [4, 5]])", 2)
-check("max_non_overlapping([])", 0)
-check("max_non_overlapping([[5, 6]])", 1)
-check("max_non_overlapping([[1, 4], [1, 4], [1, 4]])", 1)
-check("max_non_overlapping([[0, 1], [1, 2], [0, 2]])", 2)`),
+    mini('The fence wants the actual shift list this time, not a headcount. Write kept_shifts(intervals) returning the intervals you keep, as [start, end] pairs, in the order you took them — no two kept ones may overlap, though touching is fine: one may start exactly when another ends. An empty list gives an empty list.',
+      'Same rule as always: sort by end time and walk once, holding the time you are free again. This time hold onto the interval itself when you take it, not just a count.',
+`check("kept_shifts([[1, 3], [2, 4], [3, 5]])", [[1, 3], [3, 5]])
+check("kept_shifts([[1, 2], [2, 3], [3, 4]])", [[1, 2], [2, 3], [3, 4]])
+check("kept_shifts([[1, 10], [2, 3], [4, 5]])", [[2, 3], [4, 5]])
+check("kept_shifts([])", [])
+check("kept_shifts([[5, 6]])", [[5, 6]])
+check("kept_shifts([[1, 4], [1, 4], [1, 4]])", [[1, 4]])
+check("kept_shifts([[0, 1], [1, 2], [0, 2]])", [[0, 1], [1, 2]])`),
   ],
 })

@@ -1,7 +1,7 @@
 import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('string-search', {
-  tier: 'S', xp: 320, requires: ['strings'], gates: ['kmp', 'palsub'],
+  tier: 'S', xp: 320, requires: ['strings', 'tracking'], gates: ['kmp', 'palsub'],
   title: 'A word already half heard', algo: 'Prefix tables',
   steps: [
     explain([

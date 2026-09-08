@@ -10,11 +10,11 @@ def min_coins_greedy(amount, coins):
     return used
 
 # === greedy/5
-def max_non_overlapping(intervals):
-    count = 0
+def kept_shifts(intervals):
+    kept = []
     end = 0
     for s, e in sorted(intervals, key=lambda iv: iv[1]):
         if s >= end:
-            count += 1
+            kept.append([s, e])
             end = e
-    return count
+    return kept

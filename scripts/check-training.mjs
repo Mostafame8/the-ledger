@@ -26,6 +26,10 @@ for (const n of NODES) {
   const need = n.id === 'method' ? ['explain', 'spot'] : ['trace', 'spot', 'blank', 'mini']
   for (const t of need) if (!types.includes(t)) fail(`${n.id}: needs at least one ${t} step`)
   if (n.id === 'method' && types.some(t => !['explain', 'spot'].includes(t))) fail(`method: explain and spot steps only`)
+  if (n.id !== 'method') {
+    const order = ['explain', 'explain', 'trace', 'spot', 'blank', 'mini']
+    if (types.length !== order.length || !order.every((t, i) => types[i] === t)) fail(`${n.id}: step order must be explain, explain, trace, spot, blank, mini`)
+  }
 
   n.steps?.forEach((s, i) => {
     const at = `${n.id}[${i}] ${s.type}`
@@ -50,16 +54,22 @@ for (const n of NODES) {
         if (!Array.isArray(s.options) || s.options.length < 3 || s.options.length > 4) fail(`${at}: 3–4 options`)
         if (!(Number.isInteger(s.answer) && s.answer >= 0 && s.answer < (s.options || []).length)) fail(`${at}: answer out of range`)
         break
-      case 'blank':
+      case 'blank': {
         if (!s.intro) fail(`${at}: missing intro`)
         if (!s.template?.includes('___')) fail(`${at}: template has no ___ marker`)
         if (!s.tests?.includes('check(')) fail(`${at}: tests never call check()`)
+        const n2 = (s.tests?.match(/check\(/g) || []).length
+        if (n2 < 4 || n2 > 7) fail(`${at}: ${n2} checks, want 4–7`)
         break
-      case 'mini':
+      }
+      case 'mini': {
         if (!s.mission || !s.hint) fail(`${at}: needs mission and hint`)
         if (!/\b[a-z_][a-z0-9_]*\(/.test(s.mission)) fail(`${at}: mission must name a function like foo(...)`)
         if (!s.tests?.includes('check(')) fail(`${at}: tests never call check()`)
+        const n2 = (s.tests?.match(/check\(/g) || []).length
+        if (n2 < 4 || n2 > 7) fail(`${at}: ${n2} checks, want 4–7`)
         break
+      }
       default: fail(`${at}: unknown step type`)
     }
   })
