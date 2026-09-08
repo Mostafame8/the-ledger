@@ -64,8 +64,8 @@ for (const n of NODES) {
   if (!Array.isArray(n.gates)) fail(`${n.id}: gates must be an array`)
   else for (const g of n.gates) if (!gateIds.has(g)) fail(`${n.id}: unknown gate ${g}`)
   if (n.id !== 'method' && !n.gates?.length) fail(`${n.id}: should list the gates it prepares`)
-  if (n.tools !== undefined && !Array.isArray(n.tools)) fail(`${n.id}: tools must be an array`)
-  else for (const t of (n.tools || [])) if (!TOOL_BY_ID[t]) fail(`${n.id}: requires unknown tool ${t}`)
+  if (!Array.isArray(n.tools)) fail(`${n.id}: tools must be an array`)
+  else for (const t of n.tools) if (!TOOL_BY_ID[t]) fail(`${n.id}: requires unknown tool ${t}`)
 
   const types = (n.steps || []).map(s => s.type)
   if (!types.length) fail(`${n.id}: no steps`)
@@ -84,12 +84,14 @@ for (const n of NODES) {
 }
 
 // Armoury tools: flat drills reusing the lesson step engine, no rank/requires/gates.
+if (TOOLS.length !== 12) fail(`expected exactly 12 tools, found ${TOOLS.length}`)
 const toolIdRe = /^tool-[a-z0-9]+(-[a-z0-9]+)*$/
 for (const t of TOOLS) {
   if (!toolIdRe.test(t.id)) fail(`${t.id}: id must match ${toolIdRe}`)
   if (seen.has(t.id)) fail(`duplicate id ${t.id} (collides with a lesson or tool)`); seen.add(t.id)
   if (!(t.xp >= 20 && t.xp <= 40)) fail(`${t.id}: xp ${t.xp} outside 20–40`)
   for (const f of ['title', 'algo']) if (!t[f]) fail(`${t.id}: missing ${f}`)
+  for (const f of ['tier', 'requires', 'gates']) if (t[f] !== undefined) fail(`${t.id}: must not carry ${f}`)
 
   const types = (t.steps || []).map(s => s.type)
   const order = ['explain', 'explain', 'trace', 'blank']

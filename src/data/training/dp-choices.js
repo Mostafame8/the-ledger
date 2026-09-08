@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('dp-choices', {
   tier: 'A', xp: 240, requires: ['dp-line'], gates: ['coins', 'wordbreak', 'lis', 'knap'],
+  tools: ['tool-list'],
   title: 'Exact change at the border', algo: 'Tables over choices',
   steps: [
     explain([

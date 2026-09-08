@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('loops', {
   tier: 'F', xp: 40, requires: ['method'], gates: ['fizz'],
+  tools: ['tool-list'],
   title: 'Counting on fingers', algo: 'Loops and accumulators',
   steps: [
     explain([

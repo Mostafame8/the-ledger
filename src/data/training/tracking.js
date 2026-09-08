@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('tracking', {
   tier: 'E', xp: 60, requires: ['loops'], gates: ['stocks', 'majority'],
+  tools: [],
   title: 'The ticker on the bar', algo: 'Tracking a running best',
   steps: [
     explain([

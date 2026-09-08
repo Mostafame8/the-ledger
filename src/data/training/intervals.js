@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('intervals', {
   tier: 'B', xp: 160, requires: ['tracking'], gates: ['timetable', 'meetings'],
+  tools: ['tool-list'],
   title: 'The shift board', algo: 'Sorting and merging intervals',
   steps: [
     explain([

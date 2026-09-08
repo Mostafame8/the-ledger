@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('tries', {
   tier: 'S', xp: 300, requires: ['hash-maps', 'recursion'], gates: ['trie', 'ladder'],
+  tools: ['tool-dict', 'tool-recursion'],
   title: 'The code-word rack', algo: 'Prefix trees',
   steps: [
     explain([

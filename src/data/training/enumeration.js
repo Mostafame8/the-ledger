@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('enumeration', {
   tier: 'B', xp: 170, requires: ['recursion'], gates: ['letters', 'perms', 'safe'],
+  tools: ['tool-recursion', 'tool-list'],
   title: 'Every room, in or out', algo: 'Enumerating every subset',
   steps: [
     explain([

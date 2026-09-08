@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('greedy', {
   tier: 'A', xp: 200, requires: ['intervals', 'heaps'], gates: ['task', 'jump', 'timetable', 'epilogue'],
+  tools: ['tool-list'],
   title: 'Take the one that ends first', algo: 'Greedy choices',
   steps: [
     explain([

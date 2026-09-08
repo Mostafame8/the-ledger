@@ -2,6 +2,7 @@ import { node, explain, spot } from './node.js'
 
 export default node('method', {
   tier: 'F', xp: 40, requires: [], gates: [],
+  tools: [],
   title: 'The back room', algo: 'The six moves',
   steps: [
     explain([

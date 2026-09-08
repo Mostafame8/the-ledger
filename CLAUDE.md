@@ -16,7 +16,8 @@ Clearing a gate grants XP, raises a stat, and unlocks the next gate.
 - `src/style.css` — the "System window" look. Do not add per-component CSS; keep it here.
 - `scripts/check-gates.mjs` — content validator.
 - `src/data/training/` — training room content. One file per technique node, `index.js` lists them in order. `node.js` has the constructors, `progress.js` and `answers.js` are pure logic with unit tests in `tests/`.
-- `src/components/SkillTree.vue`, `LessonWindow.vue`, `Step*.vue` — training presentation.
+- `src/data/training/tools/` — armoury content. One file per tool, `index.js` lists all twelve in a fixed order (list, string, dict, set, stack, queue, heap, recursion, linked-node, tree-node, graph, table).
+- `src/components/SkillTree.vue`, `LessonWindow.vue`, `Step*.vue` — training presentation. `SkillTree.vue` also renders the Armoury tab (tools list, kit progress) and, on lesson rows, tool chips (red/locked until the tool is cleared).
 - `scripts/check-training.mjs` — training validator. `scripts/solutions/training/` — reference solutions for drills, blocks `# === <node-id>/<step-index>`.
 
 ## Gate schema
@@ -36,6 +37,7 @@ Use the `g(...)` helper in gates.js:
 ## Training node schema
 Use `node(id, {...})` and the step constructors from `src/data/training/node.js`:
 - `tier` F–S, `xp` in the tier's range (F 40–60, E 60–80, D 90–100, C 120–140, B 160–180, A 200–240, S 280–400), `requires` node ids, `gates` gate ids it prepares.
+- `tools` — array of `tool-…` ids from the armoury, at most two. A lesson opens only once every `requires` node is cleared AND every listed tool is cleared. Lessons that need no structure (`method`, `bits`, `tracking`, `search-the-answer`) still carry `tools: []`.
 - `title` is a scene name, `algo` the plain technique name.
 - Steps in order: `explain(lines, {move?, code?})`, `trace(code, input, frames)`, `spot(problem, options, answer, why)`, `blank(intro, template, tests)`, `mini(mission, hint, tests)`.
 - Every technique node has at least one trace, spot, blank, and mini. `method` has explain and spot only.
@@ -44,6 +46,13 @@ Use `node(id, {...})` and the step constructors from `src/data/training/node.js`
 - Content order in a lesson: two explain steps (Dax's brute force, then the waste named or the pattern shown, with a code block), then trace, spot, blank, mini.
 - Exception to the `algo`-only rule: `spot` options, a spot's `problem` and `why`, the `method` lesson, mandated function names, and unavoidable interpreter vocabulary (e.g. Python's own error text) may name techniques. Explain lines, missions, and hints may not.
 - The lesson list is tier tabs (populated tiers only) with one row per lesson ordered by prerequisite depth; locked rows show `needs: <titles>`. No drawn links.
+
+### Tool schema
+Use `tool(id, {...})` from `src/data/training/node.js`, one file per tool in `src/data/training/tools/`:
+- `tool(id, { xp, title, algo, steps })` — `id` is `tool-<name>` (kebab), `xp` 20–40 (use 30), `title` the scene name, `algo` the plain structure name (e.g. `List`, `Heap`). No `tier`, `requires`, or `gates` — tools are flat, ungated drills.
+- Steps in order: `explain, explain, trace, blank` (no spot, no mini). Unlike lesson prose, tool prose may name its own structure — the structure is the drill's subject.
+- Add a reference block per drill in `scripts/solutions/training/<tool-id>.py`, headed `# === tool-<name>/<step-index>`.
+- Kit xp (the sum of cleared tools' `xp`) is a separate pool that never enters `training.xp` and never touches the rank ladder (`rankFor`, `rankProgress`, `depthOf` read lesson fields only).
 
 ## The story (keep it consistent)
 - Setting: a contemporary city, a heist on Halden Bank, and a book of payments called the Ledger.

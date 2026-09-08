@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('recursion', {
   tier: 'C', xp: 120, requires: ['trees'], gates: ['letters', 'perms', 'safe'],
+  tools: ['tool-recursion'],
   title: 'The folded note', algo: 'Recursion',
   steps: [
     explain([

@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('sets', {
   tier: 'F', xp: 40, requires: ['hash-maps'], gates: ['dupes'],
+  tools: ['tool-set'],
   title: 'The guest list', algo: 'Sets for membership',
   steps: [
     explain([

@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('bits', {
   tier: 'F', xp: 40, requires: ['loops'], gates: ['xor'],
+  tools: [],
   title: 'The odd key', algo: 'XOR and bit tests',
   steps: [
     explain([

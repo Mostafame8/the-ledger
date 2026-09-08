@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('sliding-window', {
   tier: 'D', xp: 90, requires: ['two-pointers', 'tracking'], gates: ['window', 'minsub'],
+  tools: ['tool-list', 'tool-string'],
   title: 'Three seconds of tape', algo: 'Sliding window',
   steps: [
     explain([

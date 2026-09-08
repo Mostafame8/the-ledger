@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('two-strings', {
   tier: 'S', xp: 280, requires: ['dp-grid'], gates: ['edit', 'lcs', 'regex'],
+  tools: ['tool-table', 'tool-string'],
   title: 'Two copies of the same page', algo: 'Tables over two strings',
   steps: [
     explain([

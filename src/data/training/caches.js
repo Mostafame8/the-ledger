@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('caches', {
   tier: 'S', xp: 300, requires: ['hash-maps', 'linked-lists'], gates: ['lru'],
+  tools: ['tool-dict', 'tool-linked-node'],
   title: 'What the fence forgets', algo: 'Caching and eviction',
   steps: [
     explain([

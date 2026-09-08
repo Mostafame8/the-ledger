@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('arrays-in-place', {
   tier: 'F', xp: 50, requires: ['loops'], gates: ['zeros', 'rmdup'],
+  tools: ['tool-list'],
   title: 'The SIM tray', algo: 'In-place writing with a write pointer',
   steps: [
     explain([

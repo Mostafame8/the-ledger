@@ -249,3 +249,34 @@ drawn prerequisite lines. Both are now part of the design:
   two-strings, monotonic, caches, tries, string-search, search-the-answer,
   interval-dp. Full tables live in
   `docs/superpowers/plans/2026-09-08-training-room-tiers-c-s.md`.
+
+## Tools (armoury) (added 2026-09-08 after user review)
+
+Data structures become a separate, parallel unlock track: twelve tools, fixed
+order list, string, dict, set, stack, queue, heap, recursion, linked-node,
+tree-node, graph, table. Decisions:
+
+- **Drill shape**: each tool is a flat, ungated drill — `explain, explain,
+  trace, blank` (no spot, no mini) — reusing the lesson step engine but never
+  carrying `tier`, `requires`, or `gates`. Unlike lesson prose, a tool's prose
+  may name its own structure, since the structure is the drill's subject.
+- **Gating rule**: a lesson opens only when every prerequisite lesson is
+  cleared *and* every tool it lists is cleared. Lessons list at most two
+  tools, mapped by the technique's underlying structure(s) — see
+  `docs/superpowers/plans/2026-09-08-training-tools.md` for the full mapping.
+  Lessons with no structure dependency (`method`, `bits`, `tracking`,
+  `search-the-answer`) carry `tools: []` and stay gated on `requires` alone.
+- **Kit xp is separate**: clearing a tool grants "kit xp," summed and shown
+  independently. Kit xp never enters `training.xp` and never touches the rank
+  ladder — `rankFor`, `rankProgress`, and `depthOf` read lesson fields only.
+- **UI**: the lesson list gains an "Armoury" tab (tools list, kit progress
+  `cleared / 12`) alongside the tier tabs, and defaults there while no tool is
+  cleared. Lesson rows show a chip per listed tool, colored red/locked until
+  that tool is cleared; a locked row's "needs" line also names any uncleared
+  tools. The status window gains a kit grid (one tile per tool, lit once
+  cleared) and a kit xp readout.
+- **Old saves**: a save from before tools existed has no `training.tools`.
+  Previously cleared lessons stay cleared (clearing is never revoked); only
+  *opening* new lessons is newly gated on tools, so an old save's next
+  not-yet-cleared lesson reads as sealed with a "needs: <tool title>" line
+  until its tools are unlocked.

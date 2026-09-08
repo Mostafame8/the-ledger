@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('dp-grid', {
   tier: 'A', xp: 220, requires: ['dp-line', 'grids'], gates: ['paths', 'minpath', 'edit', 'lcs'],
+  tools: ['tool-table'],
   title: 'The one-way streets', algo: 'Tables over a grid',
   steps: [
     explain([

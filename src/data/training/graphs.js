@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('graphs', {
   tier: 'B', xp: 160, requires: ['grid-bfs'], gates: ['clone', 'bipartite', 'ladder'],
+  tools: ['tool-graph', 'tool-queue'],
   title: 'The napkin network', algo: 'Adjacency lists and graph search',
   steps: [
     explain([

@@ -2,6 +2,7 @@ import { node, explain, trace, spot, blank, mini } from './node.js'
 
 export default node('knapsack-dp', {
   tier: 'S', xp: 280, requires: ['dp-choices'], gates: ['knap', 'ledger'],
+  tools: ['tool-list'],
   title: 'What the bag will carry', algo: 'One-row knapsack',
   steps: [
     explain([
