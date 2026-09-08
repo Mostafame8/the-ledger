@@ -1,11 +1,12 @@
 // Web Worker that hosts Pyodide. Keeping Python off the main thread means an
 // infinite loop in a learner's solution can be killed with worker.terminate().
-import { loadPyodide } from 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.mjs'
-
 const INDEX_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/'
 let py = null
 
-const boot = loadPyodide({ indexURL: INDEX_URL })
+// Dynamic import so the bundler leaves the CDN URL alone (a static import gets rewritten
+// into a global in production builds). The worker is created with { type: 'module' }.
+const boot = import(/* @vite-ignore */ INDEX_URL + 'pyodide.mjs')
+  .then(({ loadPyodide }) => loadPyodide({ indexURL: INDEX_URL }))
   .then(p => { py = p; postMessage({ type: 'ready' }) })
   .catch(err => postMessage({ type: 'boot-error', error: String(err?.message || err) }))
 
