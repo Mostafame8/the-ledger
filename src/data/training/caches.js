@@ -12,7 +12,7 @@ export default node('caches', {
     explain([
       '“Two questions, and they want two different structures. What is the value for this name — that is a dictionary, and it is instant. Which name has been unused longest — a dictionary cannot answer that at all, because a dictionary has no idea what order anything arrived in.”',
       '“So keep both. A dictionary for the values, and an order beside it, most recently used at the back. A use pulls the name out of the order and puts it at the back. A new name when the order is full drops whatever sits at the front, and drops it from the dictionary too, because a value nobody can reach is a leak.”',
-      '“Written with a plain list the order is honest and slow: pulling a name out of the middle of a list shifts everything after it. That is the version below and it is the one to think in. The constant-time version keeps the same order in a doubly linked list and has the dictionary point straight at the links, so the name to promote unhooks itself without a search.”',
+      '“Written with a plain list the order is honest and slow: pulling a name out of the middle of a list shifts everything after it. That is the version below and it is the one to think in. The constant-time version keeps the same order as a chain of notes where each note knows its neighbours on both sides, and has the dictionary point straight at the notes — so the name to promote is two snips and a pin, with nothing searched.”',
       '“The same trick is worth having in the small: a function that remembers what it was asked. Same dictionary, no eviction at all, and it turns the fire escape from a tree of repeated calls into one answer per question.”',
     ], { move: 'pick the pattern', code:
 `def run(ops, cap):
