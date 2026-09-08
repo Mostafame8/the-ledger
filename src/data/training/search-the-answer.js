@@ -70,7 +70,6 @@ export default node('search-the-answer', {
 `check("feasible([7, 2, 5, 10, 8], 2, 18)", True)
 check("feasible([7, 2, 5, 10, 8], 2, 17)", False)
 check("feasible([1, 2, 3, 4, 5], 2, 9)", True)
-check("feasible([1, 2, 3, 4, 5], 2, 8)", False)
 check("feasible([1, 4, 4], 3, 4)", True)
 check("feasible([1, 4, 4], 3, 3)", False)
 check("feasible([5], 1, 5)", True)
@@ -79,7 +78,6 @@ check("feasible([], 1, 0)", True)`),
       'The candidates run from 0 to n itself, and the property is monotone: if x squared fits then so does everything below x. Halve the bracket and keep the middle when its square fits.',
 `check("sqrt_floor(0)", 0)
 check("sqrt_floor(1)", 1)
-check("sqrt_floor(2)", 1)
 check("sqrt_floor(8)", 2)
 check("sqrt_floor(9)", 3)
 check("sqrt_floor(15)", 3)

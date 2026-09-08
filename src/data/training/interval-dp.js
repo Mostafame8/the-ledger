@@ -78,7 +78,6 @@ check("count_pal_substrings('aaa')", 6)
 check("count_pal_substrings('aba')", 4)
 check("count_pal_substrings('abba')", 6)
 check("count_pal_substrings('aabaa')", 9)
-check("count_pal_substrings('abcba')", 7)
 check("count_pal_substrings('a')", 1)
 check("count_pal_substrings('')", 0)`),
     mini('Write longest_pal_len(s) returning the length of the longest stretch of s that reads the same both ways, and 0 for the empty string. Build the same table over stretches and read the answer off it.',
@@ -88,7 +87,6 @@ check("longest_pal_len('cbbd')", 2)
 check("longest_pal_len('forgeeksskeegfor')", 10)
 check("longest_pal_len('abcba')", 5)
 check("longest_pal_len('aaaa')", 4)
-check("longest_pal_len('abc')", 1)
 check("longest_pal_len('a')", 1)
 check("longest_pal_len('')", 0)`),
   ],

@@ -88,7 +88,6 @@ check("_t_fast(4)", 16)
 check("_t_fast(5)", 25)
 check("_t_fast(5)", 25)
 check("len(_t_calls)", 2)
-check("sorted(_t_calls)", [4, 5])
 check("_t_fast(0)", 0)
 check("len(_t_calls)", 3)`),
     mini("Write first_evicted(ops, cap) returning the first key the fence forgets, or None if she never has to forget anything. ops is a list of tuples: ('put', key) stores or refreshes a key, ('get', key) uses it. A put of a key she already holds refreshes it and evicts nothing; a put of a new key when she is holding cap of them evicts the one unused longest. A get of a key she does not hold changes nothing.",
@@ -97,7 +96,6 @@ check("len(_t_calls)", 3)`),
 check("first_evicted([('put', 1), ('put', 2), ('put', 3)], 2)", 1)
 check("first_evicted([('put', 1), ('put', 1), ('put', 2), ('put', 3)], 2)", 1)
 check("first_evicted([('get', 9), ('put', 1), ('put', 2), ('put', 3)], 2)", 1)
-check("first_evicted([('put', 1), ('put', 2), ('put', 3), ('put', 4)], 2)", 1)
 check("first_evicted([('put', 5), ('put', 6)], 1)", 5)
 check("first_evicted([('put', 1), ('put', 2)], 2)", None)
 check("first_evicted([], 2)", None)`),

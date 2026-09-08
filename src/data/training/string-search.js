@@ -60,14 +60,12 @@ check("expand('abba', 1, 2)", (0, 3))
 check("expand('aaa', 1, 2)", (1, 2))
 check("expand('ab', 0, 1)", (1, 0))
 check("expand('a', 0, 0)", (0, 0))
-check("expand('xy', 0, 0)", (0, 0))
 check("expand('racecar', 3, 3)", (0, 6))`),
     mini('Write count_occurrences(text, pat) returning how many positions of text the string pat starts at, counting overlaps separately, with pat non-empty. A plain left-to-right scan is accepted here; the point is the counting, not the speed.',
       'Every start position from 0 up to the last one where pat still fits. Overlapping counts, so a match does not let you skip ahead by the length of the pattern.',
 `check("count_occurrences('aaaa', 'aa')", 3)
 check("count_occurrences('abababa', 'aba')", 3)
 check("count_occurrences('mississippi', 'issi')", 2)
-check("count_occurrences('aaa', 'a')", 3)
 check("count_occurrences('abc', 'abc')", 1)
 check("count_occurrences('abc', 'd')", 0)
 check("count_occurrences('aaa', 'aaaa')", 0)

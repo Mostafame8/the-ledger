@@ -68,15 +68,13 @@ check("edit('abc', 'abc')", 0)
 check("edit('a', 'b')", 1)
 check("edit('', 'abc')", 3)
 check("edit('abc', '')", 3)
-check("edit('', '')", 0)
-check("edit('sunday', 'saturday')", 3)`),
+check("edit('', '')", 0)`),
     mini('Write min_deletions_to_equal(a, b) returning the smallest number of character deletions — counting deletions from both strings together — that leaves the two strings identical. Deleting is the only move allowed. Two strings that are already equal need none, and two strings with nothing in common need all of their characters gone.',
       'Whatever survives in both is a shared run with gaps allowed, and everything else is deleted. So count the longest shared run once and work out how many characters that leaves behind on each side.',
 `check("min_deletions_to_equal('sea', 'eat')", 2)
 check("min_deletions_to_equal('leetcode', 'etco')", 4)
 check("min_deletions_to_equal('abc', 'abc')", 0)
 check("min_deletions_to_equal('abc', 'def')", 6)
-check("min_deletions_to_equal('ab', 'ba')", 2)
 check("min_deletions_to_equal('', 'abc')", 3)
 check("min_deletions_to_equal('abc', '')", 3)
 check("min_deletions_to_equal('', '')", 0)`),

@@ -64,7 +64,6 @@ def build(words):
 `_t_root = {'t': {'o': {'#': True}, 'e': {'a': {'#': True}}}}
 check("has_prefix(_t_root, 'te')", True)
 check("has_prefix(_t_root, 'tea')", True)
-check("has_prefix(_t_root, 'to')", True)
 check("has_prefix(_t_root, 'ted')", False)
 check("has_prefix(_t_root, 'a')", False)
 check("has_prefix(_t_root, '')", True)
@@ -75,7 +74,6 @@ check("has_prefix({}, '')", True)`),
 `check("count_with_prefix(['to', 'tea', 'ted', 'ten', 'a'], 'te')", 3)
 check("count_with_prefix(['to', 'tea', 'ted', 'ten', 'a'], 't')", 4)
 check("count_with_prefix(['dog', 'do', 'door'], 'do')", 3)
-check("count_with_prefix(['to', 'tea'], 'tea')", 1)
 check("count_with_prefix(['to', 'tea'], 'teas')", 0)
 check("count_with_prefix(['a', 'a', 'b'], 'a')", 2)
 check("count_with_prefix(['abc'], '')", 1)

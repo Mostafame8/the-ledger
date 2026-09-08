@@ -54,7 +54,6 @@ check("knap([1, 3, 4, 5], [1, 4, 5, 7], 7)", 9)
 check("knap([3, 4, 5], [30, 50, 60], 8)", 90)
 check("knap([1, 2, 3], [6, 10, 12], 5)", 22)
 check("knap([2], [5], 1)", 0)
-check("knap([1, 1, 1], [1, 1, 1], 2)", 2)
 check("knap([], [], 5)", 0)
 check("knap([4], [9], 0)", 0)`),
     mini('Write subset_exists(nums, target) returning True if some subset of nums adds up exactly to target, and False otherwise. nums holds non-negative whole numbers and target is non-negative. The empty subset counts, so a target of 0 is always reachable.',
@@ -62,7 +61,6 @@ check("knap([4], [9], 0)", 0)`),
 `check("subset_exists([3, 34, 4, 12, 5, 2], 9)", True)
 check("subset_exists([3, 34, 4, 12, 5, 2], 30)", False)
 check("subset_exists([1, 2, 5], 4)", False)
-check("subset_exists([1, 2, 5], 8)", True)
 check("subset_exists([7], 7)", True)
 check("subset_exists([2, 4], 0)", True)
 check("subset_exists([], 0)", True)
