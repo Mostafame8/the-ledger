@@ -28,7 +28,14 @@ import intervals from './intervals.js'
 import heaps from './heaps.js'
 import sorting from './sorting.js'
 import enumeration from './enumeration.js'
+import backtracking from './backtracking.js'
+import greedy from './greedy.js'
+import weightedGraphs from './weighted-graphs.js'
+import unionFind from './union-find.js'
+import dpLine from './dp-line.js'
+import dpGrid from './dp-grid.js'
+import dpChoices from './dp-choices.js'
 export { TIERS } from './progress.js'
 
-export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets, tracking, stacks, binarySearch, rotation, merging, slidingWindow, prefixSums, linkedLists, trees, gridBfs, floodFill, recursion, graphs, topoOrder, intervals, heaps, sorting, enumeration]
+export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets, tracking, stacks, binarySearch, rotation, merging, slidingWindow, prefixSums, linkedLists, trees, gridBfs, floodFill, recursion, graphs, topoOrder, intervals, heaps, sorting, enumeration, backtracking, greedy, weightedGraphs, unionFind, dpLine, dpGrid, dpChoices]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
