@@ -10,7 +10,12 @@ import hashMaps from './hash-maps.js'
 import frequency from './frequency.js'
 import bits from './bits.js'
 import sets from './sets.js'
+import tracking from './tracking.js'
+import stacks from './stacks.js'
+import binarySearch from './binary-search.js'
+import rotation from './rotation.js'
+import merging from './merging.js'
 export { TIERS } from './progress.js'
 
-export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets]
+export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets, tracking, stacks, binarySearch, rotation, merging]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
