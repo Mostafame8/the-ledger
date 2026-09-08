@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue'
 import { ARCS, GATES, XP_PER_LEVEL, titleFor } from './data/index.js'
 import { runTests, runtime, warm } from './runner.js'
-import { NODES, NODE_BY_ID } from './data/training/index.js'
+import { NODES, NODE_BY_ID, TIERS } from './data/training/index.js'
 import { rankFor, rankProgress, isOpen } from './data/training/progress.js'
 
 const KEY = 'ledger-save-v2'
@@ -17,7 +17,7 @@ const active = ref(null)
 const flash = ref(null)   // text to show in the level-up overlay, or null
 
 // ── Training room ────────────────────────────────────────────────────────────────
-const freshTraining = () => ({ xp: 0, nodes: {}, active: null, code: {} })
+const freshTraining = () => ({ xp: 0, nodes: {}, active: null, code: {}, tab: null })
 const mode = ref(saved.mode === 'training' ? 'training' : 'heist')
 const training = ref({ ...freshTraining(), ...(saved.training || {}) })
 const setMode = m => { mode.value = m === 'training' ? 'training' : 'heist' }
@@ -27,6 +27,19 @@ const trainingRank = computed(() => rankFor(training.value.xp, NODES))
 const trainingProgress = computed(() => rankProgress(training.value.xp, NODES))
 const nodesCleared = computed(() => NODES.filter(n => training.value.nodes[n.id]?.cleared).length)
 const nodeState = id => training.value.nodes[id]?.cleared ? 'cleared' : NODE_BY_ID[id] && isOpen(NODE_BY_ID[id], training.value.nodes) ? 'open' : 'locked'
+
+// Selected training tier tab. Defaults to the first populated tier holding an uncleared node.
+const populatedTiers = TIERS.filter(t => NODES.some(n => n.tier === t))
+const defaultTrainingTab = () => {
+  const t = populatedTiers.find(t => NODES.some(n => n.tier === t && !training.value.nodes[n.id]?.cleared))
+  return t ?? populatedTiers[populatedTiers.length - 1]
+}
+const trainingTab = ref(populatedTiers.includes(training.value.tab) ? training.value.tab : defaultTrainingTab())
+const setTrainingTab = t => { trainingTab.value = t }
+const tierProgress = tier => {
+  const nodes = NODES.filter(n => n.tier === tier)
+  return { done: nodes.filter(n => training.value.nodes[n.id]?.cleared).length, total: nodes.length }
+}
 
 const activeNode = computed(() => training.value.active ? NODE_BY_ID[training.value.active] ?? null : null)
 const stepIndex = computed(() => {
@@ -149,13 +162,14 @@ function reset() {
   if (!confirm('Wipe the save and start the heist and the training over?')) return
   player.value = fresh(); cleared.value = []; notes.value = {}; active.value = null; tab.value = 0
   training.value = freshTraining(); mode.value = 'heist'
+  trainingTab.value = defaultTrainingTab()
 }
 
 enterStep()   // resume: initialise `satisfied` for a persisted `training.active` on load
 
-watch([player, cleared, notes, tab, mode, training], () => save({
+watch([player, cleared, notes, tab, mode, training, trainingTab], () => save({
   player: player.value, cleared: cleared.value, notes: notes.value, tab: tab.value,
-  mode: mode.value, training: training.value,
+  mode: mode.value, training: { ...training.value, tab: trainingTab.value },
 }), { deep: true })
 window.addEventListener('keydown', e => { if (e.key === 'Escape') { close(); closeNode() } })
 
@@ -164,6 +178,7 @@ export function useStore() {
     clearedCount, title, statList, isDone, isLocked, arcOpen, arcProgress, tab, setTab, open, close, clear, reset,
     run, runtime, test,
     mode, setMode, training, trainingXp, trainingRank, trainingProgress, nodesCleared, nodeState,
+    trainingTab, setTrainingTab, tierProgress,
     activeNode, stepIndex, activeStep, satisfied, openNode, closeNode, answer, next, back,
     stepCode, stepRun, runStepTests }
 }
