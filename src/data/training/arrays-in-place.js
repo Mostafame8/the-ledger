@@ -58,8 +58,8 @@ check("swap_ends([1, 2])", lambda: inplace(swap_ends, [1, 2]), [2, 1])
 check("swap_ends([9])", lambda: inplace(swap_ends, [9]), [9])
 check("swap_ends([])", lambda: inplace(swap_ends, []), [])
 check("swap_ends returns None", lambda: swap_ends([1, 2]), None)`),
-    mini('Write move_negatives_back(nums) that rearranges nums so every value below zero sits after every value zero or above. Both groups keep their original order. Change the list in place and return None.',
-      'A write pointer packs the keepers to the front, exactly as fill_front did. The negatives are not blanks, though, so set them aside in a small list before the pass and write them in behind the keepers.',
+    mini('Write move_negatives_back(nums) that rearranges nums so every value below zero sits after every value zero or above. Both groups keep their original order. Change the list in place and return None. Marguerite, grudgingly: “Tonight you may use one small side tray for the negatives, but the positives move with the same one-finger write pointer, in order, on the original tray.”',
+      'Two passes over one tray: walk once writing the positives forward with the pointer, then lay the set-aside negatives into the slots left behind.',
 `check("move_negatives_back([1, -2, 3, -4])", lambda: inplace(move_negatives_back, [1, -2, 3, -4]), [1, 3, -2, -4])
 check("move_negatives_back([0, -1, 0])", lambda: inplace(move_negatives_back, [0, -1, 0]), [0, 0, -1])
 check("move_negatives_back([5, 6])", lambda: inplace(move_negatives_back, [5, 6]), [5, 6])
