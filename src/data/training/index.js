@@ -22,7 +22,13 @@ import trees from './trees.js'
 import gridBfs from './grid-bfs.js'
 import floodFill from './flood-fill.js'
 import recursion from './recursion.js'
+import graphs from './graphs.js'
+import topoOrder from './topo-order.js'
+import intervals from './intervals.js'
+import heaps from './heaps.js'
+import sorting from './sorting.js'
+import enumeration from './enumeration.js'
 export { TIERS } from './progress.js'
 
-export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets, tracking, stacks, binarySearch, rotation, merging, slidingWindow, prefixSums, linkedLists, trees, gridBfs, floodFill, recursion]
+export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets, tracking, stacks, binarySearch, rotation, merging, slidingWindow, prefixSums, linkedLists, trees, gridBfs, floodFill, recursion, graphs, topoOrder, intervals, heaps, sorting, enumeration]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
