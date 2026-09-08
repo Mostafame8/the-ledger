@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue'
 import { ARCS, GATES, XP_PER_LEVEL, titleFor } from './data/index.js'
 import { runTests, runtime, warm } from './runner.js'
-import { NODES, NODE_BY_ID, TIERS } from './data/training/index.js'
+import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID, TIERS } from './data/training/index.js'
 import { rankFor, rankProgress, isOpen } from './data/training/progress.js'
 
 const KEY = 'ledger-save-v2'
@@ -17,79 +17,97 @@ const active = ref(null)
 const flash = ref(null)   // text to show in the level-up overlay, or null
 
 // ── Training room ────────────────────────────────────────────────────────────────
-const freshTraining = () => ({ xp: 0, nodes: {}, active: null, code: {}, tab: null })
+const freshTraining = () => ({ xp: 0, nodes: {}, tools: {}, active: null, code: {}, tab: null })
 const mode = ref(saved.mode === 'training' ? 'training' : 'heist')
 const training = ref({ ...freshTraining(), ...(saved.training || {}) })
 const setMode = m => { mode.value = m === 'training' ? 'training' : 'heist' }
+
+// Lessons and tools share one lookup and one progress-record accessor.
+const ITEM_BY_ID = { ...NODE_BY_ID, ...TOOL_BY_ID }
+const progressMap = id => TOOL_BY_ID[id] ? training.value.tools : training.value.nodes
 
 const trainingXp = computed(() => training.value.xp)
 const trainingRank = computed(() => rankFor(training.value.xp, NODES))
 const trainingProgress = computed(() => rankProgress(training.value.xp, NODES))
 const nodesCleared = computed(() => NODES.filter(n => training.value.nodes[n.id]?.cleared).length)
-const nodeState = id => training.value.nodes[id]?.cleared ? 'cleared' : NODE_BY_ID[id] && isOpen(NODE_BY_ID[id], training.value.nodes) ? 'open' : 'locked'
+const toolsCleared = computed(() => TOOLS.filter(t => training.value.tools[t.id]?.cleared).length)
+const kitXp = computed(() => TOOLS.filter(t => training.value.tools[t.id]?.cleared).reduce((sum, t) => sum + t.xp, 0))
+const nodeState = id => {
+  const rec = progressMap(id)[id]
+  if (rec?.cleared) return 'cleared'
+  if (TOOL_BY_ID[id]) return 'open'
+  return NODE_BY_ID[id] && isOpen(NODE_BY_ID[id], training.value.nodes, training.value.tools) ? 'open' : 'locked'
+}
 
-// Selected training tier tab. Defaults to the first populated tier holding an uncleared node.
+// Selected training tier tab. Defaults to the Armoury while no tool is cleared, else the
+// first populated tier holding an uncleared node.
 const populatedTiers = TIERS.filter(t => NODES.some(n => n.tier === t))
 const defaultTrainingTab = () => {
+  if (toolsCleared.value === 0) return 'kit'
   const t = populatedTiers.find(t => NODES.some(n => n.tier === t && !training.value.nodes[n.id]?.cleared))
   return t ?? populatedTiers[populatedTiers.length - 1]
 }
-const trainingTab = ref(populatedTiers.includes(training.value.tab) ? training.value.tab : defaultTrainingTab())
+const trainingTab = ref(training.value.tab === 'kit' || populatedTiers.includes(training.value.tab) ? training.value.tab : defaultTrainingTab())
 const setTrainingTab = t => { trainingTab.value = t }
 const tierProgress = tier => {
   const nodes = NODES.filter(n => n.tier === tier)
   return { done: nodes.filter(n => training.value.nodes[n.id]?.cleared).length, total: nodes.length }
 }
 
-const activeNode = computed(() => training.value.active ? NODE_BY_ID[training.value.active] ?? null : null)
+const activeNode = computed(() => training.value.active ? ITEM_BY_ID[training.value.active] ?? null : null)
 const stepIndex = computed(() => {
   const n = activeNode.value
   if (!n) return 0
-  return Math.min(training.value.nodes[n.id]?.step ?? 0, n.steps.length - 1)
+  return Math.min(progressMap(n.id)[n.id]?.step ?? 0, n.steps.length - 1)
 })
 const activeStep = computed(() => activeNode.value ? activeNode.value.steps[stepIndex.value] : null)
 const satisfied = ref(false)       // current step answered correctly (or needs no answer)
 const stepRun = ref(null)          // last test run for a code step, same shape as `run`
 
 function enterStep() {
-  if (training.value.active && !NODE_BY_ID[training.value.active]) training.value.active = null
+  if (training.value.active && !ITEM_BY_ID[training.value.active]) training.value.active = null
   const st = activeStep.value
-  const cleared = !!(activeNode.value && training.value.nodes[activeNode.value.id]?.cleared)
+  const cleared = !!(activeNode.value && progressMap(activeNode.value.id)[activeNode.value.id]?.cleared)
   satisfied.value = !st || st.type === 'explain' || cleared
   stepRun.value = null
 }
 function openNode(id) {
-  if (!NODE_BY_ID[id] || nodeState(id) === 'locked') return
-  const rec = (training.value.nodes[id] ||= { step: 0, cleared: false })
+  if (!ITEM_BY_ID[id] || nodeState(id) === 'locked') return
+  const map = progressMap(id)
+  const rec = (map[id] ||= { step: 0, cleared: false })
   if (rec.cleared) rec.step = 0            // review from the top
   training.value.active = id
   enterStep()
-  if (NODE_BY_ID[id].steps.some(st => st.tests)) warm()
+  if (ITEM_BY_ID[id].steps.some(st => st.tests)) warm()
 }
 function closeNode() { training.value.active = null }
 function answer(ok) { if (ok) satisfied.value = true }
 function next() {
   const n = activeNode.value
   if (!n || !satisfied.value) return
-  const rec = training.value.nodes[n.id]
-  if ((rec.step ?? 0) + 1 >= n.steps.length) { finishNode(n); return }
+  const rec = progressMap(n.id)[n.id]
+  if ((rec.step ?? 0) + 1 >= n.steps.length) { finishItem(n); return }
   rec.step = (rec.step ?? 0) + 1
   enterStep()
 }
 function back() {
   const n = activeNode.value
-  const rec = n && training.value.nodes[n.id]
+  const rec = n && progressMap(n.id)[n.id]
   if (!rec || (rec.step ?? 0) === 0) return
   rec.step = (rec.step ?? 0) - 1
   enterStep()
 }
-function finishNode(n) {
-  const rec = training.value.nodes[n.id]
+function finishItem(n) {
+  const rec = progressMap(n.id)[n.id]
   if (!rec.cleared) {
     rec.cleared = true
-    const before = trainingRank.value
-    training.value.xp += n.xp
-    showFlash(trainingRank.value !== before ? `Rank ${trainingRank.value}` : 'Lesson cleared')
+    if (TOOL_BY_ID[n.id]) {
+      showFlash('Tool unlocked')
+    } else {
+      const before = trainingRank.value
+      training.value.xp += n.xp
+      showFlash(trainingRank.value !== before ? `Rank ${trainingRank.value}` : 'Lesson cleared')
+    }
   }
   training.value.active = null
 }
@@ -178,7 +196,7 @@ export function useStore() {
     clearedCount, title, statList, isDone, isLocked, arcOpen, arcProgress, tab, setTab, open, close, clear, reset,
     run, runtime, test,
     mode, setMode, training, trainingXp, trainingRank, trainingProgress, nodesCleared, nodeState,
-    trainingTab, setTrainingTab, tierProgress,
+    toolsCleared, kitXp, trainingTab, setTrainingTab, tierProgress,
     activeNode, stepIndex, activeStep, satisfied, openNode, closeNode, answer, next, back,
     stepCode, stepRun, runStepTests }
 }
