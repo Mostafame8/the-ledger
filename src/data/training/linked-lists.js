@@ -14,6 +14,7 @@ export default node('linked-lists', {
       '“You cannot jump, so you run, and you run twice. Two runners on the same chain from the same drop: one taking one address at a time, one taking two.”',
       '“When the fast runner steps off the end, the slow one is standing exactly halfway along. You never counted the drops and you never wrote one down.”',
       '“And if the chain loops, the fast runner cannot step off. It comes round behind the slow one and closes the gap by one every pass until they are on the same drop. Same two runners, two different questions, no notebook for either.”',
+      '“If you take both of the fast hand\'s steps on one line, the guard has to cover both: while fast and fast.next.”',
     ], { move: 'pick the pattern', code:
 `def middle(head):
     slow = head

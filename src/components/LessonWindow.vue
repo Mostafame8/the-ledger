@@ -19,8 +19,8 @@ const kicker = { explain: 'Marguerite explains', trace: 'Trace it by hand', spot
       <div class="body">
         <h2>{{ s.activeNode.value.title }}</h2>
         <div class="algo">
-          {{ s.activeNode.value.algo }} · {{ kicker[s.activeStep.value.type] }} · step {{ s.stepIndex.value + 1 }} of {{ s.activeNode.value.steps.length }}
-          <span v-if="s.activeStep.value.move" class="move">move: {{ s.activeStep.value.move }}</span>
+          {{ s.activeNode.value.algo }} · {{ kicker[s.activeStep.value?.type] }} · step {{ s.stepIndex.value + 1 }} of {{ s.activeNode.value.steps.length }}
+          <span v-if="s.activeStep.value?.move" class="move">move: {{ s.activeStep.value?.move }}</span>
         </div>
         <div class="dots" aria-hidden="true">
           <i v-for="(st, i) in s.activeNode.value.steps" :key="i" :class="{ done: i < s.stepIndex.value, now: i === s.stepIndex.value }"></i>

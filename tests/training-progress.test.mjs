@@ -39,3 +39,13 @@ test('depthOf: longest prerequisite chain', () => {
   assert.equal(depthOf(byId['two-pointers'], byId), 1)
   assert.equal(depthOf(byId.window, byId), 3)
 })
+
+test('depthOf: sibling branches that share an ancestor do not shortcut each other', () => {
+  const shared = [
+    N('a', 'F', 40), N('b', 'F', 40, ['a']), N('c', 'F', 40, ['a']),
+    N('d', 'F', 40, ['b', 'c']), N('e', 'F', 40, ['d', 'a']),
+  ]
+  const sharedById = Object.fromEntries(shared.map(n => [n.id, n]))
+  assert.equal(depthOf(sharedById.d, sharedById), 2)
+  assert.equal(depthOf(sharedById.e, sharedById), 3)
+})

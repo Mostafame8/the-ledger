@@ -25,7 +25,12 @@ function measure() {
   for (const n of NODES) for (const r of n.requires) {
     const a = cards.get(r)?.getBoundingClientRect(), b = cards.get(n.id)?.getBoundingClientRect()
     if (!a || !b) continue
-    out.push({ x1: a.right - box.left, y1: a.top + a.height / 2 - box.top, x2: b.left - box.left, y2: b.top + b.height / 2 - box.top })
+    if (Math.abs(a.left - b.left) < 1) {
+      // Same tier column: route the link vertically, prerequisite's bottom to dependent's top.
+      out.push({ x1: a.left + a.width / 2 - box.left, y1: a.bottom - box.top, x2: b.left + b.width / 2 - box.left, y2: b.top - box.top })
+    } else {
+      out.push({ x1: a.right - box.left, y1: a.top + a.height / 2 - box.top, x2: b.left - box.left, y2: b.top + b.height / 2 - box.top })
+    }
   }
   links.value = out
 }

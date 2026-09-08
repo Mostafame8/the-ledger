@@ -32,7 +32,7 @@ function submit() {
     <p>Call: <code>{{ step.input }}</code>. At each stop, type the value of the highlighted variable exactly as Python would print it.</p>
   </div>
   <div class="trace">
-    <pre class="trace-code"><div v-for="(l, i) in lines" :key="i" :class="{ hl: i + 1 === frame.line }"><span class="ln">{{ i + 1 }}</span>{{ l }}</div></pre>
+    <pre class="trace-code"><div v-for="(l, i) in lines" :key="i" :class="{ hl: i + 1 === frame.line }"><span class="ln" aria-hidden="true">{{ i + 1 }}</span>{{ l }}</div></pre>
     <div class="trace-side">
       <div class="dim">Stop {{ Math.min(k + 1, total) }} of {{ total }} · after line {{ frame.line }}</div>
       <div class="state">

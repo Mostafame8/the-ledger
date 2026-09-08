@@ -36,5 +36,5 @@ export function isOpen(node, nodeStates) {
 export function depthOf(node, byId, seen = new Set()) {
   if (!node.requires.length || seen.has(node.id)) return 0
   seen.add(node.id)
-  return 1 + Math.max(...node.requires.map(id => depthOf(byId[id], byId, seen)))
+  return 1 + Math.max(...node.requires.map(id => depthOf(byId[id], byId, new Set(seen))))
 }

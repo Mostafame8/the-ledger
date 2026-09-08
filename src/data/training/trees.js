@@ -9,7 +9,7 @@ export default node('trees', {
       'Each name is a Node with a val, a left and a right, and None where nobody reports in. It is the chain of drops again, except every link forks.',
       'Dax: “How deep does it go? I will count the rows on the paper.”',
       '“The paper is a photograph on your phone and half of it is glare. Stop counting rows and ask the chart itself.”',
-    ], { move: 'restate' }),
+    ], { move: 'brute force' }),
     explain([
       '“Put your thumb on any name. What hangs underneath it is another org chart. Smaller, same shape, same rules. That is the only fact you need and it is why the answer is three lines long.”',
       '“How deep is this chart? One, for the name you are standing on, plus however deep the deeper of its two sides runs. Ask each side the same question and let it ask its own sides.”',

@@ -48,7 +48,7 @@ check("is_anagram('ab', 'abb')", False)
 check("is_anagram('rat', 'car')", False)
 check("is_anagram('aab', 'abb')", False)
 check("is_anagram('', '')", True)`),
-    mini('Write most_common(nums) that returns the value appearing most often in nums. If two values tie, return the smaller one.',
+    mini('Write most_common(nums) that returns the value appearing most often in nums. If two values tie, return the smaller one. nums holds at least one value.',
       'Tally first, then walk the tally instead of the list. Deciding the tie is easier if you visit the keys in order.',
 `check("most_common([1, 2, 2, 3])", 2)
 check("most_common([9, 1, 1, 9, 3])", 1)

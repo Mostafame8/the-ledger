@@ -6,17 +6,17 @@ Clearing a gate grants XP, raises a stat, and unlocks the next gate.
 
 ## Run
 - `npm install`, then `npm run dev`
-- `npm run check` validates all gate and training data. `npm test` proves every gate and drill against reference solutions. Run both after every content change.
+- `npm run check` validates all gate and training data. `npm test` runs the unit tests in `tests/` and proves every gate and drill against reference solutions. Run both after every content change.
 
 ## Layout
 - `src/data/gates.js` — ALL gate content lives here (the `ARCS` array). Story text, missions, hints.
 - `src/data/index.js` — derived lists, XP per level, title thresholds.
 - `src/store.js` — progress state, persisted to localStorage.
-- `src/components/` — StatusWindow, GateList, QuestWindow. Presentation only.
+- `src/components/` — StatusWindow, GateList, QuestWindow, TestResults (shared by QuestWindow and the training presentation). Presentation only.
 - `src/style.css` — the "System window" look. Do not add per-component CSS; keep it here.
 - `scripts/check-gates.mjs` — content validator.
 - `src/data/training/` — training room content. One file per technique node, `index.js` lists them in order. `node.js` has the constructors, `progress.js` and `answers.js` are pure logic with unit tests in `tests/`.
-- `src/components/SkillTree.vue`, `LessonWindow.vue`, `Step*.vue`, `TestResults.vue` — training presentation.
+- `src/components/SkillTree.vue`, `LessonWindow.vue`, `Step*.vue` — training presentation.
 - `scripts/check-training.mjs` — training validator. `scripts/solutions/training/` — reference solutions for drills, blocks `# === <node-id>/<step-index>`.
 
 ## Gate schema
@@ -41,7 +41,8 @@ Use `node(id, {...})` and the step constructors from `src/data/training/node.js`
 - Every technique node has at least one trace, spot, blank, and mini. `method` has explain and spot only.
 - Trace frames: `{ line, state, ask, note }`; `line` is 1-based into `code`; `ask` names a key of `state`; values are JS literals or `{ py: '(1, 3)' }` for tuples.
 - Drill `tests` use the same `check()` dialect as gates. Add a reference block per drill in `scripts/solutions/training/<node-id>.py`.
-- Content order in a lesson: brute force from Dax, the waste named, the pattern shown, then trace, spot, blank, mini.
+- Content order in a lesson: two explain steps (Dax's brute force, then the waste named or the pattern shown, with a code block), then trace, spot, blank, mini.
+- Exception to the `algo`-only rule: `spot` options and the `method` lesson may name techniques in prose, because recognising the technique is the point of those steps.
 
 ## The story (keep it consistent)
 - Setting: a contemporary city, a heist on Halden Bank, and a book of payments called the Ledger.

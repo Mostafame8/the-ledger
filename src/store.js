@@ -26,15 +26,20 @@ const trainingXp = computed(() => training.value.xp)
 const trainingRank = computed(() => rankFor(training.value.xp, NODES))
 const trainingProgress = computed(() => rankProgress(training.value.xp, NODES))
 const nodesCleared = computed(() => NODES.filter(n => training.value.nodes[n.id]?.cleared).length)
-const nodeState = id => training.value.nodes[id]?.cleared ? 'cleared' : isOpen(NODE_BY_ID[id], training.value.nodes) ? 'open' : 'locked'
+const nodeState = id => training.value.nodes[id]?.cleared ? 'cleared' : NODE_BY_ID[id] && isOpen(NODE_BY_ID[id], training.value.nodes) ? 'open' : 'locked'
 
 const activeNode = computed(() => training.value.active ? NODE_BY_ID[training.value.active] ?? null : null)
-const stepIndex = computed(() => activeNode.value ? training.value.nodes[activeNode.value.id]?.step ?? 0 : 0)
+const stepIndex = computed(() => {
+  const n = activeNode.value
+  if (!n) return 0
+  return Math.min(training.value.nodes[n.id]?.step ?? 0, n.steps.length - 1)
+})
 const activeStep = computed(() => activeNode.value ? activeNode.value.steps[stepIndex.value] : null)
 const satisfied = ref(false)       // current step answered correctly (or needs no answer)
 const stepRun = ref(null)          // last test run for a code step, same shape as `run`
 
 function enterStep() {
+  if (training.value.active && !NODE_BY_ID[training.value.active]) training.value.active = null
   const st = activeStep.value
   const cleared = !!(activeNode.value && training.value.nodes[activeNode.value.id]?.cleared)
   satisfied.value = !st || st.type === 'explain' || cleared
@@ -71,7 +76,7 @@ function finishNode(n) {
     rec.cleared = true
     const before = trainingRank.value
     training.value.xp += n.xp
-    showFlash(trainingRank.value !== before ? `Rank ${trainingRank.value}` : `${n.algo}: learned`)
+    showFlash(trainingRank.value !== before ? `Rank ${trainingRank.value}` : 'Lesson cleared')
   }
   training.value.active = null
 }
@@ -97,7 +102,8 @@ async function runStepTests() {
   if (passed) answer(true)
 }
 
-function showFlash(text) { flash.value = text; setTimeout(() => { flash.value = null }, 1900) }
+let flashTimer = null
+function showFlash(text) { clearTimeout(flashTimer); flash.value = text; flashTimer = setTimeout(() => { flash.value = null }, 1900) }
 
 const gate = computed(() => active.value === null ? null : GATES[active.value])
 const level = computed(() => Math.floor(player.value.xp / XP_PER_LEVEL))
@@ -140,10 +146,12 @@ function clear(g) {
   if (level.value > before) showFlash(`Level ${level.value}`)
 }
 function reset() {
-  if (!confirm('Wipe the save and start the heist over?')) return
+  if (!confirm('Wipe the save and start the heist and the training over?')) return
   player.value = fresh(); cleared.value = []; notes.value = {}; active.value = null; tab.value = 0
   training.value = freshTraining(); mode.value = 'heist'
 }
+
+enterStep()   // resume: initialise `satisfied` for a persisted `training.active` on load
 
 watch([player, cleared, notes, tab, mode, training], () => save({
   player: player.value, cleared: cleared.value, notes: notes.value, tab: tab.value,
