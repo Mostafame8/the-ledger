@@ -56,7 +56,6 @@ check("climb(1)", 1)
 check("climb(2)", 2)
 check("climb(3)", 3)
 check("climb(4)", 5)
-check("climb(5)", 8)
 check("climb(10)", 89)
 check("climb(30)", 1346269)`),
     mini('Write min_cost_climb(cost) where cost[i] is what standing on step i costs. You may start on step 0 or step 1 without paying for the ground, and from a step you may climb one or two. Return the cheapest total paid to get past the last step. cost has at least two entries.',

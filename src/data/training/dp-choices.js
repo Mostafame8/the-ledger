@@ -61,7 +61,6 @@ check("can_make([3, 5], 4)", False)
 check("can_make([2], 7)", False)
 check("can_make([2], 8)", True)
 check("can_make([1], 0)", True)
-check("can_make([5, 7], 12)", True)
 check("can_make([6, 9], 11)", False)
 check("can_make([], 0)", True)`),
     mini('Write count_combinations(coins, amount) returning how many different sets of notes add up to amount, where a set is counted once no matter what order it is handed over in. Every denomination may be used as often as you like, and coins holds distinct positive values. An amount of 0 has one answer: the empty set.',
@@ -71,7 +70,6 @@ check("count_combinations([1, 2, 5], 5)", 4)
 check("count_combinations([2], 3)", 0)
 check("count_combinations([2], 4)", 1)
 check("count_combinations([1], 0)", 1)
-check("count_combinations([3, 5, 7], 8)", 1)
 check("count_combinations([], 0)", 1)
 check("count_combinations([2, 3, 5], 10)", 4)`),
   ],

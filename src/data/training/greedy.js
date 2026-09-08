@@ -12,8 +12,8 @@ export default node('greedy', {
     explain([
       '“Take the courier who finishes earliest. Not the shortest window, not the earliest to start — the earliest to finish, because finishing early is the only thing that buys you room for the next one.”',
       '“Then forget everything that overlaps what you just took, and ask the same question of what remains. Sort once by end time and one pass down the list does it: hold the time you are free again, and take anything that starts at or after it.”',
-      '“This is a bargain and you should know what you paid. One pass, no table, no memory of the choices — and no way back. If the rule is wrong for your problem, a greedy pass will not notice; it will just hand you a wrong answer confidently.”',
-      '“Earliest finish is provable here. Whatever the best possible schedule is, swapping its first booking for the earliest-finishing one cannot make it worse, and you can keep doing that swap all the way down. Say that sentence out loud before you ever trust a greedy rule.”',
+      '“This is a bargain and you should know what you paid. One pass, no table, no memory of the choices — and no way back. If the rule is wrong for your problem, one pass down the list will not notice; it will just hand you a wrong answer confidently.”',
+      '“Earliest finish is provable here. Whatever the best possible schedule is, swapping its first booking for the earliest-finishing one cannot make it worse, and you can keep doing that swap all the way down. Say that sentence out loud before you ever trust a rule that never looks back.”',
     ], { move: 'pick the pattern', code:
 `def max_events(intervals):
     order = sorted(intervals, key=lambda iv: iv[1])
@@ -48,7 +48,7 @@ export default node('greedy', {
        'Sort by fee divided by the length of the window and take the best rate first',
        'No greedy rule is safe here. Work along the windows by end time and keep, for each one, the best total achievable up to it — either you take it and add the best total from before its start, or you skip it'],
       3, 'Highest fee first breaks on one fat courier who blocks three lean ones worth more together, and best-rate-first breaks the same way with extra arithmetic. Earliest finish maximises the count, which was a different question; the most jobs and the most money are not the same schedule. There is no beer-mat rule for this one. It needs the choices remembered — take it or leave it, best of the two — which is a table, and a table is the next technique rather than this one. Knowing which of these two a problem is is most of the skill.'),
-    blank('“Where greedy does hold: change out of a till. Twenty-fives, tens, fives and ones, biggest first, and you cannot beat it. Take as many of each coin as fit and carry what is left.”',
+    blank('“Where the rule does hold: change out of a till. Twenty-fives, tens, fives and ones, biggest first, and you cannot beat it. Take as many of each coin as fit and carry what is left.”',
 `def min_coins_greedy(amount, coins):
     used = 0
     for c in coins:
