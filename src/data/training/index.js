@@ -35,7 +35,15 @@ import unionFind from './union-find.js'
 import dpLine from './dp-line.js'
 import dpGrid from './dp-grid.js'
 import dpChoices from './dp-choices.js'
+import knapsackDp from './knapsack-dp.js'
+import twoStrings from './two-strings.js'
+import monotonic from './monotonic.js'
+import caches from './caches.js'
+import tries from './tries.js'
+import stringSearch from './string-search.js'
+import searchTheAnswer from './search-the-answer.js'
+import intervalDp from './interval-dp.js'
 export { TIERS } from './progress.js'
 
-export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets, tracking, stacks, binarySearch, rotation, merging, slidingWindow, prefixSums, linkedLists, trees, gridBfs, floodFill, recursion, graphs, topoOrder, intervals, heaps, sorting, enumeration, backtracking, greedy, weightedGraphs, unionFind, dpLine, dpGrid, dpChoices]
+export const NODES = [method, loops, arraysInPlace, grids, twoPointers, strings, digitArrays, hashMaps, frequency, bits, sets, tracking, stacks, binarySearch, rotation, merging, slidingWindow, prefixSums, linkedLists, trees, gridBfs, floodFill, recursion, graphs, topoOrder, intervals, heaps, sorting, enumeration, backtracking, greedy, weightedGraphs, unionFind, dpLine, dpGrid, dpChoices, knapsackDp, twoStrings, monotonic, caches, tries, stringSearch, searchTheAnswer, intervalDp]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
