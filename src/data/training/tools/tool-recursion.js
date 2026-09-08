@@ -20,7 +20,7 @@ sys.getrecursionlimit()       # 1000 on a stock build. Frames are not free
 count_down(5000)              # RecursionError: maximum recursion depth exceeded` }),
     explain([
       '“Every call gets a frame: its own n, its own place in the code, stacked on the frame that called it. Three envelopes open at once means three frames open at once, and no frame can see inside another one.”',
-      '“The last frame opened is the first to answer, and its answer travels back out through every frame still waiting, in reverse. It is the tray of plates again, except Python holds the tray for you and never lets you touch it.”',
+      '“The last frame opened is the first to answer, and its answer travels back out through every frame still waiting, in reverse. It is the tray of plates from the stack drill again, except Python holds the tray for you and never lets you touch it.”',
       '“Write the answer that involves no asking first, and make sure the step reaches it. Miss either and the stack grows until Python gives up: RecursionError, at a thousand frames or so.”',
       '“Depth is what costs you, not the work. A parcel a thousand deep needs a thousand frames standing at once, however little each one is holding.”',
     ]),

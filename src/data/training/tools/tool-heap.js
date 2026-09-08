@@ -22,7 +22,7 @@ heapq.heappop([])           # IndexError. Ask before you take` }),
       '“It is an ordinary crate. heapq keeps one promise about it and no more: whatever sits at drawer[0] is the smallest thing in the drawer. Read the rest and it will look shuffled to you, because it is.”',
       '“heappush drops one in, heappop takes the front one out, and each costs a handful of moves rather than a walk. Double the drawer and you pay one more step. Reading drawer[0] costs nothing at all.”',
       '“Smallest first, always. If you want the largest out front, push the price with a minus in front of it and take the minus off when it comes back.”',
-      '“So never index anything but the front, never sort it and expect it to stay sorted, and never pop an empty drawer. That is an IndexError, same as the tray.”',
+      '“So never index anything but the front, never sort it and expect it to stay sorted, and never pop an empty drawer. That is an IndexError, same as the tray of plates.”',
     ]),
     trace(
 `import heapq

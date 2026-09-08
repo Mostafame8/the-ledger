@@ -21,7 +21,7 @@ deque()                 # an empty line` }),
     explain([
       '“append puts one on the back, popleft takes one off the front, and both are one move however long the line runs. That is the whole reason the thing exists.”',
       '“First in, first out. When you want everything one step away before anything two steps away, the line is what holds that order for you and you never have to think about it.”',
-      '“It is not a crate. Reaching into the middle by number costs a walk from one end, so only ever index the ends. And popleft on an empty line raises IndexError, same as the tray.”',
+      '“It is not a crate. Reaching into the middle by number costs a walk from one end, so only ever index the ends. And popleft on an empty line raises IndexError, same as the tray of plates.”',
     ]),
     trace(
 `from collections import deque

@@ -50,8 +50,8 @@ const rankPct = computed(() => {
         </div>
         <div class="titles">Lessons trained: <b>{{ s.nodesCleared.value }} / {{ NODES.length }}</b></div>
         <div class="kit-head">Kit: <b>{{ s.toolsCleared.value }} / {{ TOOLS.length }}</b> &middot; <b>{{ s.kitXp.value }} kit xp</b></div>
-        <div class="kit-grid" aria-label="Kit">
-          <div v-for="t in TOOLS" :key="t.id" class="kit-tile" :class="{ lit: s.nodeState(t.id) === 'cleared' }" :title="t.title">{{ t.algo }}</div>
+        <div class="kit-grid">
+          <div v-for="t in TOOLS" :key="t.id" class="kit-tile" :class="{ lit: s.nodeState(t.id) === 'cleared' }" :title="t.algo + ' — ' + t.title">{{ t.algo }}</div>
         </div>
       </template>
 

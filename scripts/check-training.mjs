@@ -65,7 +65,10 @@ for (const n of NODES) {
   else for (const g of n.gates) if (!gateIds.has(g)) fail(`${n.id}: unknown gate ${g}`)
   if (n.id !== 'method' && !n.gates?.length) fail(`${n.id}: should list the gates it prepares`)
   if (!Array.isArray(n.tools)) fail(`${n.id}: tools must be an array`)
-  else for (const t of n.tools) if (!TOOL_BY_ID[t]) fail(`${n.id}: requires unknown tool ${t}`)
+  else {
+    for (const t of n.tools) if (!TOOL_BY_ID[t]) fail(`${n.id}: requires unknown tool ${t}`)
+    if ((n.tools || []).length > 2) fail(`${n.id}: at most two tools, found ${n.tools.length}`)
+  }
 
   const types = (n.steps || []).map(s => s.type)
   if (!types.length) fail(`${n.id}: no steps`)
