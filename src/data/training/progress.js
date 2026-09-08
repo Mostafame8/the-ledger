@@ -15,6 +15,7 @@ function ladder(nodes) {
   return tierTotals(nodes).map(([rank, total]) => { const step = { rank, floor: acc }; acc += total; return step })
 }
 
+// Reads lesson fields (tier, xp) only; tool xp never enters this ladder.
 export function rankFor(xp, nodes) {
   const steps = ladder(nodes)
   let rank = steps[0]?.rank ?? 'F'
@@ -22,6 +23,7 @@ export function rankFor(xp, nodes) {
   return rank
 }
 
+// Reads lesson fields (tier, xp) only; tool xp never enters this ladder.
 export function rankProgress(xp, nodes) {
   const steps = ladder(nodes)
   let i = 0
@@ -29,10 +31,13 @@ export function rankProgress(xp, nodes) {
   return { rank: steps[i]?.rank ?? 'F', floor: steps[i]?.floor ?? 0, ceil: steps[i + 1] ? steps[i + 1].floor : null }
 }
 
-export function isOpen(node, nodeStates) {
+// A lesson opens only when every prerequisite lesson is cleared AND every listed tool is cleared.
+export function isOpen(node, nodeStates, toolStates = {}) {
   return node.requires.every(id => nodeStates[id]?.cleared)
+    && (node.tools || []).every(id => toolStates[id]?.cleared)
 }
 
+// Reads lesson prerequisite chains only; a `tools` array (if present) never affects depth.
 export function depthOf(node, byId, seen = new Set()) {
   if (!node.requires.length || seen.has(node.id)) return 0
   seen.add(node.id)

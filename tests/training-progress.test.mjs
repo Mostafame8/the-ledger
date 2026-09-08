@@ -49,3 +49,27 @@ test('depthOf: sibling branches that share an ancestor do not shortcut each othe
   assert.equal(depthOf(sharedById.d, sharedById), 2)
   assert.equal(depthOf(sharedById.e, sharedById), 3)
 })
+
+test('isOpen: a node with tools also needs every listed tool cleared', () => {
+  const withTool = { ...byId['two-pointers'], tools: ['tool-x'] }
+  assert.equal(isOpen(withTool, { method: { cleared: true } }, {}), false)
+  assert.equal(isOpen(withTool, { method: { cleared: true } }, { 'tool-x': { cleared: true } }), true)
+})
+
+test('isOpen: requires cleared but tool locked stays closed', () => {
+  const withTool = { ...byId['two-pointers'], tools: ['tool-x'] }
+  const nodeStates = { method: { cleared: true } }
+  assert.equal(isOpen(withTool, nodeStates, { 'tool-x': { cleared: false } }), false)
+  assert.equal(isOpen(withTool, nodeStates, {}), false)
+})
+
+test('isOpen: tool cleared but requires locked stays closed', () => {
+  const withTool = { ...byId['two-pointers'], tools: ['tool-x'] }
+  assert.equal(isOpen(withTool, {}, { 'tool-x': { cleared: true } }), false)
+})
+
+test('depthOf: a tools array naming an id absent from byId does not change the result', () => {
+  const withTool = { ...byId['two-pointers'], tools: ['tool-missing'] }
+  const byIdWithTool = { ...byId, 'two-pointers': withTool }
+  assert.equal(depthOf(withTool, byIdWithTool), 1)
+})
