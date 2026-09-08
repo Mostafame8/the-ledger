@@ -77,8 +77,8 @@
   .gate:disabled{cursor:not-allowed;opacity:.4}
   .rank{width:46px;height:46px;display:grid;place-items:center;font-weight:700;font-size:21px;
     border:1px solid currentColor;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
-  .rank.F{color:#6f8db0}.rank.E{color:#8fb3d9}.rank.D{color:#5ec2ff}.rank.C{color:#3fa9ff}
-  .rank.B{color:#9d7bff}.rank.A{color:#c56bff}.rank.S{color:#ffb454;text-shadow:0 0 10px rgba(255,180,84,.6)}
+  .rank.F,.rank-letter.F{color:#6f8db0}.rank.E,.rank-letter.E{color:#8fb3d9}.rank.D,.rank-letter.D{color:#5ec2ff}.rank.C,.rank-letter.C{color:#3fa9ff}
+  .rank.B,.rank-letter.B{color:#9d7bff}.rank.A,.rank-letter.A{color:#c56bff}.rank.S,.rank-letter.S{color:#ffb454;text-shadow:0 0 10px rgba(255,180,84,.6)}
   .gate h3{margin:0;font-size:19px;font-weight:600}
   .gate p{margin:1px 0 0;color:var(--dim);font-size:15px}
   .tag{color:var(--dim);font-size:14px;white-space:nowrap}
@@ -95,7 +95,7 @@
   .quest .algo{color:var(--dim);margin-top:-8px}
   .story{font-size:18px;display:grid;gap:10px}
   .story p{margin:0}
-  .story .voice{color:#a9c6f2;border-left:2px solid var(--violet);padding-left:12px}
+  .story .voice,.mission .voice{color:#a9c6f2;border-left:2px solid var(--violet);padding-left:12px}
   .mission{border:1px dashed rgba(63,169,255,.45);padding:14px 16px;background:rgba(63,169,255,.05)}
   .mission h4{margin:0 0 6px;color:var(--glow);font-size:16px;letter-spacing:.04em}
   .mission p{margin:0 0 10px}
@@ -132,3 +132,52 @@
   .levelup{position:fixed;inset:0;z-index:20;display:grid;place-items:center;pointer-events:none;animation:flash 1.8s ease-out both}
   .levelup div{font-size:64px;font-weight:700;color:var(--glow);text-shadow:0 0 40px var(--glow),0 0 80px var(--edge)}
   @keyframes flash{0%{opacity:0;transform:scale(.7)}15%{opacity:1;transform:scale(1.05)}75%{opacity:1}100%{opacity:0}}
+
+  /* ── Mode toggle & training status ─────────────────────────────────────── */
+  .mode{display:grid;grid-template-columns:1fr 1fr;margin:-4px -4px 14px;border:1px solid var(--faint)}
+  .mode button{background:none;border:0;padding:8px;color:var(--dim);font:inherit;font-weight:600;letter-spacing:.06em;cursor:pointer}
+  .mode button+button{border-left:1px solid var(--faint)}
+  .mode button.active{color:var(--glow);background:rgba(63,169,255,.12);text-shadow:0 0 10px rgba(127,212,255,.5)}
+  .mode button:focus-visible{outline:2px solid var(--glow);outline-offset:-2px}
+  /* ── Skill tree ────────────────────────────────────────────────────────── */
+  .tree .body{padding:0 0 8px}
+  .lesson-row .needs{display:block;margin-top:2px;color:var(--faint);font-size:13px}
+  .lesson-row .needs b{color:var(--dim);font-weight:500}
+  .gate:disabled .needs b{color:var(--ink);opacity:.9}
+
+  /* ── Lesson window ─────────────────────────────────────────────────────── */
+  .lesson .move{margin-left:8px;padding:1px 8px;border:1px solid var(--violet);color:#c9b8ff;font-size:13px;letter-spacing:.04em}
+  .dots{display:flex;gap:6px}
+  .dots i{width:14px;height:4px;background:var(--faint)}
+  .dots i.done{background:var(--ok)}
+  .dots i.now{background:var(--glow);box-shadow:0 0 8px var(--glow)}
+  .opts{display:grid;gap:8px}
+  .opt{text-align:left;padding:10px 14px;background:rgba(5,10,22,.5);border:1px solid var(--faint);color:var(--ink);font:inherit;cursor:pointer}
+  .opt:hover:not(:disabled){border-color:var(--edge);background:rgba(63,169,255,.08)}
+  .opt:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+  .opt.right{border-color:var(--ok);color:var(--ok)}
+  .opt.wrong{border-color:#ff8a8a;color:#ff8a8a}
+  .opt:disabled{cursor:default}
+  .why{margin:0;color:#ff8a8a}
+  .why.ok{color:var(--ok)}
+
+  /* ── Trace step ────────────────────────────────────────────────────────── */
+  .trace{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+  @media (max-width:700px){.trace{grid-template-columns:1fr}}
+  .trace-code{padding:10px 0}
+  .trace-code div{padding:0 14px;white-space:pre}
+  .trace-code .ln{display:inline-block;width:2.2em;color:var(--faint);user-select:none}
+  .trace-code .hl{background:rgba(63,169,255,.18);box-shadow:inset 3px 0 0 var(--glow)}
+  .trace-side{display:grid;gap:10px;align-content:start}
+  .state{display:grid;gap:4px;border:1px solid var(--faint);padding:10px 12px;background:rgba(5,10,22,.5)}
+  .var{display:grid;grid-template-columns:90px 1fr;gap:10px;font-size:15px}
+  .var span{color:var(--dim)}
+  .var.ask code{color:var(--glow);font-weight:700}
+  .ans{display:grid;gap:6px}
+  .ans label{color:var(--dim);font-size:15px}
+  .ans input{background:#050a16;color:var(--ink);border:1px solid var(--faint);padding:8px 10px;font:inherit;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14px}
+  .ans input:focus{outline:none;border-color:var(--edge);box-shadow:0 0 0 2px rgba(63,169,255,.25)}
+
+  /* ── Code steps ────────────────────────────────────────────────────────── */
+  .lesson textarea{min-height:180px}
+  .lesson .mission code{color:var(--glow)}

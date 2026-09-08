@@ -230,3 +230,22 @@ Same world and voice as `CLAUDE.md`. Training is what the crew does between
 jobs, in a back room Marguerite rents above a laundromat. She teaches; Dax sits
 in and proposes brute force; the fence occasionally supplies a prop. Technique
 names appear only in `algo`. No references to real anime, manga, or games.
+
+## Content plan, tiers C–S (added 2026-09-08 after user review)
+
+The first version shipped tiers F–D. The user asked for the full ladder, and for
+the lesson list to use tier tabs like the gate list instead of columns with
+drawn prerequisite lines. Both are now part of the design:
+
+- **Lesson list**: tier tabs (populated tiers only) with `trained / total`, then
+  one row per lesson ordered by prerequisite depth: tier badge, scene title,
+  technique, "used in N gates", and on locked rows "needs: <titles>". No drawn
+  links.
+- **Tiers C–S**: 24 more nodes mapped to Arc III–V techniques. XP ranges follow
+  the gate table (C 120–140, B 160–180, A 200–240, S 280–400). Node ids and
+  their gates: C — grid-bfs, flood-fill, recursion. B — graphs, topo-order,
+  intervals, heaps, sorting, enumeration. A — backtracking, greedy,
+  weighted-graphs, union-find, dp-line, dp-grid, dp-choices. S — knapsack-dp,
+  two-strings, monotonic, caches, tries, string-search, search-the-answer,
+  interval-dp. Full tables live in
+  `docs/superpowers/plans/2026-09-08-training-room-tiers-c-s.md`.
