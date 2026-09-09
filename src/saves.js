@@ -55,3 +55,31 @@ export function writeSlot(file, id, data, now) {
 }
 
 export const currentSlot = file => file.slots.find(s => s.id === file.current) ?? null
+
+// ── Export / import: move a slot between browsers as a small JSON document ───────
+const FORMAT = 'ledger-save'
+const VERSION = 1
+
+export const exportSlot = slot => JSON.stringify({ format: FORMAT, version: VERSION, slot }, null, 2)
+
+// A slot is either fresh (data null) or carries a player record. Anything else is not ours.
+const validData = d => d === null || (d && typeof d === 'object' && d.player && typeof d.player === 'object')
+
+// Returns { ok: true, slot } with a fresh id (so it never collides with a local slot), or { ok: false, error }.
+export function parseImport(text, now) {
+  let doc
+  try { doc = JSON.parse(text) } catch { return { ok: false, error: 'That is not a Ledger save file (unreadable JSON).' } }
+  if (!doc || doc.format !== FORMAT || !doc.slot || typeof doc.slot !== 'object') {
+    return { ok: false, error: 'That is not a Ledger save file.' }
+  }
+  const s = doc.slot
+  const data = s.data === undefined ? null : s.data
+  if (!validData(data)) return { ok: false, error: 'That save file has no player in it.' }
+  const created = Number.isFinite(s.created) ? s.created : now
+  const updated = Number.isFinite(s.updated) ? s.updated : created
+  return { ok: true, slot: { id: newId(now), name: cleanName(s.name ?? data?.player?.name), created, updated, data } }
+}
+
+export function importSlot(file, slot) {
+  return { current: slot.id, slots: [...file.slots, slot] }
+}

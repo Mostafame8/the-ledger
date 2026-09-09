@@ -4,7 +4,7 @@ import { runTests, runtime, warm } from './runner.js'
 import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID, TIERS } from './data/training/index.js'
 import { rankFor, rankProgress, isOpen } from './data/training/progress.js'
 
-import { SAVES_KEY, LEGACY_KEY, migrateLegacy, createSlot, selectSlot, deleteSlot, renameSlot, writeSlot, currentSlot } from './saves.js'
+import { SAVES_KEY, LEGACY_KEY, migrateLegacy, createSlot, selectSlot, deleteSlot, renameSlot, writeSlot, currentSlot, exportSlot, parseImport, importSlot } from './saves.js'
 
 // ── Save files ───────────────────────────────────────────────────────────────────
 // All slots live under SAVES_KEY. The pre-slot save under LEGACY_KEY migrates into slot 1 once.
@@ -253,6 +253,21 @@ function renameSave(id, name) {
   commitFile(renameSlot(file.value, id, name))
   if (id === file.value.current) player.value.name = currentSave.value.name
 }
+// { name, text } for a download, or null for an unknown id.
+function exportSave(id) {
+  const s = file.value.slots.find(s => s.id === id)
+  return s ? { name: s.name, text: exportSlot(s) } : null
+}
+// Adds the file's slot as a new save and switches to it. Returns an error string, or null on success.
+function importSave(text) {
+  const r = parseImport(text, Date.now())
+  if (!r.ok) return r.error
+  const f = importSlot(file.value, r.slot)
+  commitFile(f)
+  applyData(r.slot.data, r.slot.name)
+  savesOpen.value = false
+  return null
+}
 
 // Resume: load whatever slot was selected; with none, the save screen opens and the refs stay fresh.
 if (currentSave.value) applyData(currentSave.value.data, currentSave.value.name)
@@ -268,7 +283,7 @@ export function useStore() {
   return { player, cleared, notes, active, flash, gate, level, xpInLevel, xpPct, xpPerLevel: XP_PER_LEVEL,
     clearedCount, title, statList, isDone, isLocked, arcOpen, arcProgress, tab, setTab, open, close, clear,
     run, runtime, test,
-    saves, currentSave, savesOpen, openSaves, closeSaves, newSave, loadSave, deleteSave, renameSave, summary,
+    saves, currentSave, savesOpen, openSaves, closeSaves, newSave, loadSave, deleteSave, renameSave, summary, exportSave, importSave,
     mode, setMode, training, trainingXp, trainingRank, trainingProgress, nodesCleared, nodeState,
     toolsCleared, kitXp, trainingTab, setTrainingTab, tierProgress,
     activeNode, stepIndex, activeStep, satisfied, openNode, closeNode, answer, next, back,

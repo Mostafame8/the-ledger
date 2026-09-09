@@ -9,6 +9,26 @@ const rename = slot => {
   if (name !== null) s.renameSave(slot.id, name)
 }
 const when = ts => new Date(ts).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+
+// Export: hand the browser a .json download. Import: read a picked file and add it as a new save.
+const err = ref(null)
+const picker = ref(null)
+const download = slot => {
+  const out = s.exportSave(slot.id)
+  if (!out) return
+  const url = URL.createObjectURL(new Blob([out.text], { type: 'application/json' }))
+  const a = Object.assign(document.createElement('a'), { href: url, download: `ledger-${out.name.replace(/[^\w-]+/g, '_')}.json` })
+  document.body.appendChild(a); a.click(); a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+const pick = () => { err.value = null; picker.value?.click() }
+const imported = async e => {
+  const f = e.target.files?.[0]
+  e.target.value = ''
+  if (!f) return
+  try { err.value = s.importSave(await f.text()) }
+  catch { err.value = 'Could not read that file.' }
+}
 </script>
 
 <template>
@@ -33,6 +53,7 @@ const when = ts => new Date(ts).toLocaleString(undefined, { dateStyle: 'medium',
             <div class="row save-actions">
               <button class="btn" @click="s.loadSave(slot.id)">{{ slot.id === s.currentSave.value?.id ? 'Continue' : 'Load' }}</button>
               <button class="btn ghost" @click="rename(slot)">Rename</button>
+              <button class="btn ghost" @click="download(slot)" title="Download this save as a .json file">Export</button>
               <button class="btn ghost danger" @click="s.deleteSave(slot.id)">Delete</button>
             </div>
           </li>
@@ -42,7 +63,10 @@ const when = ts => new Date(ts).toLocaleString(undefined, { dateStyle: 'medium',
           <label class="dim" for="save-name">New file</label>
           <input id="save-name" v-model="draft" maxlength="24" placeholder="Your name" autocomplete="off">
           <button class="btn" type="submit">Start</button>
+          <button class="btn ghost" type="button" @click="pick" title="Add a save exported from another browser">Import file…</button>
+          <input ref="picker" type="file" accept=".json,application/json" hidden @change="imported">
         </form>
+        <p v-if="err" class="save-err" role="alert">{{ err }}</p>
 
         <div class="row" v-if="s.currentSave.value">
           <button class="btn ghost" type="button" @click="s.closeSaves">Back</button>

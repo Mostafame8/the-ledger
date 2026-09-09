@@ -91,3 +91,48 @@ test('currentSlot: the selected slot or null', () => {
   assert.equal(currentSlot(f).id, f.current)
   assert.equal(currentSlot({ current: 'gone', slots: f.slots }), null)
 })
+
+// ── Export / import ──────────────────────────────────────────────────────────────
+import { exportSlot, parseImport, importSlot } from '../src/saves.js'
+
+test('exportSlot: a labelled JSON document carrying the whole slot', () => {
+  const f = migrateLegacy(legacy, T0)
+  const doc = JSON.parse(exportSlot(f.slots[0]))
+  assert.equal(doc.format, 'ledger-save')
+  assert.equal(doc.version, 1)
+  assert.deepEqual(doc.slot, f.slots[0])
+})
+
+test('parseImport: round-trips an export into a slot with a fresh id, same name and data', () => {
+  const f = migrateLegacy(legacy, T0)
+  const r = parseImport(exportSlot(f.slots[0]), T1)
+  assert.equal(r.ok, true)
+  assert.notEqual(r.slot.id, f.slots[0].id)
+  assert.equal(r.slot.name, 'Hunter')
+  assert.deepEqual(r.slot.data, legacy)
+  assert.equal(r.slot.updated, T0)        // "last played" travels with the file
+})
+
+test('parseImport: rejects bad JSON, the wrong format, and a slot without a player', () => {
+  assert.equal(parseImport('not json', T1).ok, false)
+  assert.equal(parseImport('{"hello":1}', T1).ok, false)
+  assert.equal(parseImport(JSON.stringify({ format: 'ledger-save', version: 1, slot: { name: 'x', data: {} } }), T1).ok, false)
+  assert.match(parseImport('not json', T1).error, /save file/i)
+})
+
+test('parseImport: a fresh (never played) slot exports and imports too', () => {
+  const { file: f, id } = createSlot(emptyFile(), 'New', T0)
+  const r = parseImport(exportSlot(f.slots.find(s => s.id === id)), T1)
+  assert.equal(r.ok, true)
+  assert.equal(r.slot.data, null)
+})
+
+test('importSlot: appends the slot and selects it, never replacing an existing one', () => {
+  const f0 = migrateLegacy(legacy, T0)
+  const r = parseImport(exportSlot(f0.slots[0]), T1)
+  const f1 = importSlot(f0, r.slot)
+  assert.equal(f1.slots.length, 2)
+  assert.equal(f1.current, r.slot.id)
+  assert.deepEqual(f1.slots[0], f0.slots[0])
+  assert.equal(f0.slots.length, 1)
+})
