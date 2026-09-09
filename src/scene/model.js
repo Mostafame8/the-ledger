@@ -1,10 +1,12 @@
 // Pure: turn a scene descriptor plus one frame's state into a picture the renderer can draw.
 // No DOM, no three. See docs/superpowers/specs/2026-09-09-training-3d-scenes-design.md.
 
-export const KINDS = ['cells']
+export const KINDS = ['cells', 'rows']
 export const CELL_TEXT_MAX = 6
-// A string `data` is a state key when it looks like an identifier; content literals ('HB4417') never do.
+// A string `data` is a state key when it looks like an identifier, or when the row gives an `init`
+// (the list before the first frame). Content literals ('HB4417', 'ok go', '(()') have no init.
 export const KEY_RE = /^[a-z_][a-z0-9_]*$/
+export const dataIsKey = row => typeof row?.data === 'string' && (row.init !== undefined || KEY_RE.test(row.data))
 
 // Text for one cell, Python-flavoured like the state panel.
 export function cellText(v) {
@@ -33,35 +35,41 @@ const isList = v => Array.isArray(v) || typeof v === 'string'
 const toCells = src => Array.from(src, (v, index) => ({ index, text: cellText(v) }))
 
 // The row for this frame: the literal; else the frame's own list, else the previous frame's, else init.
-function rowFor(scene, state, prev) {
-  const d = scene.data
+function rowFor(row, state, prev) {
+  const d = row.data
   if (Array.isArray(d)) return d
-  if (typeof d === 'string' && !KEY_RE.test(d)) return d
+  if (!dataIsKey(row)) return d
   const v = state?.[d]
   if (isList(v)) return v
   if (prev?.source !== undefined) return prev.source
-  return scene.init ?? []
+  return row.init ?? []
 }
 
 const intAt = (state, k) => (typeof k === 'number' ? k : state?.[k])
 const inRow = (v, len) => Number.isInteger(v) && v >= -1 && v <= len
+const present = (state, key) => key in state && state[key] !== null && state[key] !== undefined
+const captioned = (row, key) => { const cap = row.labels?.[key]; return cap ? `${key} · ${cap}` : key }
 
-export function resolve(scene, state = {}, prev = null) {
-  if (!scene || scene.kind !== 'cells') return null
-  const source = rowFor(scene, state, prev)
+// One row of cells: shared by kind 'cells' (one row) and kind 'rows' (each lane or pile).
+export function resolveRow(row, state = {}, prev = null) {
+  const source = rowFor(row, state, prev)
   const cells = toCells(source)
   const len = cells.length
 
   const pointers = []
-  for (const key of Array.isArray(scene.pointers) ? scene.pointers : []) {
+  for (const key of Array.isArray(row.pointers) ? row.pointers : []) {
     const v = state[key]
     if (!inRow(v, len)) continue
-    const cap = scene.labels?.[key]
-    pointers.push({ key, index: v, label: cap ? `${key} · ${cap}` : key })
+    pointers.push({ key, index: v, label: captioned(row, key) })
+  }
+  for (const key of row.at || []) {                 // value pins: one per matching cell
+    if (!present(state, key)) continue
+    const t = cellText(state[key])
+    for (const c of cells) if (c.text === t) pointers.push({ key, index: c.index, label: captioned(row, key) })
   }
 
   const ranges = []
-  for (const r of scene.ranges || []) {
+  for (const r of row.ranges || []) {
     let from, to
     if (Array.isArray(r)) { from = intAt(state, r[0]); to = intAt(state, r[1]) }
     else if (r && typeof r === 'object') { to = intAt(state, r.end); from = Number.isInteger(to) ? to - (r.width ?? 1) + 1 : undefined }
@@ -72,8 +80,8 @@ export function resolve(scene, state = {}, prev = null) {
   }
 
   const marks = []
-  for (const key of scene.marks || []) {
-    if (!(key in state) || state[key] === null || state[key] === undefined) continue
+  for (const key of row.marks || []) {
+    if (!present(state, key)) continue
     const t = cellText(state[key])
     cells.forEach(c => { if (c.text === t && !marks.includes(c.index)) marks.push(c.index) })
   }
@@ -86,5 +94,15 @@ export function resolve(scene, state = {}, prev = null) {
     cells.forEach(c => changed.push(c.index))
   }
 
-  return { kind: 'cells', cells, pointers, ranges, marks, changed, source }
+  return { kind: 'cells', label: row.label ?? null, pile: !!row.pile, chain: !!row.chain, cells, pointers, ranges, marks, changed, source }
+}
+
+export function resolve(scene, state = {}, prev = null) {
+  if (!scene) return null
+  if (scene.kind === 'cells') return resolveRow(scene, state, prev?.kind === 'cells' ? prev : null)
+  if (scene.kind === 'rows') {
+    const rows = (scene.rows || []).map((row, i) => resolveRow(row, state, prev?.kind === 'rows' ? prev.rows[i] ?? null : null))
+    return { kind: 'rows', rows }
+  }
+  return null
 }
