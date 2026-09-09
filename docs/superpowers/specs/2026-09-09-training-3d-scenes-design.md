@@ -147,8 +147,8 @@ Matches the System-window aesthetic:
 - A range bathes its cells in `--glow` at low opacity.
 - A cell whose value changed since the previous stop flashes `--ok` for 400 ms.
 - Camera sits front-high, slightly off-axis, framing all cells with margin. Orbit
-  by drag, zoom by wheel within limits, no pan. Slow auto-orbit (one turn per
-  ~40 s) unless `prefers-reduced-motion`.
+  by drag, zoom by wheel within limits, no pan. No auto-orbit: the table holds
+  still until the learner turns it (user preference, 2026-09-09).
 - Transitions: pointers slide, changed cells pulse, all via a 300 ms ease-out lerp
   driven in the render loop. `prefers-reduced-motion` snaps instead.
 

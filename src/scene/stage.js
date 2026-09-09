@@ -39,8 +39,7 @@ export async function createStage(host) {
   controls.minDistance = 3
   controls.maxDistance = 24
   controls.maxPolarAngle = Math.PI * 0.49
-  controls.autoRotate = !reduced
-  controls.autoRotateSpeed = 1.5           // one turn in ~40 s
+  controls.autoRotate = false              // the table holds still until the learner turns it
   controls.touches = { ONE: null, TWO: THREE.TOUCH.DOLLY_ROTATE }   // one finger scrolls the page, two drive the table
 
   // Framed a bit further back and aimed above the row so pin label sprites clear the canvas top.
