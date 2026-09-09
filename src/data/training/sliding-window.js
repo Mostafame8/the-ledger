@@ -22,7 +22,10 @@ export default node('sliding-window', {
         s += nums[r] - nums[r - k]
         if s > best:
             best = s
-    return best` }),
+    return best`,
+      scene: { kind: 'cells', data: [2, 1, 5, 1, 3], pointers: ['r'], ranges: [{ end: 'r', width: 3 }],
+        states: [{ r: 2 }, { r: 3 }, { r: 4 }] },
+    }),
     trace(
 `def max_window_sum(nums, k):
     s = sum(nums[:k])
@@ -39,7 +42,8 @@ export default node('sliding-window', {
         { line: 5, state: { r: 3, s: 7, best: 8 }, ask: 's', note: 'The window slid to seconds 1, 2 and 3. nums[3] is 1 and joins; nums[0] is 2 and leaves. 8 + 1 - 2 is 7, and the shared 1 and 5 in the middle were never touched.' },
         { line: 5, state: { r: 4, s: 9, best: 8 }, ask: 's', note: 'Slide again: 3 joins, 1 leaves, so 7 + 3 - 1 is 9. Note that best is still 8 on this line; the comparison has not happened yet.' },
         { line: 7, state: { r: 4, s: 9, best: 9 }, ask: 'best', note: '9 beats 8, so the pocket number moves. Three windows, five additions in total instead of nine, and the gap only widens as the window grows.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: [2, 1, 5, 1, 3], pointers: ['r'], ranges: [{ end: 'r', width: 3 }] } }),
     spot('Ninety seconds of crossing counts, and Marguerite wants the busiest stretch of exactly ten consecutive seconds. Dax is adding up each ten-second stretch from scratch. Name the waste.',
       ['There is none. Each stretch is a different stretch and has to be added up',
        'Nine of the ten seconds are shared with the stretch before it, so add the second joining on the right, subtract the one leaving on the left, and each step costs two operations instead of ten',

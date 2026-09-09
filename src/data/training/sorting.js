@@ -24,7 +24,10 @@ export default node('sorting', {
             nums[j + 1] = nums[j]
             j -= 1
         nums[j + 1] = x
-    return nums` }),
+    return nums`,
+      scene: { kind: 'cells', data: 'nums', init: [3, 1, 2], pointers: ['i', 'j'],
+        states: [{ i: 1, j: 0, nums: [3, 1, 2] }, { i: 1, j: -1, nums: [1, 3, 2] }, { i: 2, j: 1, nums: [1, 3, 3] }, { i: 2, j: 0, nums: [1, 2, 3] }] },
+    }),
     trace(
 `def insertion_sort(nums):
     for i in range(1, len(nums)):
@@ -40,7 +43,8 @@ export default node('sorting', {
         { line: 8, state: { i: 1, x: 1, j: -1, nums: [1, 3, 2] }, ask: 'nums', note: 'The 1 was lifted out and held in x, the 3 was shunted one place right, and j walked off the front of the list, which is what tells you the note belongs at position 0. The first two notes are in order and the third has not been touched.' },
         { line: 6, state: { i: 2, x: 2, j: 1, nums: [1, 3, 3] }, ask: 'nums', note: 'Caught mid-shunt. There are two 3s because the 2 was lifted into x first, leaving a hole that the 3 was copied into rather than swapped with. Nothing is lost: the original 2 is safe in x and is about to be written into the hole.' },
         { line: 8, state: { i: 2, x: 2, j: 0, nums: [1, 2, 3] }, ask: 'nums', note: 'j stopped at 0 because 1 is not bigger than 2, so the walk left ended early. Three notes cost three shunts; a hundred and twenty of them, badly ordered, cost about seven thousand. That is the curve Marguerite is pointing at.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'nums', init: [3, 1, 2], pointers: ['i', 'j'] } }),
     spot('A hundred thousand staff badges, each carrying a clearance level from 0 to 9, and Marguerite wants them grouped by level with the badge order inside a level left exactly as it was. Dax reaches for the note-shunting routine. What should he reach for instead?',
       ['Insertion, one badge at a time, since a hundred thousand badges are nearly in order anyway',
        'Count how many badges hold each of the ten levels, turn those counts into a starting position per level, then make one pass placing each badge into its block',

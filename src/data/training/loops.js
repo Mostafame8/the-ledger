@@ -20,7 +20,9 @@ export default node('loops', {
     for n in nums:
         if n % k == 0:
             count += 1
-    return count` }),
+    return count`,
+      scene: { kind: 'cells', data: [3, 5, 6, 7, 9], marks: ['n'], states: [{ n: 3 }, { n: 5 }, { n: 6 }, { n: 7 }, { n: 9 }] },
+    }),
     trace(
 `def count_multiples(nums, k):
     count = 0
@@ -35,7 +37,8 @@ export default node('loops', {
         { line: 5, state: { count: 1, n: 3 }, ask: 'count', note: '3 % 3 is 0, so 3 is a multiple and one goes in the box.' },
         { line: 3, state: { count: 1, n: 5 }, ask: 'n', note: 'The loop moves on regardless of what happened inside it. Next item is 5.' },
         { line: 6, state: { count: 3, n: 9 }, ask: 'count', note: '5 and 7 left the box alone. 3, 6 and 9 each added one, so the pass ends at 3.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: [3, 5, 6, 7, 9], marks: ['n'] } }),
     spot('You have a list of radio calls and you want how many came in after midnight. Dax offers to write out one if statement per call. What is wrong with that?',
       ['Nothing, if the list is short', 'The list length changes every shift, so the code has to walk it instead of naming each entry', 'Ifs are slower than loops', 'He should sort the calls first'],
       1, 'The code is written once and the list is different every night, so the number of ifs is never right twice. Speed is not the issue: one loop and one if do exactly the same work as fifty ifs. Sorting costs a rearrangement and answers nothing about how many are past midnight.'),

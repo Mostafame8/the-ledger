@@ -25,7 +25,10 @@ export default node('binary-search', {
             lo = mid + 1
         else:
             hi = mid - 1
-    return -1` }),
+    return -1`,
+      scene: { kind: 'cells', data: [1, 3, 5, 7, 9, 11], pointers: ['lo', 'hi', 'mid'], ranges: [['lo', 'hi']],
+        states: [{ lo: 0, hi: 5 }, { lo: 0, hi: 5, mid: 2 }, { lo: 3, hi: 5 }, { lo: 3, hi: 5, mid: 4 }] },
+    }),
     trace(
 `def find(nums, target):
     lo, hi = 0, len(nums) - 1
@@ -45,7 +48,8 @@ export default node('binary-search', {
         { line: 8, state: { lo: 3, hi: 5, mid: 2 }, ask: 'lo', note: 'Box 2 holds 5, which is under 9, so 9 cannot be at index 2 or to its left. lo jumps past mid and three boxes are gone in one look.' },
         { line: 4, state: { lo: 3, hi: 5, mid: 4 }, ask: 'mid', note: 'The window is now indices 3 to 5, so the probe lands at 4.' },
         { line: 6, state: { lo: 3, hi: 5, mid: 4, returns: 4 }, ask: 'returns', note: 'Box 4 holds 9. Two openings for six boxes, and the same two openings would have handled seven.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: [1, 3, 5, 7, 9, 11], pointers: ['lo', 'hi', 'mid'], ranges: [['lo', 'hi']] } }),
     spot('A thousand boxes in serial order, and opening one is the expensive part. You need the single box holding one serial. Which plan costs the fewest openings?',
       ['Open the middle box, throw away the half that cannot hold the serial, and repeat',
        'Open every second box, then back up one when you overshoot',

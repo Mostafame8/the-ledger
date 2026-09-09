@@ -19,7 +19,10 @@ export default node('rotation', {
     while i < j:
         nums[i], nums[j] = nums[j], nums[i]
         i += 1
-        j -= 1` }),
+        j -= 1`,
+      scene: { kind: 'cells', data: 'nums', init: [1, 2, 3, 4, 5], pointers: ['i', 'j'],
+        states: [{ i: 0, j: 4, nums: [1, 2, 3, 4, 5] }, { i: 1, j: 3, nums: [5, 2, 3, 4, 1] }, { i: 2, j: 2, nums: [5, 4, 3, 2, 1] }] },
+    }),
     trace(
 `def reverse_range(nums, i, j):
     while i < j:
@@ -31,7 +34,8 @@ export default node('rotation', {
         { line: 3, state: { i: 0, j: 4, nums: [5, 2, 3, 4, 1] }, ask: 'nums', note: 'The two ends trade places in one statement. i and j have not moved yet; that happens on the next two lines.' },
         { line: 3, state: { i: 1, j: 3, nums: [5, 4, 3, 2, 1] }, ask: 'nums', note: 'Second swap, one step in from each end. Two swaps have already reversed four of the five names.' },
         { line: 5, state: { i: 2, j: 2, nums: [5, 4, 3, 2, 1] }, ask: 'nums', note: 'The hands have met on the middle name, which never needed to move. i is no longer under j, so the loop stops and the sheet is reversed in two swaps.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'nums', init: [1, 2, 3, 4, 5], pointers: ['i', 'j'] } }),
     spot('The rota must shift right by k, on the sheet itself, with no second sheet and no room to build one. Dax has his k pops and pushes ready. What replaces them?',
       ['Reverse the whole sheet, then reverse the first k names, then reverse the rest',
        'Sort the names and the shift falls out of the ordering',

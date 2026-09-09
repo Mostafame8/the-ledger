@@ -24,7 +24,10 @@ export default node('arrays-in-place', {
     while w < len(nums):
         nums[w] = 0
         w += 1
-    return nums` }),
+    return nums`,
+      scene: { kind: 'cells', data: 'nums', init: [0, 4, 0, 7], pointers: ['r', 'w'], labels: { r: 'reader', w: 'writer' },
+        states: [{ r: 0, w: 0, nums: [0, 4, 0, 7] }, { r: 1, w: 1, nums: [4, 4, 0, 7] }, { r: 3, w: 2, nums: [4, 7, 0, 7] }, { r: 3, w: 4, nums: [4, 7, 0, 0] }] },
+    }),
     trace(
 `def fill_front(nums):
     w = 0
@@ -43,7 +46,8 @@ export default node('arrays-in-place', {
         { line: 6, state: { r: 3, w: 2, nums: [4, 7, 0, 7] }, ask: 'w', note: 'Slot 2 was empty. The 7 was copied to slot 1. Two keepers written, so the write finger sits at 2.' },
         { line: 9, state: { r: 3, w: 3, nums: [4, 7, 0, 7] }, ask: 'w', note: 'The reader is finished, so the tail pass blanks slot 2. It already held 0, so the tray looks unchanged, but the write finger still steps on.' },
         { line: 10, state: { r: 3, w: 4, nums: [4, 7, 0, 0] }, ask: 'nums', note: 'The last write blanks slot 3, which was the stale 7. Keepers in order, blanks behind them, one tray.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'nums', init: [0, 4, 0, 7], pointers: ['r', 'w'], labels: { r: 'reader', w: 'writer' } } }),
     spot('A tray of card serials with blanks scattered through it. You need the real serials packed at the front in the same order, and you may not allocate a second list. Which move?',
       ['Build a new list of the keepers and return it', 'A read pointer and a write pointer walking the same list', 'Sort the list so the blanks fall to the end', 'Delete each blank from the list as you find it'],
       1, 'A new list is exactly the thing you were told you cannot have. Sorting scrambles the order you were told to keep. Deleting inside a loop shifts every item after it down one, so you pay for each blank twice and the shift makes you skip the item that slid into the hole. One reader, one writer, one pass.'),

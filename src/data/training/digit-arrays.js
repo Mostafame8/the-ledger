@@ -26,7 +26,10 @@ export default node('digit-arrays', {
         i -= 1
     if carry:
         digits.insert(0, 1)
-    return digits` }),
+    return digits`,
+      scene: { kind: 'cells', data: 'digits', init: [1, 9, 9], pointers: ['i'],
+        states: [{ i: 2, digits: [1, 9, 9] }, { i: 2, digits: [1, 9, 0] }, { i: 1, digits: [1, 0, 0] }, { i: 0, digits: [2, 0, 0] }, { i: -1, digits: [2, 0, 0] }] },
+    }),
     trace(
 `def add_one(digits):
     carry = 1
@@ -46,7 +49,8 @@ export default node('digit-arrays', {
         { line: 6, state: { i: 1, total: 10, digits: [1, 0, 0] }, ask: 'digits', note: 'The carry arrived at the middle wheel, which was also a 9, so it does the same thing and passes another carry left.' },
         { line: 7, state: { i: 0, total: 2, carry: 0, digits: [2, 0, 0] }, ask: 'carry', note: 'The first wheel was a 1, so total is 2 and it fits. 2 // 10 is 0, the carry dies, and the while condition fails on the next check.' },
         { line: 11, state: { i: -1, carry: 0, digits: [2, 0, 0] }, ask: 'digits', note: 'No carry survived the leftmost slot, so nothing is inserted and the list stays three long. 199 rolled to 200.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'digits', init: [1, 9, 9], pointers: ['i'] } }),
     spot('A locker number is held as a list of single digits and you have to add one to it, keeping it a list of digits. Where does the work start?',
       ['At the leftmost digit, carrying rightward', 'At the rightmost digit, carrying leftward', 'Add one to every digit', 'Sort the digits, then add one to the largest'],
       1, 'A carry runs the way the wheels turn: the rightmost slot takes the one, and anything over nine pushes into the slot on its left. Adding one to every digit of 199 gives 2, 10, 10, which is not a number. Sorting throws away the place values, so the digits stop meaning anything. And a carry travelling rightward runs off the end of the list with nowhere to land.'),
