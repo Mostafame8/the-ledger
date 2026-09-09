@@ -57,3 +57,48 @@ test('explain: pointers as object or states loop are checked against literal dat
   assert.match(sceneErrors(tr({ kind: 'cells', data: [1], states: [{}] }, { i: 0 }, { i: 0 }, { i: 0 }))[0], /states.*explain/)
   assert.deepEqual(sceneErrors(ex({ kind: 'cells', data: 'nums', init: [0, 4], pointers: ['w'], states: [{ w: 0 }, { w: 1, nums: [4, 4] }] })), [])
 })
+
+test('key rule: a non-identifier data with init is a key; without init it is a literal', () => {
+  assert.deepEqual(sceneErrors(tr({ kind: 'cells', data: 'list(line)', init: ['a'], marks: ['first'] }, { 'list(line)': ['a', 'b'] }, { first: 'a' }, { first: 'a' })), [])
+  assert.deepEqual(sceneErrors(ex({ kind: 'cells', data: 'ok go', pointers: { i: 2 } })), [])
+})
+
+test('at: array of keys that appear somewhere; never range-checked; labels may name them', () => {
+  const good = tr({ kind: 'cells', chain: true, data: [1, 2, 3], at: ['slow.val'], labels: { 'slow.val': 'slow' } }, { 'slow.val': 1 }, { 'slow.val': 2 }, { 'slow.val': 99 })
+  assert.deepEqual(sceneErrors(good), [])
+  assert.match(sceneErrors(tr({ kind: 'cells', data: [1], at: ['q'] }, { a: 1 }, { a: 1 }, { a: 1 }))[0], /'q' never/)
+  assert.match(sceneErrors(tr({ kind: 'cells', data: [1], at: 'q' }, { q: 1 }, { q: 1 }, { q: 1 }))[0], /at must/)
+})
+
+test('pile and chain: booleans, exclusive; a pile has no pointers or ranges', () => {
+  assert.deepEqual(sceneErrors(tr({ kind: 'cells', data: 'tray', init: [], pile: true, marks: ['taken'] }, { tray: ['p'] }, { taken: 'p', tray: [] }, { tray: [] })), [])
+  assert.match(sceneErrors(tr({ kind: 'cells', data: [1], pile: true, chain: true }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /both/)
+  assert.match(sceneErrors(tr({ kind: 'cells', data: [1], pile: 'yes' }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /pile/)
+  assert.match(sceneErrors(tr({ kind: 'cells', data: [1, 2], pile: true, pointers: ['i'] }, { i: 0 }, { i: 1 }, { i: 1 }))[0], /pile.*pointers/)
+  assert.match(sceneErrors(tr({ kind: 'cells', data: [1, 2], pile: true, ranges: [[0, 1]] }, { x: 0 }, { x: 1 }, { x: 1 }))[0], /pile.*ranges/)
+})
+
+const R = (rows, ...states) => tr({ kind: 'rows', rows }, ...states)
+test('rows: a valid three-row scene passes; per-row bounds errors name the row', () => {
+  const rows = [{ label: 'a', data: [1, 4], pointers: ['i'] }, { label: 'b', data: [2, 3], pointers: ['j'] }, { label: 'out', data: 'out', init: [] }]
+  assert.deepEqual(sceneErrors(R(rows, { i: 0, j: 0 }, { i: 1, j: 0, out: [1] }, { i: 2, j: 2, out: [1, 2, 3, 4] })), [])
+  assert.match(sceneErrors(R(rows, { i: 0, j: 0 }, { i: 5, j: 0, out: [1] }, { i: 2, j: 2 }))[0], /row 'a'.*'i' is 5 at frame 1/)
+})
+
+test('rows: shape rules', () => {
+  const st = [{ x: 1 }, { x: 1 }, { x: 1 }]
+  assert.match(sceneErrors(R([], ...st))[0], /1.*4 rows/)
+  assert.match(sceneErrors(R([1, 2, 3, 4, 5].map(n => ({ label: 'r' + n, data: [n] })), ...st))[0], /1.*4 rows/)
+  assert.match(sceneErrors(R([{ data: [1] }], ...st))[0], /label/)
+  assert.match(sceneErrors(R([{ label: 'a', data: [1] }, { label: 'a', data: [2] }], ...st))[0], /unique/)
+  assert.match(sceneErrors(R([{ label: 'a', data: [1], kind: 'cells' }], ...st))[0], /kind/)
+  assert.match(sceneErrors(R([{ label: 'a', data: [1], states: [{}] }], ...st))[0], /states/)
+  assert.match(sceneErrors(R([{ label: 'a', data: 'out' }], ...st))[0], /row 'a'.*init/)
+  assert.match(sceneErrors(tr({ kind: 'rows' }, ...st))[0], /rows must/)
+})
+
+test('rows on explain: states loop is checked against every row', () => {
+  const sc = { kind: 'rows', rows: [{ label: 'a', data: [1, 2], pointers: ['i'] }, { label: 'p', data: 'chosen', init: [], pile: true }], states: [{ i: 0, chosen: [1] }, { i: 2, chosen: [] }] }
+  assert.deepEqual(sceneErrors(ex(sc)), [])
+  assert.match(sceneErrors(ex({ ...sc, states: [{ i: 3, chosen: [] }] }))[0], /row 'a'.*state 0/)
+})
