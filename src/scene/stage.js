@@ -16,7 +16,13 @@ export async function createStage(host) {
   const { THREE, OrbitControls } = await preload()
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' })   // throws without WebGL
+  // Probe for WebGL ourselves so three.js's own WebGLRenderer never gets to console.error the failure.
+  const probe = document.createElement('canvas')
+  const gl = probe.getContext('webgl2') || probe.getContext('webgl')
+  if (!gl) throw new Error('The table needs WebGL, which this browser does not provide.')
+  gl.getExtension('WEBGL_lose_context')?.loseContext()
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' })
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
   renderer.setClearColor(0x000000, 0)
   host.appendChild(renderer.domElement)
@@ -36,11 +42,12 @@ export async function createStage(host) {
   controls.autoRotate = !reduced
   controls.autoRotateSpeed = 1.5           // one turn in ~40 s
 
+  // Framed a bit further back and aimed above the row so pin label sprites clear the canvas top.
   function frameCells(count) {
     const span = Math.max(count, 3)
-    const dist = span * 0.95 + 3
-    camera.position.set(dist * 0.35, dist * 0.55, dist * 0.95)
-    controls.target.set(0, 0, 0)
+    const dist = span * 1.0 + 4
+    camera.position.set(dist * 0.3, dist * 0.55, dist * 0.9)
+    controls.target.set(0, 0.6, 0)
     controls.update()
   }
 
