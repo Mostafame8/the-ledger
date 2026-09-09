@@ -19,7 +19,9 @@ export default node('bits', {
     acc = 0
     for n in nums:
         acc ^= n
-    return acc` }),
+    return acc`,
+      scene: { kind: 'cells', data: [3, 5, 3], marks: ['n'], states: [{ n: 3 }, { n: 5 }, { n: 3 }] },
+    }),
     trace(
 `def fold_xor(nums):
     acc = 0
@@ -31,7 +33,8 @@ export default node('bits', {
         { line: 4, state: { n: 3, acc: 3 }, ask: 'acc', note: 'acc started at 0, and 0 disagrees with 3 in exactly the bits 3 has set, so 0 xor 3 is 3.' },
         { line: 4, state: { n: 5, acc: 6 }, ask: 'acc', note: '3 is 011 and 5 is 101. They agree only in the last bit, so that bit drops and the other two stay: 110, which is 6.' },
         { line: 5, state: { n: 3, acc: 5 }, ask: 'acc', note: 'The second 3 cancels the first: 110 xor 011 is 101, which is 5. The pair is gone and the odd key is what is left.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: [3, 5, 3], marks: ['n'] } }),
     spot('Four hundred key blanks. Every serial was cut exactly twice except one. You get one pass over the tray and no room for a second list. Name the move.',
       ['Sort the tray and walk it in pairs', 'Xor every serial together and read what survives', 'Tally every serial in a dictionary and find the one that counts one', 'Compare every serial against every other serial'],
       1, 'Sorting rearranges the tray and costs more than the single pass you were given. A tally is exactly the second list you do not have room for. Every serial against every other is four hundred squared for a question one pass answers. Xor runs once and remembers nothing but a single number.'),

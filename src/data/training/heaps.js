@@ -24,7 +24,10 @@ def two_largest(nums):
         heapq.heappush(heap, x)
         if len(heap) > 2:
             heapq.heappop(heap)
-    return sorted(heap, reverse=True)` }),
+    return sorted(heap, reverse=True)`,
+      scene: { kind: 'cells', data: 'heap', init: [], marks: ['x'],
+        states: [{ x: 5, heap: [5] }, { x: 1, heap: [1, 5] }, { x: 4, heap: [1, 5, 4] }, { x: 4, heap: [4, 5] }] },
+    }),
     trace(
 `import heapq
 
@@ -42,7 +45,8 @@ def two_largest(nums):
         { line: 6, state: { x: 4, heap: [1, 5, 4] }, ask: 'heap', note: 'Here is the difference. 4 landed as the second child of 1, compared itself with its parent, found 1 smaller and stopped. It never met the 5, and it never had to: the promise only ever concerns a parent and its children, which is exactly why a push is cheap.' },
         { line: 8, state: { x: 4, heap: [4, 5] }, ask: 'heap', note: 'Three items is one too many, so the front goes. Popping lifts the last item into the hole and walks it back down, which leaves [4, 5] — still not sorted by luck, just legal. The 1 was the worst of the three and it is the one that left.' },
         { line: 9, state: { x: 4, heap: [4, 5], returns: [5, 4] }, ask: 'returns', note: 'Two hundred more numbers would each cost one push and one pop of a two-item list, not a sort of two hundred. The last line sorts two things because a heap was never sorted, and sorting two things is not a cost worth naming.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'heap', init: [], marks: ['x'] } }),
     spot('Ten thousand items come past one at a time, and at the end Marguerite wants the twenty most valuable. Which of these holds the least and does the least?',
       ['Keep all ten thousand, sort them at the end, read off the top twenty',
        'Push all ten thousand into one heap and take twenty off the front at the end',

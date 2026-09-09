@@ -20,7 +20,9 @@ export default node('hash-maps', {
     for i, n in enumerate(nums):
         if n not in seen:
             seen[n] = i
-    return seen` }),
+    return seen`,
+      scene: { kind: 'cells', data: [4, 7, 4], pointers: ['i'], marks: ['n'], states: [{ i: 0, n: 4 }, { i: 1, n: 7 }, { i: 2, n: 4 }] },
+    }),
     trace(
 `def index_of_first(nums):
     seen = {}
@@ -33,7 +35,8 @@ export default node('hash-maps', {
         { line: 5, state: { i: 0, n: 4, seen: { py: '{4: 0}' } }, ask: 'seen', note: 'The first 4 sits at index 0, so that is what goes on its card. The key is the value, the value is where it was found.' },
         { line: 5, state: { i: 1, n: 7, seen: { py: '{4: 0, 7: 1}' } }, ask: 'seen', note: '7 has no card yet, so it gets one. Cards keep the order they were filed in.' },
         { line: 6, state: { i: 2, n: 4, seen: { py: '{4: 0, 7: 1}' } }, ask: 'seen', note: 'The second 4 already has a card, and line 4 guards against overwriting it, so the box is unchanged. Two cards for three values, and the sheet was read once.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: [4, 7, 4], pointers: ['i'], marks: ['n'] } }),
     spot('Dax has a sheet of two hundred informants and a stack of questions, each one asking whether a given name is on the sheet. He reads the sheet from the top for every question. Name the fix.',
       ['Read the sheet backwards', 'Sort the sheet first', 'File every name in a dictionary once, then answer each question with one lookup', 'Ask fewer questions'],
       2, 'Reading backwards is the same work in the other direction. Sorting is closer but still costs a sort up front and a search per question. Fewer questions is not an answer, it is a smaller problem. Build the box once and every question after that costs the same whether the sheet holds two hundred names or two million.'),

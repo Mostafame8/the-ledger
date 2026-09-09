@@ -23,7 +23,10 @@ export default node('tracking', {
             low = p
         if p - low > best:
             best = p - low
-    return best` }),
+    return best`,
+      scene: { kind: 'cells', data: [7, 1, 5, 3, 6], marks: ['p', 'low'],
+        states: [{ p: 7, low: 7 }, { p: 1, low: 1 }, { p: 5, low: 1 }, { p: 3, low: 1 }, { p: 6, low: 1 }] },
+    }),
     trace(
 `def best_profit(prices):
     low = prices[0]
@@ -42,7 +45,8 @@ export default node('tracking', {
         { line: 8, state: { p: 5, low: 1, best: 4 }, ask: 'best', note: 'Selling at 5 against the cheapest day so far makes 4, better than nothing, so best moves up.' },
         { line: 7, state: { p: 3, low: 1, best: 4 }, ask: 'low', note: 'Day four is 3. It is dearer than 1, so the cheapest day does not move, and selling at 3 makes only 2, so best does not move either.' },
         { line: 9, state: { p: 6, low: 1, best: 5 }, ask: 'best', note: 'Day five sells at 6 against the 1, which is 5. One pass, two numbers, and the answer falls out at the end.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: [7, 1, 5, 3, 6], marks: ['p', 'low'] } }),
     spot('A month of nightly takings, in order. Marguerite wants the largest drop from any day to a later day. Dax is drawing a grid of every day against every day after it. What is he carrying that he does not need?',
       ['Nothing. Every pair really has to be compared',
        'The grid. One number for the highest day seen so far is enough, because the largest drop ending today can only start at the highest earlier day',

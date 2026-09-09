@@ -21,7 +21,9 @@ export default node('sets', {
         if n in seen:
             return True
         seen.add(n)
-    return False` }),
+    return False`,
+      scene: { kind: 'cells', data: [2, 5, 2], marks: ['n'], states: [{ n: 2 }, { n: 5 }, { n: 2 }] },
+    }),
     trace(
 `def has_repeat(nums):
     seen = set()
@@ -35,7 +37,8 @@ export default node('sets', {
         { line: 6, state: { n: 2, seen: { py: '{2}' } }, ask: 'seen', note: 'Line 4 asked the empty set about 2 and got nothing, so line 6 files it. A set prints inside curly brackets with no colons.' },
         { line: 6, state: { n: 5, seen: { py: '{2, 5}' } }, ask: 'seen', note: '5 was not on the list either, so it goes on. A set holds each name once, so filing never has to check anything first.' },
         { line: 5, state: { n: 2, seen: { py: '{2, 5}' }, returns: true }, ask: 'returns', note: 'The second 2 is already there, so line 5 returns and line 6 never runs. One lookup, and the rest of the list is never touched.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: [2, 5, 2], marks: ['n'] } }),
     spot('A guest list with doubles in it. You need to know whether any name appears twice, and you want to stop on the first one you find.',
       ['Compare every name against every other name', 'Sort the list and look at neighbours', 'Walk it once, keeping a set of the names already seen', 'Count every name in a dictionary first, then scan the counts for one above one'],
       2, 'Every name against every other is n squared. Sorting has to read the whole list and rearrange it before it can say anything. Counting first also reads to the end before it starts looking. Only the set answers on the name you are standing on, which is what stopping early means.'),

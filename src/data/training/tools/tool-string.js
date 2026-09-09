@@ -17,7 +17,9 @@ len(tape)               # 6
 tape.lower()            # 'hb4417', and tape is still 'HB4417'
 list(tape)              # ['H', 'B', '4', '4', '1', '7']
 ''.join(['H', 'B'])     # 'HB'
-tape[0] = 'X'           # TypeError. A tape does not take corrections` }),
+tape[0] = 'X'           # TypeError. A tape does not take corrections`,
+      scene: { kind: 'cells', data: 'HB4417', ranges: [[0, 1], [2, 5]] },
+    }),
     explain([
       '“A tape is frozen the moment it is printed. Every method that looks like a change hands you a new tape and leaves the old one exactly as it was.”',
       '“So growing a tape one character at a time with + prints a whole fresh strip on every pass of the loop. Collect the characters in a crate and join them once at the end.”',
@@ -35,7 +37,8 @@ tape[0] = 'X'           # TypeError. A tape does not take corrections` }),
         { line: 3, state: { head: 'HB', body: '4417' }, ask: 'body', note: 'Leave the end off a slice and it runs to the end of the tape. The two slices together cover the original and neither one is the original.' },
         { line: 4, state: { head: 'HB', body: '4417', out: 'hb-4417' }, ask: 'out', note: 'lower() printed a new strip, and join glued three strips into a fourth. Four tapes exist now and not one of them was edited.' },
         { line: 5, state: { head: 'HB', body: '4417', out: 'hb-4417', returns: 'HB4417' }, ask: 'returns', note: 'The tape we were handed is untouched. Nothing in that function could have changed it even by accident.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'HB4417', ranges: [[0, 1], [2, 5]] } }),
     blank('“Two hands on the tape. One reads me the first character, and an empty strip has no first character. One takes a crate of pieces and prints them as a single strip, no separator.”',
 `def head_char(tape):
     if not tape:

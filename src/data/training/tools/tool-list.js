@@ -16,7 +16,10 @@ len(crate)                   # 3
 crate.pop()                  # 'radio', and the crate is one shorter
 crate.insert(0, 'jack')      # ['jack', 'torch', 'cutter']
 crate[1:3]                   # ['torch', 'cutter'], a new crate
-for item in crate: ...       # in order, front to back` }),
+for item in crate: ...       # in order, front to back`,
+      scene: { kind: 'cells', data: 'crate', init: ['torch', 'cutter'],
+        states: [{ crate: ['torch', 'cutter'] }, { crate: ['torch', 'cutter', 'radio'] }, { crate: ['jack', 'torch', 'cutter', 'radio'] }, { crate: ['jack', 'torch', 'cutter'] }] },
+    }),
     explain([
       '“Reaching in by number is one move, whatever the number. crate[0] and crate[900] cost the same, because the crate knows where every slot sits.”',
       '“The back end is free. append puts one on, pop takes the last one off, and neither cares how much is already in there. Most of what we do lives at that end.”',
@@ -35,7 +38,8 @@ for item in crate: ...       # in order, front to back` }),
         { line: 3, state: { crate: ['jack', 'torch', 'cutter', 'radio'] }, ask: 'crate', note: 'insert(0, ...) puts the jack at the front, and every other item slid along one slot to make room. That is the expensive one.' },
         { line: 4, state: { last: 'radio', crate: ['jack', 'torch', 'cutter'] }, ask: 'last', note: 'pop with no argument takes the last item off and hands it back. The radio was on the back, so the radio is what you get.' },
         { line: 5, state: { last: 'radio', crate: ['jack', 'torch', 'cutter'], returns: 3 }, ask: 'returns', note: 'Four dropped in, one taken out, three left. Two appends and a pop cost the same whatever the crate holds; the insert at the front did not.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'crate', init: ['torch', 'cutter'] } }),
     blank('“Two hands on the crate. One stows a thing on the back, one tells me the newest thing in there without taking it out. An empty crate has no newest thing, so say so.”',
 `def stow(crate, item):
     ___
