@@ -1,7 +1,7 @@
 # Training room — 3D scenes
 
 Date: 2026-09-09
-Status: approved in brainstorm, awaiting implementation plan
+Status: implemented (wave 1, cells) — see docs/superpowers/plans/2026-09-09-training-3d-scenes.md
 
 ## Purpose
 
@@ -115,9 +115,11 @@ variable name is always shown too: pin text reads `i · small hand`.
 ```
 src/scene/
   model.js       pure: resolve(scene, state, prev) -> { cells, pointers, ranges, changed }
-  SceneView.vue  canvas host, lazy-loads three, owns one renderer per mounted view
+  validate.js    content rules for scene descriptors, used by check-training.mjs
   stage.js       renderer, camera, lights, floor grid, orbit, resize, dispose
   cells.js       build/update meshes for kind 'cells'; tweens between resolved frames
+src/components/
+  SceneView.vue  canvas host, lazy-loads three, owns one renderer per mounted view
 ```
 
 `model.js` has no DOM or three imports and is unit-tested in

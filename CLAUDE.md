@@ -6,7 +6,7 @@ Clearing a gate grants XP, raises a stat, and unlocks the next gate.
 
 ## Run
 - `npm install`, then `npm run dev`
-- `npm run check` validates all gate and training data. `npm test` runs the unit tests in `tests/` and proves every gate and drill against reference solutions. Run both after every content change.
+- `npm run check` validates all gate and training data, including every `scene`. `npm test` runs the unit tests in `tests/` and proves every gate and drill against reference solutions. Run both after every content change.
 
 ## Layout
 - `src/data/gates.js` — ALL gate content lives here (the `ARCS` array). Story text, missions, hints.
@@ -20,6 +20,7 @@ Clearing a gate grants XP, raises a stat, and unlocks the next gate.
 - `src/data/training/tools/` — armoury content. One file per tool, `index.js` lists all twelve in a fixed order (list, string, dict, set, stack, queue, heap, recursion, linked-node, tree-node, graph, table).
 - `src/components/SkillTree.vue`, `LessonWindow.vue`, `Step*.vue` — training presentation. `SkillTree.vue` also renders the Armoury tab (tools list, kit progress) and, on lesson rows, tool chips (red/locked until the tool is cleared).
 - `scripts/check-training.mjs` — training validator. `scripts/solutions/training/` — reference solutions for drills, blocks `# === <node-id>/<step-index>`.
+- `src/scene/` — "the table", the 3D view on training steps. `model.js` (pure: descriptor + state → picture, unit-tested), `validate.js` (content rules, used by `check-training`), `stage.js` and `cells.js` (three.js, lazy-loaded). `src/components/SceneView.vue` is the canvas host; it hides itself without WebGL.
 
 ## Gate schema
 Use the `g(...)` helper in gates.js:
@@ -47,6 +48,7 @@ Use `node(id, {...})` and the step constructors from `src/data/training/node.js`
 - Content order in a lesson: two explain steps (Dax's brute force, then the waste named or the pattern shown, with a code block), then trace, spot, blank, mini.
 - Exception to the `algo`-only rule: `spot` options, a spot's `problem` and `why`, the `method` lesson, mandated function names, and unavoidable interpreter vocabulary (e.g. Python's own error text) may name techniques. Explain lines, missions, and hints may not.
 - The lesson list is tier tabs (populated tiers only) with one row per lesson ordered by prerequisite depth; locked rows show `needs: <titles>`. No drawn links.
+- `scene` — optional on `trace` (4th arg `{ scene }`) and `explain` (in the options). Wave 1 kind `cells`: `{ kind: 'cells', data: [..] | 'HB4417' | 'stateKey', init?, pointers?: ['i'], ranges?: [['lo','hi'] | [0,1] | { end:'r', width:3 }], marks?: ['n'], labels?: { i: 'small hand' }, states?: [...] }`. `states` is explain-only (a loop). Pointer ints must be in `-1..len`. Labels reuse words from that lesson's prose. See `docs/superpowers/specs/2026-09-09-training-3d-scenes-design.md`.
 
 ### Tool schema
 Use `tool(id, {...})` from `src/data/training/node.js`, one file per tool in `src/data/training/tools/`:
