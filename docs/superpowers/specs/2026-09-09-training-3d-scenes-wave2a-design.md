@@ -1,7 +1,7 @@
 # Training room — 3D scenes, wave 2a: rows, piles, chains, and the cells rollout
 
 Date: 2026-09-09
-Status: approved in brainstorm, awaiting implementation plan
+Status: implemented — see docs/superpowers/plans/2026-09-09-training-3d-scenes-wave2a.md
 Builds on: `2026-09-09-training-3d-scenes-design.md` (wave 1, kind `cells`)
 
 ## Purpose
@@ -99,7 +99,8 @@ Plain `cells` (9): `strings` (`'ok go'`, pin `i`), `dp-line` (`table`, pin `i`),
 (weights, values, row), `enumeration` (serials, chosen pile), `backtracking` (coins,
 chosen pile), `stacks` (card, pile), `prefix-sums` (serials with mark `n`, pre with pins
 `i j` and range), `string-search` (pat with pins `i k`, table), `topo-order` (indeg with
-pins `node nxt`, queue).
+pins `node nxt`, queue). `string-search`'s pattern is written as `['a', 'b', 'a', 'b']`,
+a literal array, because the string `'abab'` would match the key-identifier rule.
 
 `chain` (2): `linked-lists` (`[1, 2, 3, 4, 5]`, at `slow.val fast.val`, captions slow /
 fast), `tool-linked-node` (`['meet', 'pay', 'burn']`, at `a.next.val b.next.val`). The
@@ -117,8 +118,8 @@ explain, as in wave 1. Twenty items in all.
 src/scene/
   model.js     resolve() handles kinds cells (with at/pile/chain) and rows
   validate.js  rules above; a shared per-row checker
-  stage.js     frame({ width, depth, height }) replaces frameCells(count) (kept as a wrapper)
-  row.js       createRow(stage, { z, label, pile, chain }) — the block renderer, moved out of cells.js
+  stage.js     frame({ width, depth, height }) replaces frameCells(count) (kept as a wrapper); onTick returns an unsubscribe
+  row.js       createRow(stage, parent, { label }) — the block renderer, moved out of cells.js; pile/chain come from the resolved row passed to update(), position via setPosition(x, z)
   cells.js     createCells(stage): one row at z = 0
   rows.js      createRows(stage): lanes front to back, piles at the right end
 src/components/SceneView.vue  dispatches on resolved.kind → cells.js or rows.js

@@ -117,7 +117,9 @@ src/scene/
   model.js       pure: resolve(scene, state, prev) -> { cells, pointers, ranges, marks, changed, source }
   validate.js    content rules for scene descriptors, used by check-training.mjs
   stage.js       renderer, camera, lights, floor grid, orbit, resize, dispose
+  row.js         the block renderer: lane, pile or chain (wave 2a; moved out of cells.js)
   cells.js       build/update meshes for kind 'cells'; tweens between resolved frames
+  rows.js        lanes and piles for kind 'rows' (wave 2a)
 src/components/
   SceneView.vue  canvas host, lazy-loads three, owns one renderer per mounted view
 ```
