@@ -14,7 +14,7 @@ const runLabel = () => {
 </script>
 
 <template>
-  <div class="veil" @click.self="s.close">
+  <div class="veil">
     <section class="sys quest" role="dialog" aria-modal="true">
       <div class="sys-title"><i></i> Quest window</div>
       <div class="body">

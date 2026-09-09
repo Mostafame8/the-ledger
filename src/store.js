@@ -4,22 +4,36 @@ import { runTests, runtime, warm } from './runner.js'
 import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID, TIERS } from './data/training/index.js'
 import { rankFor, rankProgress, isOpen } from './data/training/progress.js'
 
-const KEY = 'ledger-save-v2'
-const fresh = () => ({ name: 'Hunter', xp: 0, stats: { logic: 0, speed: 0, memory: 0 } })
-const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {} } catch { return {} } }
-const save = d => { try { localStorage.setItem(KEY, JSON.stringify(d)) } catch {} }
+import { SAVES_KEY, LEGACY_KEY, migrateLegacy, createSlot, selectSlot, deleteSlot, renameSlot, writeSlot, currentSlot } from './saves.js'
 
-const saved = load()
-const player = ref(saved.player || fresh())
-const cleared = ref(saved.cleared || [])
-const notes = ref(saved.notes || {})
+// ── Save files ───────────────────────────────────────────────────────────────────
+// All slots live under SAVES_KEY. The pre-slot save under LEGACY_KEY migrates into slot 1 once.
+const readJson = k => { try { return JSON.parse(localStorage.getItem(k)) } catch { return null } }
+const loadFile = () => {
+  const f = readJson(SAVES_KEY)
+  if (f && Array.isArray(f.slots)) return { current: f.current ?? null, slots: f.slots }
+  return migrateLegacy(readJson(LEGACY_KEY), Date.now())
+}
+const persistFile = f => { try { localStorage.setItem(SAVES_KEY, JSON.stringify(f)) } catch {} }
+
+const file = ref(loadFile())
+persistFile(file.value)   // a fresh migration must land in storage even if nothing changes this visit
+const currentSave = computed(() => currentSlot(file.value))
+const saves = computed(() => [...file.value.slots].sort((a, b) => b.updated - a.updated))
+const savesOpen = ref(false)   // the save-file screen; forced open while no slot is selected
+
+const fresh = (name = 'Hunter') => ({ name, xp: 0, stats: { logic: 0, speed: 0, memory: 0 } })
+const freshTraining = () => ({ xp: 0, nodes: {}, tools: {}, active: null, code: {}, tab: null })
+
+const player = ref(fresh())
+const cleared = ref([])
+const notes = ref({})
 const active = ref(null)
 const flash = ref(null)   // text to show in the level-up overlay, or null
 
 // ── Training room ────────────────────────────────────────────────────────────────
-const freshTraining = () => ({ xp: 0, nodes: {}, tools: {}, active: null, code: {}, tab: null })
-const mode = ref(saved.mode === 'training' ? 'training' : 'heist')
-const training = ref({ ...freshTraining(), ...(saved.training || {}) })
+const mode = ref('heist')
+const training = ref(freshTraining())
 const setMode = m => { mode.value = m === 'training' ? 'training' : 'heist' }
 
 // Lessons and tools share one lookup and one progress-record accessor.
@@ -47,7 +61,8 @@ const defaultTrainingTab = () => {
   const t = populatedTiers.find(t => NODES.some(n => n.tier === t && !training.value.nodes[n.id]?.cleared))
   return t ?? populatedTiers[populatedTiers.length - 1]
 }
-const trainingTab = ref(training.value.tab === 'kit' || populatedTiers.includes(training.value.tab) ? training.value.tab : defaultTrainingTab())
+const validTrainingTab = t => t === 'kit' || populatedTiers.includes(t)
+const trainingTab = ref(defaultTrainingTab())
 const setTrainingTab = t => { trainingTab.value = t }
 const tierProgress = tier => {
   const nodes = NODES.filter(n => n.tier === tier)
@@ -152,7 +167,8 @@ const arcProgress = arc => arc.gates.filter(g => isDone(g.id)).length
 
 // Selected arc tab. Defaults to the arc holding the next uncleared gate.
 const defaultTab = () => { const i = ARCS.findIndex(a => a.gates.some(g => !isDone(g.id))); return i === -1 ? ARCS.length - 1 : i }
-const tab = ref(Number.isInteger(saved.tab) && saved.tab >= 0 && saved.tab < ARCS.length ? saved.tab : defaultTab())
+const validTab = t => Number.isInteger(t) && t >= 0 && t < ARCS.length
+const tab = ref(defaultTab())
 const setTab = i => { tab.value = i }
 const open = g => { if (isLocked(g)) return; active.value = GATES.indexOf(g); run.value = null; if (g.tests) warm() }
 const close = () => { active.value = null }
@@ -176,25 +192,83 @@ function clear(g) {
   player.value.stats[g.stat] += 1
   if (level.value > before) showFlash(`Level ${level.value}`)
 }
-function reset() {
-  if (!confirm('Wipe the save and start the heist and the training over?')) return
-  player.value = fresh(); cleared.value = []; notes.value = {}; active.value = null; tab.value = 0
-  training.value = freshTraining(); mode.value = 'heist'
-  trainingTab.value = defaultTrainingTab()
-}
-
-enterStep()   // resume: initialise `satisfied` for a persisted `training.active` on load
-
-watch([player, cleared, notes, tab, mode, training, trainingTab], () => save({
+// ── Save files: load a slot into the live refs, write the live refs back ─────────
+const snapshot = () => ({
   player: player.value, cleared: cleared.value, notes: notes.value, tab: tab.value,
   mode: mode.value, training: { ...training.value, tab: trainingTab.value },
-}), { deep: true })
-window.addEventListener('keydown', e => { if (e.key === 'Escape') { close(); closeNode() } })
+})
+// Fill every live ref from a slot's data (null data = a fresh game named after the slot).
+// The watcher then writes the normalised snapshot straight back, which also stamps "last played".
+function applyData(data, name) {
+  const d = data || {}
+  player.value = d.player || fresh(name)
+  cleared.value = d.cleared || []
+  notes.value = d.notes || {}
+  active.value = null
+  run.value = null
+  mode.value = d.mode === 'training' ? 'training' : 'heist'
+  training.value = { ...freshTraining(), ...(d.training || {}) }
+  tab.value = validTab(d.tab) ? d.tab : defaultTab()
+  trainingTab.value = validTrainingTab(training.value.tab) ? training.value.tab : defaultTrainingTab()
+  enterStep()   // initialise `satisfied` for a persisted `training.active`
+}
+function commitFile(f) { file.value = f; persistFile(f) }
+
+// A one-line card for the save-file list.
+function summary(slot) {
+  const d = slot.data
+  if (!d) return { level: 0, gates: 0, rank: rankFor(0, NODES), lessons: 0 }
+  return {
+    level: Math.floor((d.player?.xp || 0) / XP_PER_LEVEL),
+    gates: (d.cleared || []).length,
+    rank: rankFor(d.training?.xp || 0, NODES),
+    lessons: NODES.filter(n => d.training?.nodes?.[n.id]?.cleared).length,
+  }
+}
+const openSaves = () => { savesOpen.value = true }
+const closeSaves = () => { if (currentSave.value) savesOpen.value = false }
+function newSave(name) {
+  const { file: f, id } = createSlot(file.value, name, Date.now())
+  commitFile(f)
+  applyData(null, currentSlot(f).name)
+  savesOpen.value = false
+  return id
+}
+function loadSave(id) {
+  if (id === file.value.current) { savesOpen.value = false; return }
+  const f = selectSlot(file.value, id)
+  if (f.current !== id) return
+  commitFile(f)
+  applyData(currentSlot(f).data, currentSlot(f).name)
+  savesOpen.value = false
+}
+function deleteSave(id) {
+  const s = file.value.slots.find(s => s.id === id)
+  if (!s || !confirm(`Delete the save file "${s.name}"? The heist and the training in it are gone for good.`)) return
+  const wasCurrent = id === file.value.current
+  commitFile(deleteSlot(file.value, id))
+  if (wasCurrent) { applyData(null); savesOpen.value = true }
+}
+function renameSave(id, name) {
+  commitFile(renameSlot(file.value, id, name))
+  if (id === file.value.current) player.value.name = currentSave.value.name
+}
+
+// Resume: load whatever slot was selected; with none, the save screen opens and the refs stay fresh.
+if (currentSave.value) applyData(currentSave.value.data, currentSave.value.name)
+else { savesOpen.value = true; enterStep() }
+
+watch([player, cleared, notes, tab, mode, training, trainingTab], () => {
+  if (!file.value.current) return
+  commitFile(writeSlot(file.value, file.value.current, snapshot(), Date.now()))
+}, { deep: true })
+window.addEventListener('keydown', e => { if (e.key === 'Escape') { close(); closeNode(); closeSaves() } })
 
 export function useStore() {
   return { player, cleared, notes, active, flash, gate, level, xpInLevel, xpPct, xpPerLevel: XP_PER_LEVEL,
-    clearedCount, title, statList, isDone, isLocked, arcOpen, arcProgress, tab, setTab, open, close, clear, reset,
+    clearedCount, title, statList, isDone, isLocked, arcOpen, arcProgress, tab, setTab, open, close, clear,
     run, runtime, test,
+    saves, currentSave, savesOpen, openSaves, closeSaves, newSave, loadSave, deleteSave, renameSave, summary,
     mode, setMode, training, trainingXp, trainingRank, trainingProgress, nodesCleared, nodeState,
     toolsCleared, kitXp, trainingTab, setTrainingTab, tierProgress,
     activeNode, stepIndex, activeStep, satisfied, openNode, closeNode, answer, next, back,

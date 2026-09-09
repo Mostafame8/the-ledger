@@ -20,16 +20,20 @@ const parts = name => name.split(' — ')
           <small>{{ s.arcProgress(a) }} / {{ a.gates.length }}</small>
         </button>
       </nav>
-      <div class="arc" :class="{ sealed: !s.arcOpen(arc) }">
-        <span>{{ parts(arc.name)[1] }}</span><small>{{ arc.sub }}</small>
-      </div>
-      <button v-for="g in arc.gates" :key="g.id" class="gate" :disabled="s.isLocked(g)" @click="s.open(g)">
-        <div class="rank" :class="g.rank">{{ g.rank }}</div>
-        <div><h3>{{ g.title }}</h3><p>{{ g.algo }}</p></div>
-        <span class="tag" :class="{ done: s.isDone(g.id), locked: s.isLocked(g) }">
-          {{ s.isDone(g.id) ? 'cleared' : s.isLocked(g) ? 'sealed' : '+' + g.xp + ' xp' }}
-        </span>
-      </button>
+      <Transition name="swap" mode="out-in">
+        <div class="pane" :key="s.tab.value">
+          <div class="arc" :class="{ sealed: !s.arcOpen(arc) }">
+            <span>{{ parts(arc.name)[1] }}</span><small>{{ arc.sub }}</small>
+          </div>
+          <button v-for="g in arc.gates" :key="g.id" class="gate" :disabled="s.isLocked(g)" @click="s.open(g)">
+            <div class="rank" :class="g.rank">{{ g.rank }}</div>
+            <div><h3>{{ g.title }}</h3><p>{{ g.algo }}</p></div>
+            <span class="tag" :class="{ done: s.isDone(g.id), locked: s.isLocked(g) }">
+              {{ s.isDone(g.id) ? 'cleared' : s.isLocked(g) ? 'sealed' : '+' + g.xp + ' xp' }}
+            </span>
+          </button>
+        </div>
+      </Transition>
     </div>
   </main>
 </template>

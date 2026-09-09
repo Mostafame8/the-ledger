@@ -14,7 +14,7 @@ const kicker = { explain: 'Marguerite explains', trace: 'Trace it by hand', spot
 </script>
 
 <template>
-  <div class="veil" @click.self="s.closeNode">
+  <div class="veil">
     <section class="sys quest lesson" role="dialog" aria-modal="true">
       <div class="sys-title"><i></i> Training room</div>
       <div class="body">

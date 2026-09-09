@@ -11,7 +11,8 @@ Clearing a gate grants XP, raises a stat, and unlocks the next gate.
 ## Layout
 - `src/data/gates.js` — ALL gate content lives here (the `ARCS` array). Story text, missions, hints.
 - `src/data/index.js` — derived lists, XP per level, title thresholds.
-- `src/store.js` — progress state, persisted to localStorage.
+- `src/store.js` — progress state, persisted to localStorage as named save files (slots) under `ledger-saves-v1`; the old single save `ledger-save-v2` migrates into slot 1 once.
+- `src/saves.js` — pure slot logic (create/select/delete/rename/write, legacy migration), unit-tested in `tests/saves.test.mjs`. `SaveFiles.vue` is the slot screen; it opens from the Status window and is forced open while no slot is selected.
 - `src/components/` — StatusWindow, GateList, QuestWindow, TestResults (shared by QuestWindow and the training presentation). Presentation only.
 - `src/style.css` — the "System window" look. Do not add per-component CSS; keep it here.
 - `scripts/check-gates.mjs` — content validator.

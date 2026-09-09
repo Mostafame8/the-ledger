@@ -7,6 +7,7 @@ import GateList from './components/GateList.vue'
 import QuestWindow from './components/QuestWindow.vue'
 import SkillTree from './components/SkillTree.vue'
 import LessonWindow from './components/LessonWindow.vue'
+import SaveFiles from './components/SaveFiles.vue'
 const s = useStore()
 </script>
 
@@ -18,14 +19,17 @@ const s = useStore()
       <p v-else>{{ NODES.length }} lessons in a back room. Marguerite teaches the trick before the gate demands it.</p>
     </header>
     <StatusWindow />
-    <template v-if="s.mode.value === 'heist'">
-      <GateList />
-      <QuestWindow v-if="s.gate.value" />
-    </template>
-    <template v-else>
-      <SkillTree />
-      <LessonWindow v-if="s.activeNode.value" />
-    </template>
+    <Transition name="swap" mode="out-in">
+      <GateList v-if="s.mode.value === 'heist'" />
+      <SkillTree v-else />
+    </Transition>
+    <Transition name="veil">
+      <QuestWindow v-if="s.mode.value === 'heist' && s.gate.value" />
+      <LessonWindow v-else-if="s.mode.value !== 'heist' && s.activeNode.value" />
+    </Transition>
+    <Transition name="veil">
+      <SaveFiles v-if="s.savesOpen.value || !s.currentSave.value" />
+    </Transition>
     <div v-if="s.flash.value" class="levelup"><div>{{ s.flash.value }}</div></div>
   </div>
 </template>

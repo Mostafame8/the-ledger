@@ -49,6 +49,8 @@ const kitLabel = t => s.nodeState(t.id) === 'cleared' ? 'trained' : '+' + t.xp +
           </template>
         </button>
       </nav>
+      <Transition name="swap" mode="out-in">
+      <div class="pane" :key="s.trainingTab.value">
       <div class="arc" :class="{ sealed: sealed(s.trainingTab.value) }">
         <template v-if="s.trainingTab.value === 'kit'">
           <span>Armoury</span>
@@ -84,6 +86,8 @@ const kitLabel = t => s.nodeState(t.id) === 'cleared' ? 'trained' : '+' + t.xp +
           <span class="tag" :class="{ done: s.nodeState(n.id) === 'cleared', locked: s.nodeState(n.id) === 'locked' }">{{ label(n) }}</span>
         </button>
       </template>
+      </div>
+      </Transition>
     </div>
   </main>
 </template>
