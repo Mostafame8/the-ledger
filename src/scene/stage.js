@@ -56,7 +56,7 @@ export async function createStage(host) {
   // Render loop: only while running, on screen, and the tab is visible.
   const ticks = new Set()
   let raf = 0, running = false, onScreen = true
-  const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting }, { threshold: 0 }); io.observe(host)
+  const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; if (onScreen && running && !raf) loop() }, { threshold: 0 }); io.observe(host)
   const onVis = () => { if (running && !document.hidden && !raf) loop() }
   document.addEventListener('visibilitychange', onVis)
   let last = performance.now()
@@ -64,11 +64,10 @@ export async function createStage(host) {
     raf = 0
     if (!running || document.hidden) return
     const dt = Math.min(0.1, (now - last) / 1000); last = now
-    if (onScreen) {
-      for (const fn of ticks) fn(dt, now)
-      controls.update()
-      renderer.render(scene, camera)
-    }
+    if (!onScreen) return
+    for (const fn of ticks) fn(dt, now)
+    controls.update(dt)
+    renderer.render(scene, camera)
     raf = requestAnimationFrame(loop)
   }
   const start = () => { if (running) return; running = true; last = performance.now(); loop() }
