@@ -19,7 +19,9 @@ export default node('strings', {
     i = 0
     while i < len(s) and s[i] != ' ':
         i += 1
-    return s[:i]` }),
+    return s[:i]`,
+      scene: { kind: 'cells', data: 'ok go', pointers: ['i'], states: [{ i: 0 }, { i: 1 }, { i: 2 }] },
+    }),
     trace(
 `def first_word(s):
     i = 0
@@ -32,7 +34,8 @@ export default node('strings', {
         { line: 4, state: { s: 'ok go', i: 1 }, ask: 'i', note: "s[0] is 'o', not a space, so the scanner steps forward one." },
         { line: 4, state: { s: 'ok go', i: 2 }, ask: 'i', note: "s[1] is 'k', so it steps again. s[2] is the space, so the while condition fails and the loop stops here." },
         { line: 5, state: { s: 'ok go', i: 2, returns: 'ok' }, ask: 'returns', note: 'The slice s[:2] takes positions 0 and 1 and stops before position 2, so the space is left out. A slice never includes its end index.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'ok go', pointers: ['i'] } }),
     spot('The fence sends the passphrase padded with punctuation and mixed case. You have to decide whether it reads the same both ways. What comes first?',
       ['Reverse the whole string and compare it with the original', 'Walk it once, keeping only the characters that count, then compare', 'Sort the characters and compare', 'Count each letter and compare the counts'],
       1, 'Sorting and counting both throw away the order, and the order is the entire question: “ab” and “ba” have identical letters and identical counts. Reversing does answer the question, but only after the commas and capitals are gone, and stripping them is the pass you have to write either way.'),

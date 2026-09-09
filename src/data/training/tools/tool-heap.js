@@ -17,7 +17,10 @@ drawer[0]                   # 2, read the front and take nothing
 heapq.heappop(drawer)       # 2, off the front and into your hand
 drawer                      # [3, 5]. Only the front was ever promised
 len(drawer)                 # 2
-heapq.heappop([])           # IndexError. Ask before you take` }),
+heapq.heappop([])           # IndexError. Ask before you take`,
+      scene: { kind: 'cells', data: 'drawer', init: [4, 9], marks: ['first'],
+        states: [{ drawer: [4, 9] }, { drawer: [4, 9, 5] }, { drawer: [2, 4, 5, 9] }, { first: 2, drawer: [4, 9, 5] }] },
+    }),
     explain([
       '“It is an ordinary crate. heapq keeps one promise about it and no more: whatever sits at drawer[0] is the smallest thing in the drawer. Read the rest and it will look shuffled to you, because it is.”',
       '“heappush drops one in, heappop takes the front one out, and each costs a handful of moves rather than a walk. Double the drawer and you pay one more step. Reading drawer[0] costs nothing at all.”',
@@ -38,7 +41,8 @@ def sift(drawer):
         { line: 5, state: { drawer: [2, 4, 5, 9] }, ask: 'drawer', note: '2 is cheaper than everything in there, so it had to end up at the front, and 4 and 9 shifted to let it. Three items moved, not a sort: only the path from the back to the front gets touched.' },
         { line: 6, state: { first: 2, drawer: [4, 9, 5] }, ask: 'first', note: 'heappop hands back the front, which is the smallest by the promise. Then the drawer closed up behind it and 4 is at the front again.' },
         { line: 7, state: { first: 2, drawer: [4, 9, 5], returns: 4 }, ask: 'returns', note: 'Look at that drawer: 4, 9, 5. Out of order to your eye and perfectly correct, because the only thing ever promised is drawer[0]. Dax would have sorted it three times to learn the same number.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'drawer', init: [4, 9], marks: ['first'] } }),
     blank('“Two hands on the drawer. One drops a job in and leaves the promise intact. One reads me the cheapest job without taking it, and an empty drawer has no cheapest job.”',
 `import heapq
 

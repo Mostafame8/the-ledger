@@ -17,7 +17,10 @@ banned.discard('KT19')  # gone, and no complaint if it was never there
 banned.remove('ZZ00')   # KeyError. discard is the quiet one
 len(banned)             # 2
 set()                   # the empty set. {} is an empty rolodex
-set(['a', 'b', 'a'])    # {'a', 'b'}, duplicates collapse` }),
+set(['a', 'b', 'a'])    # {'a', 'b'}, duplicates collapse`,
+      scene: { kind: 'cells', data: 'sorted(seen)', init: [], marks: ['p'],
+        states: [{ p: 'HB44', 'sorted(seen)': ['HB44'] }, { p: 'KT19', 'sorted(seen)': ['HB44', 'KT19'] }, { p: 'HB44', 'sorted(seen)': ['HB44', 'KT19'] }] },
+    }),
     explain([
       '“Adding, asking in and discarding cost one move each, whatever the size of the list. It is the rolodex with the numbers thrown away and only the names kept.”',
       '“It holds one of each and nothing more, so pouring a crate into a set is how you find out whether anything repeated. If the set comes out shorter than the crate, something did.”',
@@ -37,7 +40,8 @@ set(['a', 'b', 'a'])    # {'a', 'b'}, duplicates collapse` }),
         { line: 6, state: { p: 'KT19', 'sorted(seen)': ['HB44', 'KT19'] }, ask: 'sorted(seen)', note: 'Second plate, second entry. Adding cost one move and did not look at the plate already in there.' },
         { line: 4, state: { p: 'HB44', 'p in seen': true, 'sorted(seen)': ['HB44', 'KT19'] }, ask: 'p in seen', note: 'HB44 again. The in test is one move: the set does not read down its contents, it goes straight to where HB44 would have to be.' },
         { line: 5, state: { p: 'HB44', 'sorted(seen)': ['HB44', 'KT19'], returns: 'HB44' }, ask: 'returns', note: 'The repeat is handed straight back. Dax reading down a crate would have cost a move for every plate already seen, on every plate.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'sorted(seen)', init: [], marks: ['p'] } }),
     blank('“Two hands on the blacklist. One says whether a plate is on it. One puts a plate on it, and putting a plate on twice leaves it on once.”',
 `def is_banned(banned, plate):
     return ___

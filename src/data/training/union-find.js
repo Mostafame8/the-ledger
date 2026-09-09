@@ -32,7 +32,10 @@ def groups(n, pairs):
     parent = list(range(n))
     for a, b in pairs:
         union(parent, a, b)
-    return sum(1 for i in range(n) if find(parent, i) == i)` }),
+    return sum(1 for i in range(n) if find(parent, i) == i)`,
+      scene: { kind: 'cells', data: 'parent', init: [0, 1, 2, 3, 4], pointers: ['a', 'b', 'ra', 'rb'],
+        states: [{ a: 0, b: 1, ra: 0, rb: 1, parent: [0, 1, 2, 3, 4] }, { a: 0, b: 1, parent: [0, 0, 2, 3, 4] }, { a: 2, b: 3, ra: 2, rb: 3, parent: [0, 0, 2, 2, 4] }, { a: 1, b: 3, ra: 0, rb: 2, parent: [0, 0, 0, 2, 4] }] },
+    }),
     trace(
 `def find(parent, x):
     while parent[x] != x:
@@ -57,7 +60,8 @@ def groups(n, pairs):
         { line: 10, state: { a: 2, b: 3, ra: 2, rb: 3, parent: [0, 0, 2, 2, 4] }, ask: 'parent', note: 'A second, separate join. 3 now answers to 2. Two chains of two and a lone 4 — and the list is the only record of any of it.' },
         { line: 10, state: { a: 1, b: 3, ra: 0, rb: 2, parent: [0, 0, 0, 2, 4] }, ask: 'parent', note: 'The record joins 1 and 3, but the write is on neither of them. find walked 1 up to 0 and 3 up to 2, and it is 2 that gets pointed at 0. Write parent[3] = 0 instead and 2 is left behind in a crew of its own, which is a lie.' },
         { line: 9, state: { a: 0, b: 2, ra: 0, rb: 0, parent: [0, 0, 0, 2, 4] }, ask: 'parent', note: '0 and 2 both walk up to 0, so they are already one crew and union writes nothing at all — it returns False and the list is untouched. Two names are still their own boss, 0 and 4, so the answer is two crews. That False is the useful half: on the wiring gate it is exactly how you tell a cable you need from a cable you do not.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'parent', init: [0, 1, 2, 3, 4], pointers: ['a', 'b', 'ra', 'rb'] } }),
     spot('Two hundred thousand names and a million records. Dax’s chains keep working but the whole thing crawls, and he finds one chain nine hundred names long. What fixes it with the least code?',
       ['Give up on chains and keep, for every name, the full list of everyone in its crew',
        'Rebuild the boss list from scratch every thousand records so the chains stay short',

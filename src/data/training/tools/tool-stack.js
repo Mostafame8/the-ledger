@@ -16,7 +16,10 @@ tray.pop()              # 'badge', off the tray and into your hand
 len(tray)               # 1
 if tray: ...            # an empty tray is falsy
 tray.pop()
-tray.pop()              # IndexError. Ask before you take` }),
+tray.pop()              # IndexError. Ask before you take`,
+      scene: { kind: 'cells', data: 'tray', init: [], pile: true, marks: ['taken'],
+        states: [{ tray: [] }, { tray: ['papers'] }, { tray: ['papers', 'badge'] }, { taken: 'badge', tray: ['papers'] }] },
+    }),
     explain([
       '“It is a crate you only ever touch at the back. append puts a sheet on, pop takes the top sheet off, tray[-1] reads the top without taking it. One move each, always.”',
       '“Last on, first off. Any time the thing you need next is the most recent thing you saw, this is the tool: unanswered brackets, the last move you want to undo, the frames of a running function.”',
@@ -34,7 +37,8 @@ tray.pop()              # IndexError. Ask before you take` }),
         { line: 3, state: { tray: ['papers', 'badge'] }, ask: 'tray', note: 'The badge goes on top of the papers. The papers are still there and still reachable, just not yet.' },
         { line: 4, state: { taken: 'badge', tray: ['papers'] }, ask: 'taken', note: 'pop hands back the sheet that went on last, not the one that went on first. Two pushes and a pop, and the badge is what comes off.' },
         { line: 5, state: { taken: 'badge', tray: ['papers'], returns: 'papers' }, ask: 'returns', note: 'tray[-1] reads the new top and leaves it on the tray, so the tray is still one deep when the function ends.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: 'tray', init: [], pile: true, marks: ['taken'] } }),
     blank('“Two hands on the tray. One reads me the top sheet without taking it, and an empty tray has no top sheet. One puts a sheet on.”',
 `def peek(tray):
     if not tray:
