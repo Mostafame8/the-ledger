@@ -9,8 +9,8 @@ export const tool = (id, fields) => ({ id, ...fields })
 
 // explain(lines, { move?, code? })   read, then Next
 export const explain = (lines, opts = {}) => ({ type: 'explain', lines, ...opts })
-// trace(code, input, frames)         frames: [{ line, state, ask, note }]
-export const trace = (code, input, frames) => ({ type: 'trace', code, input, frames })
+// trace(code, input, frames, { scene? })   frames: [{ line, state, ask, note }]
+export const trace = (code, input, frames, opts = {}) => ({ type: 'trace', code, input, frames, ...opts })
 // spot(problem, options, answer, why) answer is an index into options
 export const spot = (problem, options, answer, why) => ({ type: 'spot', problem, options, answer, why })
 // blank(intro, template, tests)      template contains ___ markers

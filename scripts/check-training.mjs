@@ -2,6 +2,7 @@
 import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID } from '../src/data/training/index.js'
 import { GATES } from '../src/data/index.js'
 import { MOVES } from '../src/data/training/node.js'
+import { sceneErrors } from '../src/scene/validate.js'
 
 const XP = { F: [40, 60], E: [60, 80], D: [90, 100], C: [120, 140], B: [160, 180], A: [200, 240], S: [280, 400] }
 const gateIds = new Set(GATES.map(g => g.id))
@@ -11,6 +12,7 @@ const fail = m => { console.error('✗', m); errors++ }
 // Per-step schema checks, shared by lessons and tools.
 function validateStep(ownerId, s, i) {
   const at = `${ownerId}[${i}] ${s.type}`
+  for (const e of sceneErrors(s)) fail(`${at}: ${e}`)
   switch (s.type) {
     case 'explain':
       if (!Array.isArray(s.lines) || s.lines.length < 2 || s.lines.length > 5) fail(`${at}: 2–5 lines`)
