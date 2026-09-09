@@ -17,6 +17,14 @@ const label = k => k === 'returns' ? 'return value' : k
 const shown = computed(() => Object.entries(frame.value.state)
   .map(([name, v]) => ({ name, text: name === frame.value.ask && !done.value ? '?' : pyLiteral(v) })))
 
+// The table shows what is known so far: the last answered stop in full, plus this stop with the
+// asked value hidden. The learner predicts the picture before the table draws it.
+const sceneState = computed(() => {
+  if (done.value) return frame.value.state
+  const { [frame.value.ask]: _hidden, ...rest } = frame.value.state
+  return k.value > 0 ? { ...props.step.frames[k.value - 1].state, ...rest } : rest
+})
+
 function submit() {
   if (done.value) return
   if (sameLiteral(typed.value, frame.value.state[frame.value.ask])) {
@@ -34,7 +42,7 @@ function submit() {
     <p>Call: <code>{{ step.input }}</code>. At each stop, type the value of the highlighted variable exactly as Python would print it.</p>
   </div>
   <div class="trace">
-    <SceneView v-if="step.scene" :scene="step.scene" :state="frame.state" />
+    <SceneView v-if="step.scene" :scene="step.scene" :state="sceneState" />
     <pre class="trace-code"><div v-for="(l, i) in lines" :key="i" :class="{ hl: i + 1 === frame.line }"><span class="ln" aria-hidden="true">{{ i + 1 }}</span>{{ l }}</div></pre>
     <div class="trace-side">
       <div class="dim">Stop {{ Math.min(k + 1, total) }} of {{ total }} · after line {{ frame.line }}</div>

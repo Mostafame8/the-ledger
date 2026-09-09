@@ -41,6 +41,7 @@ export async function createStage(host) {
   controls.maxPolarAngle = Math.PI * 0.49
   controls.autoRotate = !reduced
   controls.autoRotateSpeed = 1.5           // one turn in ~40 s
+  controls.touches = { ONE: null, TWO: THREE.TOUCH.DOLLY_ROTATE }   // one finger scrolls the page, two drive the table
 
   // Framed a bit further back and aimed above the row so pin label sprites clear the canvas top.
   function frameCells(count) {
@@ -90,6 +91,7 @@ export async function createStage(host) {
       const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : []
       for (const m of mats) { m.map?.dispose?.(); m.dispose?.() }
     })
+    renderer.forceContextLoss()
     renderer.dispose()
     renderer.domElement.remove()
   }

@@ -7,7 +7,7 @@ export const node = (id, fields) => ({ id, ...fields })
 // Armoury tool: a data-structure drill unlocked independently of the rank ladder.
 export const tool = (id, fields) => ({ id, ...fields })
 
-// explain(lines, { move?, code? })   read, then Next
+// explain(lines, { move?, code?, scene? })   read, then Next
 export const explain = (lines, opts = {}) => ({ type: 'explain', lines, ...opts })
 // trace(code, input, frames, { scene? })   frames: [{ line, state, ask, note }]
 export const trace = (code, input, frames, opts = {}) => ({ type: 'trace', code, input, frames, ...opts })

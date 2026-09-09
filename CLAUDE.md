@@ -41,7 +41,7 @@ Use `node(id, {...})` and the step constructors from `src/data/training/node.js`
 - `tier` F–S, `xp` in the tier's range (F 40–60, E 60–80, D 90–100, C 120–140, B 160–180, A 200–240, S 280–400), `requires` node ids, `gates` gate ids it prepares.
 - `tools` — array of `tool-…` ids from the armoury, at most two. A lesson opens only once every `requires` node is cleared AND every listed tool is cleared. Lessons that need no structure (`method`, `bits`, `tracking`, `search-the-answer`) still carry `tools: []`.
 - `title` is a scene name, `algo` the plain technique name.
-- Steps in order: `explain(lines, {move?, code?})`, `trace(code, input, frames)`, `spot(problem, options, answer, why)`, `blank(intro, template, tests)`, `mini(mission, hint, tests)`.
+- Steps in order: `explain(lines, {move?, code?, scene?})`, `trace(code, input, frames, {scene?})`, `spot(problem, options, answer, why)`, `blank(intro, template, tests)`, `mini(mission, hint, tests)`.
 - Every technique node has at least one trace, spot, blank, and mini. `method` has explain and spot only.
 - Trace frames: `{ line, state, ask, note }`; `line` is 1-based into `code`; `ask` names a key of `state`; values are JS literals or `{ py: '(1, 3)' }` for tuples.
 - Drill `tests` use the same `check()` dialect as gates. Add a reference block per drill in `scripts/solutions/training/<node-id>.py`.

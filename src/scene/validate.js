@@ -25,8 +25,9 @@ export function sceneErrors(step) {
   if (step.type === 'explain' && sc.states !== undefined && (!Array.isArray(sc.states) || sc.states.length === 0)) bad('states must be a non-empty array')
   for (const r of sc.ranges || []) {
     const ok = (Array.isArray(r) && r.length === 2 && r.every(x => keyish(x) || Number.isInteger(x)))
-      || (r && typeof r === 'object' && !Array.isArray(r) && (keyish(r.end) || Number.isInteger(r.end)))
-    if (!ok) bad(`range ${JSON.stringify(r)} must be [a, b] or { end, width }`)
+      || (r && typeof r === 'object' && !Array.isArray(r) && (keyish(r.end) || Number.isInteger(r.end))
+        && (r.width === undefined || (Number.isInteger(r.width) && r.width > 0)))
+    if (!ok) bad(`range ${JSON.stringify(r)} must be [a, b] or { end, width } with a positive integer width`)
   }
   const n = normalize(sc)
   const pointerKeys = Array.isArray(n.pointers) ? n.pointers : []

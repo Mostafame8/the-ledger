@@ -30,13 +30,13 @@ watch(() => [props.scene, props.state], ([scene, state]) => {
   if (!r) return
   cells.update(r)
   prev = r
-}, { deep: true })
+})
 onBeforeUnmount(() => { dead = true; cells?.dispose(); stage?.dispose(); cells = stage = null })
 </script>
 
 <template>
-  <div v-if="ok" class="table">
+  <div v-if="ok" class="table" aria-hidden="true">
     <div class="table-cap"><i></i> The table <small>drag to turn · wheel to zoom</small></div>
-    <div ref="host" class="table-host" aria-hidden="true"></div>
+    <div ref="host" class="table-host"></div>
   </div>
 </template>

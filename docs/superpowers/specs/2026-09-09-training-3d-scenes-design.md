@@ -114,7 +114,7 @@ variable name is always shown too: pin text reads `i · small hand`.
 
 ```
 src/scene/
-  model.js       pure: resolve(scene, state, prev) -> { cells, pointers, ranges, changed }
+  model.js       pure: resolve(scene, state, prev) -> { cells, pointers, ranges, marks, changed, source }
   validate.js    content rules for scene descriptors, used by check-training.mjs
   stage.js       renderer, camera, lights, floor grid, orbit, resize, dispose
   cells.js       build/update meshes for kind 'cells'; tweens between resolved frames
@@ -174,7 +174,7 @@ Matches the System-window aesthetic:
 
 ```
 frames[k].state  ─┐
-scene descriptor ─┼─ model.resolve() ─► { cells, pointers, ranges, changed }
+scene descriptor ─┼─ model.resolve() ─► { cells, pointers, ranges, marks, changed }
 prev resolved    ─┘                            │
                                                ▼
                                      cells.update(resolved)  ─► tween ─► render loop

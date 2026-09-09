@@ -125,7 +125,7 @@ export function createCells(stage) {
     elapsed += dt
     for (const pin of pins.values()) {
       if (pin.t < 1) { pin.t = Math.min(1, pin.t + dt / TWEEN); pin.group.position.x = pin.fromX + (pin.x - pin.fromX) * ease(pin.t) }
-      pin.group.position.y = PIN_BASE + Math.sin(elapsed * 2.2) * 0.04
+      if (!stage.reduced) pin.group.position.y = PIN_BASE + Math.sin(elapsed * 2.2) * 0.04
     }
     for (const cell of cells) {
       if (cell.flashT > 0) {
