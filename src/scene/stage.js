@@ -42,14 +42,15 @@ export async function createStage(host) {
   controls.autoRotate = false              // the table holds still until the learner turns it
   controls.touches = { ONE: null, TWO: THREE.TOUCH.DOLLY_ROTATE }   // one finger scrolls the page, two drive the table
 
-  // Framed a bit further back and aimed above the row so pin label sprites clear the canvas top.
-  function frameCells(count) {
-    const span = Math.max(count, 3)
+  // Fit the picture: `width` in cell units, `depth` in lanes, `height` in pile cells.
+  function frame({ width = 3, depth = 1, height = 1 } = {}) {
+    const span = Math.max(width, 3) + Math.max(0, depth - 1) * 1.3 + Math.max(0, height - 1) * 0.5
     const dist = span * 1.0 + 4
     camera.position.set(dist * 0.3, dist * 0.55, dist * 0.9)
-    controls.target.set(0, 0.6, 0)
+    controls.target.set(0, 0.6 + Math.max(0, height - 1) * 0.3, 0)
     controls.update()
   }
+  const frameCells = count => frame({ width: count })
 
   function resize() {
     const w = host.clientWidth, h = host.clientHeight
@@ -95,5 +96,5 @@ export async function createStage(host) {
     renderer.domElement.remove()
   }
 
-  return { THREE, scene, camera, renderer, controls, reduced, frameCells, onTick: fn => ticks.add(fn), start, stop, dispose }
+  return { THREE, scene, camera, renderer, controls, reduced, frame, frameCells, onTick: fn => { ticks.add(fn); return () => ticks.delete(fn) }, start, stop, dispose }
 }

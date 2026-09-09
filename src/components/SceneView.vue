@@ -11,13 +11,13 @@ let stage = null, cells = null, prev = null, dead = false
 onMounted(async () => {
   try {
     const { createStage } = await import('../scene/stage.js')
-    const { createCells } = await import('../scene/cells.js')
+    const [{ createCells }, { createRows }] = await Promise.all([import('../scene/cells.js'), import('../scene/rows.js')])
     if (dead) return
     stage = await createStage(host.value)
     if (dead) { stage.dispose(); stage = null; return }
-    cells = createCells(stage)
     prev = resolve(props.scene, props.state, null)
-    cells.update(prev, { instant: true })
+    cells = (prev?.kind === 'rows' ? createRows : createCells)(stage)
+    if (prev) cells.update(prev, { instant: true })
     stage.start()
   } catch (e) {
     if (import.meta.env.DEV) console.warn('The table could not open (no WebGL?):', e)

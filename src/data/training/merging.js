@@ -27,7 +27,13 @@ export default node('merging', {
             j += 1
     out.extend(a[i:])
     out.extend(b[j:])
-    return out` }),
+    return out`,
+      scene: { kind: 'rows', rows: [
+        { label: 'a', data: [1, 4], pointers: ['i'] },
+        { label: 'b', data: [2, 3], pointers: ['j'] },
+        { label: 'out', data: 'out', init: [] },
+      ], states: [{ i: 0, j: 0, out: [] }, { i: 1, j: 0, out: [1] }, { i: 1, j: 1, out: [1, 2] }, { i: 1, j: 2, out: [1, 2, 3] }, { i: 2, j: 2, out: [1, 2, 3, 4] }] },
+    }),
     trace(
 `def merge(a, b):
     i, j = 0, 0
@@ -48,7 +54,12 @@ export default node('merging', {
         { line: 9, state: { i: 1, j: 0, out: [1, 2] }, ask: 'out', note: 'Now the fronts are 4 and 2. The second list is earlier, so it goes out and its finger is the one that will move.' },
         { line: 9, state: { i: 1, j: 1, out: [1, 2, 3] }, ask: 'out', note: '4 against 3: the second list wins again. Two entries out of the same list in a row is normal; the fingers do not take turns.' },
         { line: 11, state: { i: 1, j: 2, out: [1, 2, 3, 4] }, ask: 'out', note: 'The second list is spent, so the loop stops and the tail of the first list is tipped out whole. Line 12 then adds nothing, because b has nothing left.' },
-      ]),
+      ],
+      { scene: { kind: 'rows', rows: [
+        { label: 'a', data: [1, 4], pointers: ['i'] },
+        { label: 'b', data: [2, 3], pointers: ['j'] },
+        { label: 'out', data: 'out', init: [] },
+      ] } }),
     spot('Two sorted sighting logs, ten thousand entries each. Dax joins them into one list of twenty thousand and calls sorted() on it. Name the waste.',
       ['There is none. sorted() is written in C and cannot be beaten',
        'Sorting rediscovers an order you were handed. Walking the two fronts and taking the earlier one costs one pass over each list instead of a sort of the whole pile',
