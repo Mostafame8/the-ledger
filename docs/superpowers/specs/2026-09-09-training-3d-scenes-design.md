@@ -48,20 +48,33 @@ Shape, wave 1:
 ```js
 scene: {
   kind: 'cells',
-  data: [1, 3, 4, 6, 9]  |  'serials'  |  'nums',   // literal list/string, or a state key
-  pointers: ['i', 'j'],                             // state keys whose values are indices
-  ranges: [['lo', 'hi']],                           // optional: inclusive index pairs to bathe in light
-  labels: { i: 'small hand', j: 'big hand' },       // optional: plain-word captions on the pins
-  states: [ { i: 0, j: 4 }, { i: 0, j: 3 } ],       // explain only: a loop of states to cycle
+  data: [1, 3, 4, 6, 9] | 'HB4417' | 'nums',      // literal list/string, or a state key
+  init: [0, 4, 0, 7],                              // required when data is a state key: the list before frame 1
+  pointers: ['i', 'j'],                            // state keys whose values are indices (-1 .. len)
+  ranges: [['lo', 'hi'], [0, 1], { end: 'r', width: 3 }],   // inclusive; keys or ints; or a window ending at a key
+  marks: ['n'],                                    // state keys whose *value* lights every cell holding it
+  labels: { i: 'small hand', j: 'big hand' },      // plain-word captions on the pins
+  states: [{ i: 0, j: 4 }, { i: 0, j: 3 }],        // explain only: a loop of states to cycle
 }
 ```
 
 Rules:
 
 - `data` as a literal draws that list or string. `data` as a string names a state
-  key; the renderer reads the list from each frame's `state` so in-place traces
-  (fill_front, insertion_sort, reverse_range) show the list changing. If a frame
-  lacks the key, the previous frame's list stays.
+  key when it looks like an identifier (`/^[a-z_][a-z0-9_]*$/`); then `init` must
+  give the list before the first frame, and the renderer reads the list from each
+  frame's `state` so in-place traces (fill_front, insertion_sort, reverse_range)
+  show the list changing. If a frame lacks the key, the previous frame's list
+  stays. `init` may be empty (a heap starts empty). Literal strings in content
+  (`'HB4417'`) never match the identifier rule.
+- A pointer value of `-1` draws the pin one slot before the first cell and `len`
+  one slot after the last, so "walked off the end" is visible.
+- `marks` light, in gold, every cell whose text equals the state value's text.
+  This is how lessons with a current value but no index (loops, tracking, sets,
+  bits, heaps) get a picture.
+- A range entry is `[a, b]` (each a state key or an int) or `{ end, width }`
+  meaning `[end - width + 1, end]`. Ranges clamp to the row; an empty or inverted
+  range draws nothing.
 - On a `trace`, pointer and range values come from each frame's `state`. A pointer
   whose key is absent in a frame is hidden for that frame. `None` hides it too.
 - On an `explain`, there are no frames, so `states` supplies the values; the scene
@@ -70,7 +83,7 @@ Rules:
   as an object `{ i: 0, j: 4 }` rather than key names.
 - A string `data` draws one cell per character. Numbers and single characters are
   the only cell contents in wave 1; anything else is stringified and truncated to
-  four characters.
+  six characters with `…`.
 - Wave 2 kinds reuse `kind`, `data`, and `states`; each adds its own fields. The
   renderer dispatches on `kind` and ignores kinds it does not know (renders nothing,
   logs once in dev).
@@ -188,6 +201,10 @@ For every step carrying `scene`:
 - `states` is explain-only and non-empty when present; each entry's values obey
   the pointer bounds rule against the literal `data`.
 - A `scene` on a spot, blank, or mini step fails.
+- When `data` is a state key, `init` is present and is an array or string.
+- `marks` keys each appear in at least one frame (trace) or state (explain).
+- Pointer and range ints are in `[-1, len]` where `len` is the row length at that
+  frame (after applying the frame's own list if `data` is a key).
 
 ## Testing
 
