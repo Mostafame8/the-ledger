@@ -25,7 +25,10 @@ export default node('two-pointers', {
             i += 1
         else:
             j -= 1
-    return None` }),
+    return None`,
+      scene: { kind: 'cells', data: [1, 3, 4, 6, 9], pointers: ['i', 'j'], labels: { i: 'small hand', j: 'big hand' },
+        states: [{ i: 0, j: 4 }, { i: 0, j: 3 }, { i: 1, j: 3 }] },
+    }),
     trace(
 `def pair_sum_sorted(nums, target):
     i, j = 0, len(nums) - 1
@@ -46,7 +49,8 @@ export default node('two-pointers', {
         { line: 4, state: { i: 0, j: 3, s: 7 }, ask: 's', note: 'nums[0] + nums[3] is 1 + 6.' },
         { line: 8, state: { i: 1, j: 3, s: 7 }, ask: 'i', note: '7 is less than 9, so the small hand moves right.' },
         { line: 6, state: { i: 1, j: 3, s: 9, returns: { py: '(1, 3)' } }, ask: 'returns', note: '3 + 6 is 9. Return the pair of indices.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', data: [1, 3, 4, 6, 9], pointers: ['i', 'j'], labels: { i: 'small hand', j: 'big hand' } } }),
     spot('A sorted list of timestamps. Find whether any two are exactly one hour apart. Which pattern?',
       ['Two pointers walking inward or in step', 'A stack', 'Count every timestamp in a dictionary', 'Try every pair'],
       0, 'Sorted input plus a condition on a pair: two hands. Here both move the same direction, but it is the same idea.'),

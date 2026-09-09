@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useStore } from '../store.js'
 import StepExplain from './StepExplain.vue'
 import StepSpot from './StepSpot.vue'
@@ -10,6 +10,10 @@ const STEP_COMPONENTS = { explain: StepExplain, spot: StepSpot, trace: StepTrace
 const comp = computed(() => STEP_COMPONENTS[s.activeStep.value?.type] ?? null)
 const last = computed(() => s.stepIndex.value === s.activeNode.value.steps.length - 1)
 const isTool = computed(() => !s.activeNode.value?.tier)
+// Warm the three.js chunk as soon as a lesson with a scene opens, so the trace step never waits.
+watch(() => s.activeNode.value?.id, () => {
+  if (s.activeNode.value?.steps.some(st => st.scene)) import('../scene/stage.js').then(m => m.preload()).catch(() => {})
+}, { immediate: true })
 const kicker = { explain: 'Marguerite explains', trace: 'Trace it by hand', spot: 'Spot the pattern', blank: 'Fill the blanks', mini: 'Mini mission' }
 </script>
 

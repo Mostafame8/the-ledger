@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useStore } from '../store.js'
 import { pyLiteral, sameLiteral } from '../data/training/answers.js'
+import SceneView from './SceneView.vue'
 const props = defineProps({ step: { type: Object, required: true } })
 const s = useStore()
 
@@ -33,6 +34,7 @@ function submit() {
     <p>Call: <code>{{ step.input }}</code>. At each stop, type the value of the highlighted variable exactly as Python would print it.</p>
   </div>
   <div class="trace">
+    <SceneView v-if="step.scene" :scene="step.scene" :state="frame.state" />
     <pre class="trace-code"><div v-for="(l, i) in lines" :key="i" :class="{ hl: i + 1 === frame.line }"><span class="ln" aria-hidden="true">{{ i + 1 }}</span>{{ l }}</div></pre>
     <div class="trace-side">
       <div class="dim">Stop {{ Math.min(k + 1, total) }} of {{ total }} · after line {{ frame.line }}</div>

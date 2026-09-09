@@ -212,6 +212,15 @@
   .var{display:grid;grid-template-columns:90px 1fr;gap:10px;font-size:15px}
   .var span{color:var(--dim)}
   .var.ask code{color:var(--glow);font-weight:700}
+  .table{border:1px solid rgba(63,169,255,.3);background:rgba(5,10,22,.55);display:grid}
+  .trace .table{grid-column:1/-1}
+  .table-cap{display:flex;align-items:center;gap:8px;padding:6px 12px;color:var(--glow);font-weight:700;font-size:13px;letter-spacing:.06em;border-bottom:1px solid rgba(63,169,255,.18)}
+  .table-cap i{width:6px;height:6px;background:var(--glow);box-shadow:0 0 8px var(--glow);transform:rotate(45deg)}
+  .table-cap small{margin-left:auto;color:var(--faint);font-weight:500;letter-spacing:0}
+  .table-host{height:260px;position:relative;cursor:grab}
+  .table-host:active{cursor:grabbing}
+  .table-host canvas{display:block;width:100%!important;height:100%!important}
+  @media (max-width:700px){.table-host{height:200px}}
   .ans{display:grid;gap:6px}
   .ans label{color:var(--dim);font-size:15px}
   .ans input{background:#050a16;color:var(--ink);border:1px solid var(--faint);padding:8px 10px;font:inherit;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14px}
