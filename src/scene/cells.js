@@ -33,13 +33,17 @@ export function createCells(stage) {
   const pinGeo = new THREE.CylinderGeometry(0.035, 0.035, 1.1, 12)
   const tipGeo = new THREE.ConeGeometry(0.11, 0.26, 16)
   const cells = []         // { mesh, edges, valueSprite, indexSprite, text, flashT, marked }
-  const pins = new Map()   // key -> { group, sprite, x, fromX, t, label }
+  const pins = new Map()   // key -> { group, sprite, beam, tip, x, fromX, t, label }
   const rangeMeshes = []
   let count = -1, elapsed = 0
 
-  function buildCells(n) {
-    for (const c of cells) group.remove(c.mesh, c.edges, c.valueSprite, c.indexSprite)
+  const freeCells = () => {
+    for (const c of cells) { group.remove(c.mesh, c.edges, c.valueSprite, c.indexSprite); c.mesh.material.dispose(); c.edges.material.dispose() }
     cells.length = 0
+  }
+
+  function buildCells(n) {
+    freeCells()
     for (let i = 0; i < n; i++) {
       const mat = new THREE.MeshStandardMaterial({ color: C.panel, emissive: C.edge, emissiveIntensity: 0.12, roughness: 0.35, metalness: 0.2 })
       const mesh = new THREE.Mesh(boxGeo, mat)
@@ -67,8 +71,9 @@ export function createCells(stage) {
     const sprite = new THREE.Sprite(makeText(THREE, cache, key, '#c9b8ff', 44)); sprite.scale.set(1.9, 0.5, 1); sprite.position.y = 1.35
     g.add(beam, tip, sprite)
     g.position.y = PIN_BASE
+    g.visible = false
     scene.add(g)
-    const p = { group: g, sprite, x: 0, fromX: 0, t: 1, label: key }
+    const p = { group: g, sprite, beam, tip, x: 0, fromX: 0, t: 1, label: key }
     pins.set(key, p)
     return p
   }
@@ -133,10 +138,13 @@ export function createCells(stage) {
   })
 
   function dispose() {
-    for (const m of rangeMeshes) { m.geometry.dispose(); m.material.dispose() }
+    for (const m of rangeMeshes) { scene.remove(m); m.geometry.dispose(); m.material.dispose() }
+    rangeMeshes.length = 0
     for (const mat of cache.values()) { mat.map.dispose(); mat.dispose() }
     boxGeo.dispose(); edgeGeo.dispose(); pinGeo.dispose(); tipGeo.dispose()
-    scene.remove(group); for (const p of pins.values()) scene.remove(p.group)
+    freeCells()
+    scene.remove(group)
+    for (const p of pins.values()) { scene.remove(p.group); p.beam.material.dispose(); p.tip.material.dispose() }
   }
 
   return { update, dispose }
