@@ -140,7 +140,8 @@ src/components/SceneView.vue  dispatches on resolved.kind → cells.js or rows.j
 ### Behaviour
 
 - A change in row count, any row's length, or the pile height rebuilds that structure and
-  re-frames the camera; pins snap and flashes are skipped on rebuild (wave-1 rule).
+  re-frames the camera; pins snap on rebuild, and cells whose text changed still flash (so a
+  growing lane or pile lights its new block).
 - Disposal releases every row's materials and the label and arrow meshes.
 - Explain loops, reduced motion, WebGL fallback, and the trace-step masking of the asked
   value all carry over unchanged.

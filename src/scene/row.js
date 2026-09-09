@@ -135,7 +135,7 @@ export function createRow(stage, parent, { label = null } = {}) {
       if (cell.text !== c.text) { cell.valueSprite.material = makeText(THREE, cache, c.text, '#d7e6ff'); cell.text = c.text }
       cell.marked = r.marks.includes(i)
       baseLook(cell)
-      if (!snap && !rebuilt && r.changed.includes(i)) cell.flashT = FLASH
+      if (!snap && r.changed.includes(i)) cell.flashT = FLASH
     })
     const seen = new Set(), onCell = new Map()
     for (const p of r.pointers) {
