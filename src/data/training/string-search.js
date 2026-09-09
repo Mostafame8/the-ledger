@@ -25,7 +25,12 @@ export default node('string-search', {
         if pat[i] == pat[k]:
             k += 1
         table[i] = k
-    return table` }),
+    return table`,
+      scene: { kind: 'rows', rows: [
+        { label: 'pat', data: ['a', 'b', 'a', 'b'], pointers: ['i', 'k'] },
+        { label: 'table', data: 'table', init: [0, 0, 0, 0] },
+      ], states: [{ i: 1, k: 0, table: [0, 0, 0, 0] }, { i: 2, k: 1, table: [0, 0, 1, 0] }, { i: 3, k: 2, table: [0, 0, 1, 2] }] },
+    }),
     trace(
 `def prefix_table(pat):
     table = [0] * len(pat)
@@ -43,7 +48,11 @@ export default node('string-search', {
         { line: 9, state: { pat: 'abab', i: 2, k: 1, table: [0, 0, 1, 0] }, ask: 'table', note: 'The third character is an a, which matches the first, so the counter rose to 1 and slot 2 holds it. Read the claim: the front “aba” ends with one character that is also its beginning. A slide is therefore allowed to keep that one a.' },
         { line: 9, state: { pat: 'abab', i: 3, k: 2, table: [0, 0, 1, 2] }, ask: 'table', note: 'The counter was already 1 from the previous step, the fourth character is a b and the second character is a b, so they agree and the counter rose to 2 without any falling back. The front “abab” ends with “ab”, which is also how it starts.' },
         { line: 10, state: { pat: 'abab', table: [0, 0, 1, 2], returns: [0, 0, 1, 2] }, ask: 'returns', note: 'The word is now carrying its own instructions. Fail on the tape having matched all four characters and the 2 says: keep two, slide by two, do not touch the tape pointer. Four characters, four slots, and the table is built once no matter how long the tape turns out to be.' },
-      ]),
+      ],
+      { scene: { kind: 'rows', rows: [
+        { label: 'pat', data: ['a', 'b', 'a', 'b'], pointers: ['i', 'k'] },
+        { label: 'table', data: 'table', init: [0, 0, 0, 0] },
+      ] } }),
     spot('Dax insists his slide-by-one scan is fine because most tapes are nothing like the word. Where is the waste that the table removes?',
       ['The scan compares from the front of the word, and comparing from the back finds mismatches sooner',
        'There is no waste worth the trouble: both do at most the length of the tape times the length of the word',

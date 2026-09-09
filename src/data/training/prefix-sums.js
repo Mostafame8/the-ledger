@@ -23,7 +23,12 @@ export default node('prefix-sums', {
 
 
 def range_sum(pre, i, j):
-    return pre[j] - pre[i]` }),
+    return pre[j] - pre[i]`,
+      scene: { kind: 'rows', rows: [
+        { label: 'serials', data: [3, 1, 4], marks: ['n'] },
+        { label: 'pre', data: 'pre', init: [0], pointers: ['i', 'j'], ranges: [['i', 'j']] },
+      ], states: [{ n: 3, pre: [0, 3] }, { n: 1, pre: [0, 3, 4] }, { n: 4, pre: [0, 3, 4, 8] }, { pre: [0, 3, 4, 8], i: 1, j: 3 }] },
+    }),
     trace(
 `def prefix(nums):
     pre = [0]
@@ -40,7 +45,11 @@ def range_sum(pre, i, j):
         { line: 4, state: { n: 1, pre: [0, 3, 4] }, ask: 'pre', note: 'pre[-1] is the line above, 3, plus this month, 1. Each append reads exactly one earlier line, so the whole margin costs one pass.' },
         { line: 4, state: { n: 4, pre: [0, 3, 4, 8] }, ask: 'pre', note: 'Three months in, four lines of margin. pre[k] is always the total of the first k months, and pre[0] being 0 is what keeps that sentence true at the top of the page.' },
         { line: 9, state: { pre: [0, 3, 4, 8], i: 1, j: 3, returns: 5 }, ask: 'returns', note: 'pre[3] is the first three months, pre[1] is the first one, so the difference is months 1 and 2: 1 + 4. This range_sum takes the far end exclusive, which is why the drill below, whose ends are both included, needs a + 1.' },
-      ]),
+      ],
+      { scene: { kind: 'rows', rows: [
+        { label: 'serials', data: [3, 1, 4], marks: ['n'] },
+        { label: 'pre', data: 'pre', init: [0], pointers: ['i', 'j'], ranges: [['i', 'j']] },
+      ] } }),
     spot('The fence will ask about a hundred different month ranges on the same page, and nobody is writing on the page while she asks. Which plan?',
       ['Add up the months in each range as she asks it. A hundred small sums',
        'Walk the page once writing a running total down the margin, then answer each range with one subtraction',

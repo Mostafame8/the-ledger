@@ -24,7 +24,12 @@ export default node('stacks', {
             if not stack:
                 return False
             stack.pop()
-    return not stack` }),
+    return not stack`,
+      scene: { kind: 'rows', rows: [
+        { label: 'card', data: '(()' },
+        { label: 'pile', data: 'stack', init: [], pile: true },
+      ], states: [{ stack: ['('] }, { stack: ['(', '('] }, { stack: ['('] }] },
+    }),
     trace(
 `def balanced(s):
     stack = []
@@ -42,7 +47,11 @@ export default node('stacks', {
         { line: 5, state: { c: '(', stack: ['(', '('] }, ask: 'stack', note: 'A second open. Two promises held, and the newest sits at the end of the list, which is the top of the pile.' },
         { line: 9, state: { c: ')', stack: ['('] }, ask: 'stack', note: 'The close mark answers the top promise and pops it. The older open is still down there, still waiting.' },
         { line: 10, state: { c: ')', stack: ['('], returns: false }, ask: 'returns', note: 'The card ran out with one promise still on the pile, so the latch stays shut. Equal counts would have said yes; the pile says no.' },
-      ]),
+      ],
+      { scene: { kind: 'rows', rows: [
+        { label: 'card', data: '(()' },
+        { label: 'pile', data: 'stack', init: [], pile: true },
+      ] } }),
     spot('Dax wants to check the latch card by counting: as many close marks as open marks means the cage opens. Where does that fall down?',
       ['Nowhere. With one shape of mark, equal counts is exactly the condition',
        'A card that reads close then open has equal counts and never opens the latch, because a close can arrive with nothing waiting',

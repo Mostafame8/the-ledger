@@ -25,7 +25,10 @@ export default node('linked-lists', {
         if fast:
             fast = fast.next
             slow = slow.next
-    return slow` }),
+    return slow`,
+      scene: { kind: 'cells', chain: true, data: [1, 2, 3, 4, 5], at: ['slow.val', 'fast.val'], labels: { 'slow.val': 'slow', 'fast.val': 'fast' },
+        states: [{ 'slow.val': 1, 'fast.val': 1 }, { 'slow.val': 1, 'fast.val': 3 }, { 'slow.val': 2, 'fast.val': 3 }, { 'slow.val': 3, 'fast.val': 5 }, { 'slow.val': 3 }] },
+    }),
     trace(
 `def middle(head):
     slow = head
@@ -43,7 +46,8 @@ export default node('linked-lists', {
         { line: 8, state: { 'slow.val': 2, 'fast.val': 3 }, ask: 'slow.val', note: 'Now the slow runner takes its single step. That is the whole pass: fast twice, slow once, and the gap between them grows by one.' },
         { line: 8, state: { 'slow.val': 3, 'fast.val': 5 }, ask: 'slow.val', note: 'Second pass. fast went 3 to 4 to 5, slow went 2 to 3. Whatever the chain length, fast is always twice as far along as slow.' },
         { line: 5, state: { 'slow.val': 3, fast: null }, ask: 'fast', note: 'Third pass: drop 5 has no next, so fast steps off the chain and the if on line 6 refuses to move it again. The loop stops, and slow is on drop 3, the middle of five, without anyone counting to five.' },
-      ]),
+      ],
+      { scene: { kind: 'cells', chain: true, data: [1, 2, 3, 4, 5], at: ['slow.val', 'fast.val'], labels: { 'slow.val': 'slow', 'fast.val': 'fast' } } }),
     spot('The guards’ route is a chain of checkpoints, each holding the address of the next, and Marguerite thinks somebody looped it. She will not let you write down the checkpoints you have already visited. What proves it loops?',
       ['Walk it for a thousand steps. If you are still walking, it loops',
        'Two runners from the start, one stepping once a pass and one twice. If they ever land on the same checkpoint it loops; if the fast one steps off the end it does not',

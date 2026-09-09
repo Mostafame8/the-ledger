@@ -30,7 +30,12 @@ export default node('backtracking', {
         chosen.pop()
         return walk(i + 1, total)
 
-    return chosen if walk(0, 0) else None` }),
+    return chosen if walk(0, 0) else None`,
+      scene: { kind: 'rows', rows: [
+        { label: 'coins', data: [2, 3], pointers: ['i'] },
+        { label: 'chosen', data: 'chosen', init: [], pile: true },
+      ], states: [{ i: 0, chosen: [2] }, { i: 1, chosen: [2, 3] }, { i: 1, chosen: [2] }, { i: 0, chosen: [] }, { i: 1, chosen: [3] }] },
+    }),
     trace(
 `def pick(nums, target):
     chosen = []
@@ -54,7 +59,11 @@ export default node('backtracking', {
         { line: 12, state: { i: 1, total: 2, chosen: [2] }, ask: 'chosen', note: 'The dive failed, so the pop undoes the append and 3 leaves the hand. This is the moment the technique is named after. Skip this line and the hand keeps everything it ever touched.' },
         { line: 12, state: { i: 0, total: 0, chosen: [] }, ask: 'chosen', note: 'Both branches below 2 are exhausted, so 2 comes back out too. The hand is empty and the walk is standing exactly where it started, one room further along the list. Nothing has leaked.' },
         { line: 9, state: { i: 1, total: 0, chosen: [3] }, ask: 'chosen', note: 'The skip branch, and this time 3 is picked with nothing beside it. The next call arrives with total 3, line 5 answers True, and the True runs all the way up untouched. The hand still holds [3], which is why the answer is readable at the top.' },
-      ]),
+      ],
+      { scene: { kind: 'rows', rows: [
+        { label: 'coins', data: [2, 3], pointers: ['i'] },
+        { label: 'chosen', data: 'chosen', init: [], pile: true },
+      ] } }),
     spot('Eight queens on eight rows, one queen per row, no two attacking. Dax lists every way to put eight queens on sixty-four squares and checks each list for attacks. Which of these does the least work?',
       ['His way, but check the attacks as you build each list rather than at the end',
        'Place a queen in row 0, then row 1, and so on; before each placement check it against the queens already placed, and if it conflicts try the next column instead of going deeper',

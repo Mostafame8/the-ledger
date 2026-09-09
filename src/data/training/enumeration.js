@@ -29,7 +29,12 @@ export default node('enumeration', {
         walk(i + 1, chosen)
 
     walk(0, [])
-    return out` }),
+    return out`,
+      scene: { kind: 'rows', rows: [
+        { label: 'serials', data: [1, 2], pointers: ['i'] },
+        { label: 'chosen', data: 'chosen', init: [], pile: true },
+      ], states: [{ i: 0, chosen: [1] }, { i: 2, chosen: [1, 2] }, { i: 1, chosen: [1] }, { i: 0, chosen: [] }, { i: 2, chosen: [] }] },
+    }),
     trace(
 `def subsets(items):
     out = []
@@ -52,7 +57,11 @@ export default node('enumeration', {
         { line: 10, state: { i: 1, chosen: [1], out: [[1, 2]] }, ask: 'chosen', note: 'Back up one level and the pop undoes the append. Room 2 is out of the hand again, which is what lets the very next line ask the honest question: what if we skip room 2. One list, borrowed and returned, all the way down and back.' },
         { line: 10, state: { i: 0, chosen: [], out: [[1, 2], [1]] }, ask: 'out', note: 'The whole left half is finished and room 1 has just been put back on the plan. Two sets recorded, both containing room 1, and the hand is empty — which is exactly the state the first call started in, one room further along.' },
         { line: 6, state: { i: 2, chosen: [], out: [[1, 2], [1], [2], []] }, ask: 'out', note: 'The last bottom of all, reached by skipping both rooms, and it records the empty set. That is a legitimate answer and it always arrives last, because the skip branch is the one that waits. Four sets from two rooms, two thousand and forty-eight from eleven, and every one of them written the moment i ran off the end of the plan.' },
-      ]),
+      ],
+      { scene: { kind: 'rows', rows: [
+        { label: 'serials', data: [1, 2], pointers: ['i'] },
+        { label: 'chosen', data: 'chosen', init: [], pile: true },
+      ] } }),
     spot('Dax writes the room enumerator and it returns the right count — two thousand and forty-eight sets for eleven rooms — but every single one of them is empty. At the bottom he appends the chosen list. What is wrong?',
       ['He is missing the removal after the first call, so the chosen list only ever grows',
        'He should count the rooms first and use that many loops, since recursion cannot know how deep to go',

@@ -21,7 +21,13 @@ export default node('knapsack-dp', {
     for i in range(len(weights)):
         for c in range(cap, weights[i] - 1, -1):
             row[c] = max(row[c], values[i] + row[c - weights[i]])
-    return row[cap]` }),
+    return row[cap]`,
+      scene: { kind: 'rows', rows: [
+        { label: 'weights', data: [1, 2], pointers: ['i'] },
+        { label: 'values', data: [1, 3], pointers: ['i'] },
+        { label: 'row', data: 'row', init: [0, 0, 0, 0], pointers: ['c'] },
+      ], states: [{ row: [0, 0, 0, 0] }, { i: 0, c: 1, row: [0, 1, 1, 1] }, { i: 1, c: 2, row: [0, 1, 3, 4] }] },
+    }),
     trace(
 `def knap(weights, values, cap):
     row = [0] * (cap + 1)
@@ -35,7 +41,12 @@ export default node('knapsack-dp', {
         { line: 5, state: { weights: [1, 2], values: [1, 3], cap: 3, i: 0, c: 1, row: [0, 1, 1, 1] }, ask: 'row', note: 'The first item weighs 1 and is worth 1, and this is the row after it has passed over capacities 3, 2 and 1 in that order. One item cannot fill a bag twice, so every capacity that fits it is worth exactly 1 and capacity nought is untouched.' },
         { line: 5, state: { weights: [1, 2], values: [1, 3], cap: 3, i: 1, c: 2, row: [0, 1, 3, 4] }, ask: 'row', note: 'The second item weighs 2 and is worth 3. At capacity 3 it read row[1], which still held the 1 from the previous item and had not yet been touched this pass — 3 plus 1 is 4, better than the 1 that was there. At capacity 2 it read row[0] and wrote 3. Downward is what kept row[1] honest.' },
         { line: 6, state: { weights: [1, 2], values: [1, 3], cap: 3, row: [0, 1, 3, 4], returns: 4 }, ask: 'returns', note: 'Both items in the bag, weight 3, value 4. Two items and four capacities cost six comparisons; twenty items and a limit of a thousand cost twenty thousand, which is a blink, against the million million the combinations would have cost.' },
-      ]),
+      ],
+      { scene: { kind: 'rows', rows: [
+        { label: 'weights', data: [1, 2], pointers: ['i'] },
+        { label: 'values', data: [1, 3], pointers: ['i'] },
+        { label: 'row', data: 'row', init: [0, 0, 0, 0], pointers: ['c'] },
+      ] } }),
     spot('Dax rewrites the inner sweep as range(weights[i], cap + 1) — capacities climbing instead of falling. The code runs and the numbers come out too big. What has he actually written?',
       ['A version that reads boxes still holding noughts, so the answer comes back too small rather than too large',
        'The same answer with one extra pass over the row per item',

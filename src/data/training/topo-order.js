@@ -31,7 +31,12 @@ export default node('topo-order', {
             indeg[nxt] -= 1
             if indeg[nxt] == 0:
                 queue.append(nxt)
-    return out if len(out) == n else []` }),
+    return out if len(out) == n else []`,
+      scene: { kind: 'rows', rows: [
+        { label: 'indeg', data: 'indeg', init: [0, 1, 1, 2], pointers: ['node', 'nxt'] },
+        { label: 'queue', data: 'queue', init: [0] },
+      ], states: [{ indeg: [0, 1, 1, 2], queue: [0] }, { node: 0, nxt: 2, indeg: [0, 0, 0, 2], queue: [1, 2] }, { node: 1, nxt: 3, indeg: [0, 0, 0, 1], queue: [2] }, { node: 2, nxt: 3, indeg: [0, 0, 0, 0], queue: [3] }] },
+    }),
     trace(
 `def topo(n, edges):
     adj = [[] for _ in range(n)]
@@ -56,7 +61,11 @@ export default node('topo-order', {
         { line: 13, state: { node: 1, nxt: 3, indeg: [0, 0, 0, 1], queue: [2] }, ask: 'indeg', note: 'Cameras are done and the door’s count came off by one. One is not nought, so the door is not queued — it still waits on the lock. This is the step the sort-by-count plan skips.' },
         { line: 15, state: { node: 2, nxt: 3, indeg: [0, 0, 0, 0], queue: [3] }, ask: 'queue', note: 'The lock was the door’s last prerequisite. Its count reaches nought and only now does the door become work you can hand somebody.' },
         { line: 16, state: { indeg: [0, 0, 0, 0], queue: [], returns: [0, 1, 2, 3] }, ask: 'returns', note: 'Four cards out of a queue that never held more than two, every arrow walked once. The length check at the end is the contradiction test: cards trapped in a ring never reach nought, so they never queue, so they are missing from the output.' },
-      ]),
+      ],
+      { scene: { kind: 'rows', rows: [
+        { label: 'indeg', data: 'indeg', init: [0, 1, 1, 2], pointers: ['node', 'nxt'] },
+        { label: 'queue', data: 'queue', init: [0] },
+      ] } }),
     spot('Forty tasks and a list of pairs meaning “this one before that one”. Dax proposes sorting the tasks by how many arrows point into each, fewest first, and calling that the plan. Where does it fall over?',
       ['Nowhere. A task with fewer prerequisites is always safe to do earlier',
        'It counts the arrows but never crosses them off, so a task with one arrow into it can be scheduled ahead of the task that arrow comes from',

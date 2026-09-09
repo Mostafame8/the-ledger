@@ -23,7 +23,13 @@ export default node('monotonic', {
         while stack and nums[stack[-1]] < nums[i]:
             out[stack.pop()] = nums[i]
         stack.append(i)
-    return out` }),
+    return out`,
+      scene: { kind: 'rows', rows: [
+        { label: 'nums', data: [2, 1, 3], pointers: ['i'] },
+        { label: 'out', data: 'out', init: [-1, -1, -1] },
+        { label: 'stack', data: 'stack', init: [], pile: true },
+      ], states: [{ i: 0, out: [-1, -1, -1], stack: [0] }, { i: 1, out: [-1, -1, -1], stack: [0, 1] }, { i: 2, out: [-1, 3, -1], stack: [0] }, { i: 2, out: [3, 3, -1], stack: [] }, { out: [3, 3, -1], stack: [2] }] },
+    }),
     trace(
 `def next_greater(nums):
     out = [-1] * len(nums)
@@ -40,7 +46,12 @@ export default node('monotonic', {
         { line: 6, state: { nums: [2, 1, 3], i: 2, out: [-1, 3, -1], stack: [0] }, ask: 'out', note: 'The 3 arrives and starts clearing the pile from the top. Index 1 was holding a 1, the 3 beats it, and the answer for slot 1 is written and index 1 is gone for good. The stack is back to just index 0.' },
         { line: 6, state: { nums: [2, 1, 3], i: 2, out: [3, 3, -1], stack: [] }, ask: 'out', note: 'Same reading, second pop: the 3 also beats the 2 at index 0, so slot 0 gets a 3 too. One arrival paid off two waiting readings, and both of them were answered by the first taller thing that came along, which is exactly the definition.' },
         { line: 8, state: { nums: [2, 1, 3], out: [3, 3, -1], stack: [2], returns: [3, 3, -1] }, ask: 'returns', note: 'Index 2 is still on the stack at the end, so nothing taller ever came and its slot keeps the minus one it was seeded with. Three readings, three pushes, two pops — and on a sheet of a million the count is a million pushes and at most a million pops, no matter how the readings drift.' },
-      ]),
+      ],
+      { scene: { kind: 'rows', rows: [
+        { label: 'nums', data: [2, 1, 3], pointers: ['i'] },
+        { label: 'out', data: 'out', init: [-1, -1, -1] },
+        { label: 'stack', data: 'stack', init: [], pile: true },
+      ] } }),
     spot('Marguerite only cares about the peak reading in each span of k consecutive seconds, and she wants all of them. Which is the least work?',
       ['Keep a heap of the readings in the span, pushing the new one and popping the old one each time the span moves',
        'Recompute the peak of each span from its k readings, but stop early once a reading beats the previous peak',
