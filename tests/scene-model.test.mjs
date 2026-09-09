@@ -86,6 +86,7 @@ test('normalize: pointer object becomes keys plus a one-state loop; arrays pass 
   assert.deepEqual(n.states, [{ i: 0, j: 1 }])
   const m = normalize({ kind: 'cells', data: 'HB', ranges: [[0, 1]] })
   assert.deepEqual(m.states, [{}])
+  assert.deepEqual(m.pointers, [])
   assert.deepEqual(normalize(two).states, [{}])
   assert.deepEqual(normalize({ ...two, states: [{ i: 1 }] }).states, [{ i: 1 }])
 })

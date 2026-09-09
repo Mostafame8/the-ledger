@@ -26,7 +26,7 @@ export function normalize(scene) {
   if (p && !Array.isArray(p) && typeof p === 'object') {
     return { ...scene, pointers: Object.keys(p), states: scene.states ?? [{ ...p }] }
   }
-  return { ...scene, states: scene.states?.length ? scene.states : [{}] }
+  return { ...scene, pointers: Array.isArray(p) ? p : [], states: scene.states?.length ? scene.states : [{}] }
 }
 
 const isList = v => Array.isArray(v) || typeof v === 'string'
