@@ -102,3 +102,48 @@ test('rows on explain: states loop is checked against every row', () => {
   assert.deepEqual(sceneErrors(ex(sc)), [])
   assert.match(sceneErrors(ex({ ...sc, states: [{ i: 3, chosen: [] }] }))[0], /row 'a'.*state 0/)
 })
+
+const G = (scene, ...states) => tr({ kind: 'grid', ...scene }, ...states)
+const L = (scene, ...states) => tr({ kind: 'line', ...scene }, ...states)
+
+test('grid: rectangular data or keyed data with rectangular init', () => {
+  assert.deepEqual(sceneErrors(G({ data: [[1, 2], [3, 4]] }, { x: 1 }, { x: 1 }, { x: 1 })), [])
+  assert.match(sceneErrors(G({ data: [[1, 2], [3]] }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /rectangular/)
+  assert.match(sceneErrors(G({ data: 'grid' }, { grid: [[1]] }, { x: 1 }, { x: 1 }))[0], /init/)
+  assert.deepEqual(sceneErrors(G({ data: 'grid', init: [[0, 0], [0, 0]] }, { grid: [[5, 0], [0, 0]] }, { x: 1 }, { x: 1 })), [])
+})
+
+test('grid: cursor is two keys that appear; out-of-range names the frame; labels ⊆ cursor', () => {
+  const g = { data: [[0, 0, 0], [0, 1, 0]], cursor: ['r', 'c'] }
+  assert.deepEqual(sceneErrors(G(g, { r: 0, c: 0 }, { r: 1 }, { r: 1, c: 2 })), [])
+  assert.match(sceneErrors(G(g, { r: 0, c: 0 }, { r: 2, c: 0 }, { r: 1, c: 2 }))[0], /cursor.*frame 1/)
+  assert.match(sceneErrors(G({ ...g, cursor: ['r'] }, { r: 0 }, { r: 0 }, { r: 0 }))[0], /cursor/)
+  assert.match(sceneErrors(G(g, { r: 0 }, { r: 0 }, { r: 0 }))[0], /'c' never/)
+  assert.match(sceneErrors(G({ ...g, labels: { q: 'x' } }, { r: 0, c: 0 }, { r: 0, c: 0 }, { r: 0, c: 0 }))[0], /labels/)
+})
+
+test('grid: heads lengths match; marks appear', () => {
+  const g = { data: [[1, 2], [3, 4]], heads: { rows: ['', 'a'], cols: ['x'] } }
+  assert.match(sceneErrors(G(g, { x: 1 }, { x: 1 }, { x: 1 }))[0], /heads.cols must have 2/)
+  assert.deepEqual(sceneErrors(G({ data: [[1, 2], [3, 4]], heads: { rows: ['', 'a'], cols: ['x', 'y'] }, marks: ['v'] }, { v: 1 }, { v: 2 }, { v: 3 })), [])
+  assert.match(sceneErrors(G({ data: [[1]], marks: ['v'] }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /'v' never/)
+})
+
+test('line: axis ascending ints; 1–2 lanes with unique labels; bars within the axis', () => {
+  const ok = { axis: [0, 8], lanes: [{ label: 'given', bars: [[1, 3], [6, 7]] }, { label: 'kept', bars: 'out', init: [] }], span: ['start', 'end'] }
+  assert.deepEqual(sceneErrors(L(ok, { start: 1, end: 3 }, { out: [[1, 3]] }, { out: [[1, 4]] })), [])
+  assert.match(sceneErrors(L({ ...ok, axis: [8, 0] }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /axis/)
+  assert.match(sceneErrors(L({ ...ok, lanes: [...ok.lanes, { label: 'z', bars: [] }] }, { start: 1, end: 3 }, { out: [] }, { out: [] }))[0], /1 or 2 lanes/)
+  assert.match(sceneErrors(L({ ...ok, lanes: [{ label: 'a', bars: [[1, 9]] }] }, { start: 1, end: 3 }, { x: 1 }, { x: 1 }))[0], /outside the axis/)
+  assert.match(sceneErrors(L({ ...ok, lanes: [{ label: 'a', bars: [[4, 2]] }] }, { start: 1, end: 3 }, { x: 1 }, { x: 1 }))[0], /reversed/)
+  assert.match(sceneErrors(L({ ...ok, lanes: [{ label: 'a', bars: [] }, { label: 'a', bars: [] }] }, { start: 1, end: 3 }, { x: 1 }, { x: 1 }))[0], /unique/)
+})
+
+test('line: span two keys; pins within axis at each frame; ticks within axis; labels ⊆ pins ∪ span', () => {
+  const l = { axis: [0, 12], lanes: [{ label: 'a', bars: [] }], pins: ['lo', 'hi'], ticks: [3, 6, 7, 11], labels: { lo: 'low' } }
+  assert.deepEqual(sceneErrors(L(l, { lo: 1, hi: 11 }, { lo: 1, hi: 6 }, { lo: 4, hi: 4 })), [])
+  assert.match(sceneErrors(L(l, { lo: 1, hi: 13 }, { lo: 1 }, { lo: 1 }))[0], /'hi' is 13 at frame 0/)
+  assert.match(sceneErrors(L({ ...l, ticks: [14] }, { lo: 1, hi: 2 }, { lo: 1 }, { lo: 1 }))[0], /ticks/)
+  assert.match(sceneErrors(L({ ...l, span: ['s'] }, { lo: 1, hi: 2 }, { lo: 1 }, { lo: 1 }))[0], /span/)
+  assert.match(sceneErrors(L({ ...l, labels: { q: 'x' } }, { lo: 1, hi: 2 }, { lo: 1 }, { lo: 1 }))[0], /labels/)
+})
