@@ -129,11 +129,12 @@ test('grid: heads lengths match; marks appear', () => {
   assert.match(sceneErrors(G({ data: [[1]], marks: ['v'] }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /'v' never/)
 })
 
-test('line: axis ascending ints; 1–2 lanes with unique labels; bars within the axis', () => {
+test('line: axis ascending ints; 0–2 lanes with unique labels; bars within the axis', () => {
   const ok = { axis: [0, 8], lanes: [{ label: 'given', bars: [[1, 3], [6, 7]] }, { label: 'kept', bars: 'out', init: [] }], span: ['start', 'end'] }
   assert.deepEqual(sceneErrors(L(ok, { start: 1, end: 3 }, { out: [[1, 3]] }, { out: [[1, 4]] })), [])
   assert.match(sceneErrors(L({ ...ok, axis: [8, 0] }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /axis/)
-  assert.match(sceneErrors(L({ ...ok, lanes: [...ok.lanes, { label: 'z', bars: [] }] }, { start: 1, end: 3 }, { out: [] }, { out: [] }))[0], /1 or 2 lanes/)
+  assert.match(sceneErrors(L({ ...ok, lanes: [...ok.lanes, { label: 'z', bars: [] }] }, { start: 1, end: 3 }, { out: [] }, { out: [] }))[0], /at most 2 lanes/)
+  assert.deepEqual(sceneErrors(L({ axis: [0, 12], ticks: [3, 6, 7, 11], span: ['lo', 'hi'], pins: ['lo', 'hi', 'mid'], labels: { lo: 'low', hi: 'high' } }, { lo: 1, hi: 11, mid: 6 }, { lo: 1, hi: 6, mid: 3 }, { lo: 4, hi: 4 })), [])
   assert.match(sceneErrors(L({ ...ok, lanes: [{ label: 'a', bars: [[1, 9]] }] }, { start: 1, end: 3 }, { x: 1 }, { x: 1 }))[0], /outside the axis/)
   assert.match(sceneErrors(L({ ...ok, lanes: [{ label: 'a', bars: [[4, 2]] }] }, { start: 1, end: 3 }, { x: 1 }, { x: 1 }))[0], /reversed/)
   assert.match(sceneErrors(L({ ...ok, lanes: [{ label: 'a', bars: [] }, { label: 'a', bars: [] }] }, { start: 1, end: 3 }, { x: 1 }, { x: 1 }))[0], /unique/)

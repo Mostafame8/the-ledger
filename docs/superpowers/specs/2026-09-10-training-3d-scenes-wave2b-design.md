@@ -60,7 +60,7 @@ Rules:
 scene: {
   kind: 'line',
   axis: [0, 12],                                      // integer ends of the number line
-  lanes: [                                            // 1–2 lanes of interval bars
+  lanes: [                                            // 0–2 lanes of interval bars (omit for a bare axis)
     { label: 'events', bars: [[1, 4], [2, 3], [3, 5], [5, 6]] },      // literal pairs
     { label: 'kept',   bars: 'out', init: [] },                        // state key of pairs
   ],
@@ -99,7 +99,7 @@ Rules:
 `line` (3): `intervals` (axis `[0, 8]`, lane `given` literal `[[1,3],[2,4],[6,7]]`, lane
 `kept` key `out` init `[]`, span `start end`), `greedy` (axis `[0, 7]`, lane `events`
 literal, span `s e`, pin `end`), `search-the-answer` (axis `[0, 12]`, ticks `[3, 6, 7, 11]`,
-pins `lo hi mid`, labels `lo: low, hi: high`). `search-the-answer` drops its wave-2a `cells`
+span `lo hi`, pins `lo hi mid`, labels `lo: low, hi: high`, no lanes). `search-the-answer` drops its wave-2a `cells`
 scene in favour of the line.
 
 Nine items. Every item also gets an explain-step loop of two to five states on its

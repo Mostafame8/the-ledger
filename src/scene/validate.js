@@ -100,7 +100,7 @@ function lineErrors(sc, states, where) {
   const inAxis = v => Number.isInteger(v) && v >= ax[0] && v <= ax[1]
   const barOk = (tag, [a, b], at = '') => { if (!(inAxis(a) && inAxis(b))) bad(`${tag}: bar [${a}, ${b}]${at} is outside the axis`); else if (a > b) bad(`${tag}: bar [${a}, ${b}]${at} is reversed`) }
   const lanes = Array.isArray(sc.lanes) ? sc.lanes : []
-  if (lanes.length < 1 || lanes.length > 2) bad('lanes must be an array of 1 or 2 lanes')
+  if ((sc.lanes !== undefined && !Array.isArray(sc.lanes)) || lanes.length > 2) bad('lanes must be an array of at most 2 lanes')
   const labels = new Set()
   lanes.forEach((lane, i) => {
     const tag = `lane ${typeof lane?.label === 'string' ? `'${lane.label}'` : i}`
