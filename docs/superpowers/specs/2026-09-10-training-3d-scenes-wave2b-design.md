@@ -1,7 +1,7 @@
 # Training room — 3D scenes, wave 2b: the grid floor and the number line
 
 Date: 2026-09-10
-Status: approved in brainstorm, awaiting implementation plan
+Status: implemented (branch training-3d-wave2b)
 Builds on: wave 1 (`cells`) and wave 2a (`at`, `pile`, `chain`, `rows`)
 
 ## Purpose
@@ -121,13 +121,18 @@ pins: [{ key, at, label }] }`. Both honour the previous-source fallback like row
 src/scene/
   model.js     resolveGrid, resolveLine; resolve() dispatches on kind
   validate.js  gridShape/gridWalk, lineShape/lineWalk
+  text.js      makeText(THREE, cache, text, color, px) — sprite text, shared by row, grid and line
   pin.js       createPin(stage, parent, cache) — the violet pin, shared by row, grid and line
   grid.js      createGrid(stage): tiles, index/head sprites, cursor pin, marks, flashes
   line.js      createLine(stage): axis rail with numbers, lanes of bars, ticks, span plate, pins
 src/components/SceneView.vue  dispatch map { cells, rows, grid, line }
 ```
 
-`row.js` switches to `pin.js` with no visual change.
+`row.js` switches to `pin.js` and `text.js` with no visual change.
+
+Implementation note: `search-the-answer` was first tried with the four sacks as bars from 0 on
+one lane; they overlap into a single block, so the item uses ticks at the sack sizes and the
+`lo`–`hi` bracket as a span instead. That is why `lanes` may be empty.
 
 ### Look
 
