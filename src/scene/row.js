@@ -2,27 +2,13 @@
 // One row of blocks — a lane, a standing pile, or a chain with arrows — plus its pins, range plates,
 // gold marks, change flashes and an optional label. cells.js draws one; rows.js composes several.
 import { COLORS as C } from './stage.js'
+import { makeText } from './text.js'
+import { createPin } from './pin.js'
 
+export { makeText }
 export const GAP = 1.0, CHAIN_GAP = 1.5, PILE_STEP = 0.9, SIZE = 0.8
-const TWEEN = 0.3, FLASH = 0.4
+const FLASH = 0.4
 const PIN_BASE = SIZE / 2 + 1.5
-const ease = t => 1 - Math.pow(1 - t, 3)
-
-// Canvas text → sprite material. Cached per (text, colour, size) so re-renders never re-rasterise.
-export function makeText(THREE, cache, text, color, px = 64) {
-  const key = `${text}|${color}|${px}`
-  if (cache.has(key)) return cache.get(key)
-  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128
-  const g = cv.getContext('2d')
-  g.font = `700 ${px}px "Rajdhani", system-ui, sans-serif`
-  g.textAlign = 'center'; g.textBaseline = 'middle'
-  g.shadowColor = color; g.shadowBlur = 12
-  g.fillStyle = color; g.fillText(text, 128, 64, 240)
-  const tex = new THREE.CanvasTexture(cv); tex.anisotropy = 4
-  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false })
-  cache.set(key, mat)
-  return mat
-}
 
 // Camera-fitting size of a resolved row, in cell units (width) and pile cells (height).
 export function extentOf(r) {
@@ -36,8 +22,6 @@ export function createRow(stage, parent, { label = null } = {}) {
   const group = new THREE.Group(); parent.add(group)
   const boxGeo = new THREE.BoxGeometry(SIZE, SIZE, SIZE)
   const edgeGeo = new THREE.EdgesGeometry(boxGeo)
-  const pinGeo = new THREE.CylinderGeometry(0.035, 0.035, 1.1, 12)
-  const tipGeo = new THREE.ConeGeometry(0.11, 0.26, 16)
   const arrowGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.42, 10)
   const headGeo = new THREE.ConeGeometry(0.09, 0.2, 12)
   const cells = []         // { mesh, edges, valueSprite, indexSprite, text, flashT, marked }
@@ -97,19 +81,8 @@ export function createRow(stage, parent, { label = null } = {}) {
   }
 
   function pinFor(key) {
-    if (pins.has(key)) return pins.get(key)
-    const g = new THREE.Group()
-    const beam = new THREE.Mesh(pinGeo, new THREE.MeshStandardMaterial({ color: C.violet, emissive: C.violet, emissiveIntensity: 0.9, transparent: true, opacity: 0.85 }))
-    beam.position.y = 0.55
-    const tip = new THREE.Mesh(tipGeo, new THREE.MeshStandardMaterial({ color: C.violet, emissive: C.violet, emissiveIntensity: 1.2 }))
-    tip.rotation.x = Math.PI; tip.position.y = -0.13
-    const sprite = new THREE.Sprite(makeText(THREE, cache, key, '#c9b8ff', 44)); sprite.scale.set(1.9, 0.5, 1); sprite.position.y = 1.35
-    g.add(beam, tip, sprite)
-    g.visible = false
-    group.add(g)
-    const p = { group: g, sprite, beam, tip, from: new THREE.Vector3(), to: new THREE.Vector3(), t: 1, label: key }
-    pins.set(key, p)
-    return p
+    if (!pins.has(key)) pins.set(key, createPin(stage, group, cache, key))
+    return pins.get(key)
   }
   // Where a pin for cell i sits: above a lane cell; pointing in from the right of a pile cell.
   const pinTarget = (i, n) => {
@@ -142,16 +115,13 @@ export function createRow(stage, parent, { label = null } = {}) {
       const n = (reps.get(p.key) ?? 0) + 1; reps.set(p.key, n)
       const id = n === 1 ? p.key : `${p.key}#${n}`
       const pin = pinFor(id); seen.add(id)
-      const target = pinTarget(p.index, count)
       pin.group.rotation.z = pile ? -Math.PI / 2 : 0
-      if (pin.label !== p.label) { pin.sprite.material = makeText(THREE, cache, p.label, '#c9b8ff', 44); pin.label = p.label }
-      if (!pin.group.visible || snap || rebuilt) { pin.to.copy(target); pin.from.copy(target); pin.t = 1; pin.group.position.copy(target) }
-      else if (!pin.to.equals(target)) { pin.from.copy(pin.group.position); pin.to.copy(target); pin.t = 0 }
-      pin.group.visible = true
+      pin.setLabel(p.label)
+      pin.show(pinTarget(p.index, count), snap || rebuilt)
       const k = onCell.get(p.index) ?? 0; onCell.set(p.index, k + 1)
-      pin.sprite.position.y = 1.35 + k * 0.5
+      pin.stack(k)
     }
-    for (const [key, pin] of pins) if (!seen.has(key)) pin.group.visible = false
+    for (const [key, pin] of pins) if (!seen.has(key)) pin.hide()
     for (const m of rangeMeshes) { group.remove(m); m.geometry.dispose(); m.material.dispose() }
     rangeMeshes.length = 0
     if (!pile) for (const g of r.ranges) {
@@ -165,10 +135,7 @@ export function createRow(stage, parent, { label = null } = {}) {
 
   const off = stage.onTick(dt => {
     elapsed += dt
-    for (const pin of pins.values()) {
-      if (pin.t < 1) { pin.t = Math.min(1, pin.t + dt / TWEEN); pin.group.position.lerpVectors(pin.from, pin.to, ease(pin.t)) }
-      else if (!stage.reduced && !pile) pin.group.position.y = pin.to.y + Math.sin(elapsed * 2.2) * 0.04
-    }
+    for (const pin of pins.values()) pin.tick(dt, (!stage.reduced && !pile) ? Math.sin(elapsed * 2.2) * 0.04 : 0)
     for (const cell of cells) {
       if (cell.flashT > 0) {
         cell.flashT = Math.max(0, cell.flashT - dt)
@@ -186,11 +153,11 @@ export function createRow(stage, parent, { label = null } = {}) {
     for (const m of rangeMeshes) { group.remove(m); m.geometry.dispose(); m.material.dispose() }
     rangeMeshes.length = 0
     freeCells()
-    for (const p of pins.values()) { group.remove(p.group); p.beam.material.dispose(); p.tip.material.dispose() }
+    for (const p of pins.values()) p.dispose()
     pins.clear()
     for (const mat of cache.values()) { mat.map.dispose(); mat.dispose() }
     cache.clear()
-    boxGeo.dispose(); edgeGeo.dispose(); pinGeo.dispose(); tipGeo.dispose(); arrowGeo.dispose(); headGeo.dispose()
+    boxGeo.dispose(); edgeGeo.dispose(); arrowGeo.dispose(); headGeo.dispose()
     parent.remove(group)
   }
 
