@@ -24,7 +24,8 @@ export default node('greedy', {
         if s >= end:
             count += 1
             end = e
-    return count` }),
+    return count`, scene: { kind: 'line', axis: [0, 7], lanes: [{ label: 'events', bars: [[1, 4], [2, 3], [3, 5], [5, 6]] }], span: ['s', 'e'], pins: ['end'],
+      states: [{ s: 2, e: 3, end: 3 }, { s: 1, e: 4, end: 3 }, { s: 3, e: 5, end: 5 }, { s: 5, e: 6, end: 6 }] } }),
     trace(
 `def max_events(intervals):
     order = sorted(intervals, key=lambda iv: iv[1])
@@ -42,7 +43,7 @@ export default node('greedy', {
         { line: 8, state: { s: 3, e: 5, count: 2, end: 5 }, ask: 'end', note: '3 is exactly when the van comes free, and >= lets a booking begin the moment the last one ends. Had the test been a strict >, this courier would have been refused for touching rather than overlapping.' },
         { line: 7, state: { s: 5, e: 6, count: 3, end: 5 }, ask: 'count', note: 'Third booking accepted, and end has not moved yet — the count goes up first and the free time follows on the next line. Three of the four windows fit, which is the most that could.' },
         { line: 8, state: { s: 5, e: 6, count: 3, end: 6 }, ask: 'end', note: 'One sort and one pass. No combination of couriers was ever written down, nothing was reconsidered, and the answer is provably the best — because of the swapping argument, not because it came out right on this input.' },
-      ]),
+      ], { scene: { kind: 'line', axis: [0, 7], lanes: [{ label: 'events', bars: [[1, 4], [2, 3], [3, 5], [5, 6]] }], span: ['s', 'e'], pins: ['end'] } }),
     spot('The fence changes the question: the couriers now quote a fee each, and she wants the most money rather than the most jobs, still one van. Which rule does she use?',
       ['Sort by fee, highest first, and take any courier whose window is still free',
        'Sort by end time and take the earliest finisher, as before; the fees do not change which windows fit',

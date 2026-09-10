@@ -24,7 +24,8 @@ export default node('two-strings', {
                 table[i][j] = table[i - 1][j - 1] + 1
             else:
                 table[i][j] = max(table[i - 1][j], table[i][j - 1])
-    return table[len(a)][len(b)]` }),
+    return table[len(a)][len(b)]`, scene: { kind: 'grid', data: 'table', init: [[0, 0], [0, 0], [0, 0]], cursor: ['i', 'j'], heads: { rows: ['', 'a', 'b'], cols: ['', 'b'] },
+      states: [{ table: [[0, 0], [0, 0], [0, 0]] }, { i: 1, j: 1, table: [[0, 0], [0, 0], [0, 0]] }, { i: 2, j: 1, table: [[0, 0], [0, 0], [0, 1]] }] } }),
     trace(
 `def lcs_len(a, b):
     table = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
@@ -41,7 +42,7 @@ export default node('two-strings', {
         { line: 8, state: { a: 'ab', b: 'b', i: 1, j: 1, table: [[0, 0], [0, 0], [0, 0]] }, ask: 'table', note: 'Prefix “a” against prefix “b”. They disagree, so line 8 takes the larger of the box above and the box to the left — both noughts, so a nought goes in. The table looks unchanged and it is not a stall: that box was asked a real question and the honest answer was nothing.' },
         { line: 6, state: { a: 'ab', b: 'b', i: 2, j: 1, table: [[0, 0], [0, 0], [0, 1]] }, ask: 'table', note: 'Prefix “ab” against prefix “b”. The last characters agree, so they pair off and the box reads diagonally back to the empty-against-empty corner, adds one, and writes 1. Note which box it read — not the one above it, the one above and to the left.' },
         { line: 9, state: { a: 'ab', b: 'b', table: [[0, 0], [0, 0], [0, 1]], returns: 1 }, ask: 'returns', note: 'One character shared, and the answer is the far corner: the whole of one page against the whole of the other. Two characters against one cost two boxes; a thousand against a thousand cost a million, which is nothing, against the two-to-the-thousandth branches the guessing would have cost.' },
-      ]),
+      ], { scene: { kind: 'grid', data: 'table', init: [[0, 0], [0, 0], [0, 0]], cursor: ['i', 'j'], heads: { rows: ['', 'a', 'b'], cols: ['', 'b'] } } }),
     spot('Marguerite changes the question: not the longest shared run with gaps allowed, but the longest stretch that appears in both copies unbroken. Which is right?',
       ['The same table, but a disagreement writes a nought instead of the better neighbour, and the answer is the largest number anywhere in the table rather than the far corner',
        'The same table read backwards from the far corner, stopping at the first disagreement',

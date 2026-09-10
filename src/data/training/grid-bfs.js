@@ -29,7 +29,7 @@ export default node('grid-bfs', {
             if grid[nr][nc] == 0 and (nr, nc) not in dist:
                 dist[(nr, nc)] = d + 1
                 queue.append((nr, nc))
-    return -1` }),
+    return -1`, scene: { kind: 'grid', data: [[0, 0, 0], [0, 1, 0]], cursor: ['r', 'c'], states: [{ r: 0, c: 0 }, { r: 1, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }, { r: 1, c: 2 }] } }),
     trace(
 `def steps_to(grid, start, goal):
     queue = [start]
@@ -53,7 +53,7 @@ export default node('grid-bfs', {
         { line: 6, state: { r: 1, c: 0, d: 1, queue: { py: '[(0, 1)]' } }, ask: 'd', note: 'The front of the queue is the first junction that went in, so the whole of ring 1 comes out before any of ring 2. Its distance was written when it was queued, not now.' },
         { line: 14, state: { r: 0, c: 2, d: 2, queue: { py: '[(1, 2)]' } }, ask: 'queue', note: '(1, 0) added nothing at all: its only unseen neighbour, (1, 1), is water. The van sits at (1, 2) and it has just been queued at distance 3, but the code does not know that yet, because the test happens on the way out, not on the way in.' },
         { line: 8, state: { r: 1, c: 2, queue: { py: '[]' } , returns: 3 }, ask: 'returns', note: 'Ring 3 came out of the queue and it is the van. Five junctions were ever queued out of six squares, the water was never entered, and the answer arrived the first time the goal was reached rather than the best of every route.' },
-      ]),
+      ], { scene: { kind: 'grid', data: [[0, 0, 0], [0, 1, 0]], cursor: ['r', 'c'] } }),
     spot('Ten thousand squares of tunnel and a question: the fewest junctions between the basement and the van, count only, no route. Every step costs the same. Which shape?',
       ['A pile: follow one corridor to its end, then back out and take the next one',
        'A queue: everything one step out, then everything two steps out, marking each square as it goes in',

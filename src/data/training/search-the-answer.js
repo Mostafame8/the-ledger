@@ -28,7 +28,8 @@ export default node('search-the-answer', {
         else:
             lo = mid + 1
     return lo`,
-      scene: { kind: 'cells', data: [3, 6, 7, 11], marks: ['p'], states: [{ p: 3 }, { p: 6 }, { p: 7 }, { p: 11 }] },
+      scene: { kind: 'line', axis: [0, 12], ticks: [3, 6, 7, 11], span: ['lo', 'hi'], pins: ['lo', 'hi', 'mid'], labels: { lo: 'low', hi: 'high' },
+        states: [{ lo: 1, hi: 11, mid: 6 }, { lo: 1, hi: 6, mid: 3 }, { lo: 4, hi: 4 }] },
     }),
     trace(
 `def min_speed(piles, hours):
@@ -51,7 +52,7 @@ export default node('search-the-answer', {
         { line: 7, state: { piles: [3, 6, 7, 11], hours: 8, lo: 1, hi: 6, mid: 3, need: 10, p: 11 }, ask: 'need', note: 'At a rate of 3 the sacks take 1, 2, 3 and 4 hours. Ten against eight, so this rate fails and so does every rate below it — which is why line 11 moves the bottom of the bracket to one above the middle rather than to the middle.' },
         { line: 12, state: { piles: [3, 6, 7, 11], hours: 8, lo: 4, hi: 4, returns: 4 }, ask: 'returns', note: 'The ends met at 4. Two more guesses got there — 5 worked, 4 worked — and the whole answer cost four passes over the sacks instead of eleven. A heaviest sack of a million would cost twenty.' },
       ],
-      { scene: { kind: 'cells', data: [3, 6, 7, 11], marks: ['p'] } }),
+      { scene: { kind: 'line', axis: [0, 12], ticks: [3, 6, 7, 11], span: ['lo', 'hi'], pins: ['lo', 'hi', 'mid'], labels: { lo: 'low', hi: 'high' } } }),
     spot('Dax asks why the halving is even allowed here, since the sacks are not sorted and nobody sorted them. What actually makes it legal?',
       ['Any question whose answer is a number can be halved, as long as the range is known',
        'The sacks must be sorted first, and the code only works on this input by luck',

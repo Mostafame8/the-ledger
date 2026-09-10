@@ -23,7 +23,7 @@ export default node('grids', {
         for v in row:
             total += v
         out.append(total)
-    return out` }),
+    return out`, scene: { kind: 'grid', data: [[1, 2], [3, 4]], marks: ['v'], states: [{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }] } }),
     trace(
 `def row_sums(grid):
     out = []
@@ -39,7 +39,7 @@ export default node('grids', {
         { line: 6, state: { row: [1, 2], v: 2, total: 3, out: [] }, ask: 'total', note: '1 went in, then 2. The inner loop has run out of desks in this row.' },
         { line: 6, state: { row: [3, 4], v: 4, total: 7, out: [3] }, ask: 'total', note: 'The outer loop moved to the second row and line 4 reset the tally, so this is 3 + 4 and nothing else. out already holds the first row.' },
         { line: 8, state: { row: [3, 4], v: 4, total: 7, out: [3, 7] }, ask: 'out', note: 'One number per row, in row order. The outer loop walks rows, the inner loop walks the desks inside one.' },
-      ]),
+      ], { scene: { kind: 'grid', data: [[1, 2], [3, 4]], marks: ['v'] } }),
     spot('Every desk on the floor photo has to be checked exactly once. The floor is a list of rows, each row a list of desks. What shape does the code take?',
       ['One loop over the rows', 'One loop over the rows, then a separate loop over the columns', 'A loop over the rows with a loop over that row inside it', 'Write out the desks by hand into one long list first'],
       2, 'A loop over rows alone hands you whole rows, never a single desk. Two loops side by side visit five rows and six columns, which is eleven things, not thirty. Writing the desks out by hand is doing the walk you were trying to write. Nest them: for each row, for each desk in that row.'),

@@ -21,7 +21,7 @@ export default node('dp-grid', {
     for r in range(1, rows):
         for c in range(1, cols):
             row[c] = row[c] + row[c - 1]
-    return row[cols - 1]` }),
+    return row[cols - 1]`, scene: { kind: 'cells', data: 'row', init: [], pointers: ['c'], states: [{ row: [1, 1, 1] }, { c: 1, row: [1, 2, 1] }, { c: 2, row: [1, 2, 3] }] } }),
     trace(
 `def count_paths(rows, cols):
     row = [1] * cols
@@ -35,7 +35,7 @@ export default node('dp-grid', {
         { line: 5, state: { rows: 2, cols: 3, r: 1, c: 1, row: [1, 2, 1] }, ask: 'row', note: 'The 1 that was at row[1] was the junction to the north, and row[0] is the junction to the west, which is still the 1 the seeding put there. 1 plus 1 is 2, and the north value is gone the instant it is used — which is fine, because nothing below will ask for it again.' },
         { line: 5, state: { rows: 2, cols: 3, r: 1, c: 2, row: [1, 2, 3] }, ask: 'row', note: 'This one reads a 1 from the north and the 2 just written to its west. Three routes to the third junction of the second row. The list now holds the second row entirely, and the first row has been overwritten out of existence.' },
         { line: 6, state: { rows: 2, cols: 3, row: [1, 2, 3], returns: 3 }, ask: 'returns', note: 'Six junctions, two additions, and the answer is the east end of the last row. A nine-by-nine costs sixty-four additions instead of forty-eight thousand drawings, and the whole thing lives in nine boxes.' },
-      ]),
+      ], { scene: { kind: 'cells', data: 'row', init: [], pointers: ['c'] } }),
     spot('The lock-up moves and now the route has to pass through one particular junction in the middle of the district. Which is the least work?',
       ['Fill the whole table as before, then walk back from the corner discarding routes that missed the junction',
        'Count the routes from the bank to that junction, count the routes from that junction to the lock-up, and multiply',

@@ -28,7 +28,8 @@ export default node('interval-dp', {
                 table[i][j] = s[i] == s[j]
             else:
                 table[i][j] = s[i] == s[j] and table[i + 1][j - 1]
-    return table` }),
+    return table`, scene: { kind: 'grid', data: 'table', init: [[false, false, false], [false, false, false], [false, false, false]], cursor: ['i', 'j'], heads: { rows: ['a', 'b', 'a'], cols: ['a', 'b', 'a'] },
+      states: [{ i: 0, table: [[true, false, false], [false, false, false], [false, false, false]] }, { i: 2, table: [[true, false, false], [false, true, false], [false, false, true]] }, { i: 1, j: 2, table: [[true, false, false], [false, true, false], [false, false, true]] }, { i: 0, j: 2, table: [[true, false, true], [false, true, false], [false, false, true]] }] } }),
     trace(
 `def is_pal_table(s):
     n = len(s)
@@ -49,7 +50,7 @@ export default node('interval-dp', {
         { line: 5, state: { s: 'aba', n: 3, i: 2, table: [[true, false, false], [false, true, false], [false, false, true]] }, ask: 'table', note: 'The whole diagonal now, one True per character, and nothing else touched. Those are the length-one stretches and they are the floor the longer ones stand on.' },
         { line: 10, state: { s: 'aba', n: 3, length: 2, i: 1, j: 2, table: [[true, false, false], [false, true, false], [false, false, true]] }, ask: 'table', note: 'Both stretches of length two are done and both wrote False: “ab” is not a mirror and neither is “ba”. The table looks unchanged and it is not a stall — two real questions were asked and the answer to both was no. Length two is its own case because there is nothing between the ends to look up.' },
         { line: 12, state: { s: 'aba', n: 3, length: 3, i: 0, j: 2, table: [[true, false, true], [false, true, false], [false, false, true]] }, ask: 'table', note: 'The only stretch of length three. Its ends agree, so it asks the box for what is between them — the single b, already True on the diagonal — and writes True. Three characters, six boxes, and each one was answered in constant time because everything it needed was already finished.' },
-      ]),
+      ], { scene: { kind: 'grid', data: 'table', init: [[false, false, false], [false, false, false], [false, false, false]], cursor: ['i', 'j'], heads: { rows: ['a', 'b', 'a'], cols: ['a', 'b', 'a'] } } }),
     spot('Back to the shell companies. Dax accepts that trying every order is hopeless and proposes a table over stretches, deciding for each stretch which company in it is collapsed first. What is wrong with first, and what is right?',
       ['Nothing is wrong with first; it is the same table read from the other end',
        'First is wrong because the stretch has to be filled by decreasing length instead, and that ordering cannot be done with two loops',
