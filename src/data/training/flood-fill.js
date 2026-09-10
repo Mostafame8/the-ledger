@@ -23,7 +23,8 @@ export default node('flood-fill', {
     for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
         if 0 <= nr < len(grid) and 0 <= nc < len(grid[0]) and grid[nr][nc] == old:
             fill(grid, nr, nc, new)
-    return grid` }),
+    return grid`, scene: { kind: 'grid', data: 'grid', init: [[0, 0], [0, 0]], cursor: ['r', 'c'],
+        states: [{ r: 0, c: 0, grid: [[0, 0], [0, 0]] }, { r: 0, c: 0, grid: [[5, 0], [0, 0]] }, { r: 1, c: 0, grid: [[5, 0], [5, 0]] }, { r: 1, c: 1, grid: [[5, 0], [5, 5]] }, { r: 0, c: 1, grid: [[5, 5], [5, 5]] }] } }),
     trace(
 `def fill(grid, r, c, new):
     old = grid[r][c]
@@ -40,7 +41,7 @@ export default node('flood-fill', {
         { line: 5, state: { r: 1, c: 0, old: 0, new: 5, grid: [[5, 0], [5, 0]] }, ask: 'grid', note: 'Up from (0, 0) was off the plan, so the first neighbour the ink actually reached was down. That call painted before it looked anywhere, and it is now four levels of paperwork deep inside the first one.' },
         { line: 5, state: { r: 1, c: 1, old: 0, new: 5, grid: [[5, 0], [5, 5]] }, ask: 'grid', note: 'From (1, 0) the ink tried up first, saw a 5 there, and was turned away by the paint. Then down and left were off the plan, so it went right. Nothing is remembering visited squares; the grid itself is.' },
         { line: 5, state: { r: 0, c: 1, old: 0, new: 5, grid: [[5, 5], [5, 5]] }, ask: 'grid', note: 'The fourth square, reached by going up from (1, 1) rather than right from (0, 0), because the ink ran to the far wall before it came back. Four paints for four squares, and the calls now unwind finding a 5 everywhere they look.' },
-      ]),
+      ], { scene: { kind: 'grid', data: 'grid', init: [[0, 0], [0, 0]], cursor: ['r', 'c'] } }),
     spot('Dax wants to keep a list of squares the ink has already touched, the way the tunnel rings kept a dist box, so the paint does not go round in circles. Marguerite says he does not need one. Why not?',
       ['He does need one. Without it the four neighbours send the ink back and forth forever',
        'Painting the square is the mark: a painted square no longer holds the old colour, so the test at the top turns the next call away',

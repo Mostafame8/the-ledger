@@ -11,12 +11,14 @@ let stage = null, cells = null, prev = null, dead = false
 onMounted(async () => {
   try {
     const { createStage } = await import('../scene/stage.js')
-    const [{ createCells }, { createRows }] = await Promise.all([import('../scene/cells.js'), import('../scene/rows.js')])
+    const [{ createCells }, { createRows }, { createGrid }, { createLine }] = await Promise.all([
+      import('../scene/cells.js'), import('../scene/rows.js'), import('../scene/grid.js'), import('../scene/line.js')])
     if (dead) return
     stage = await createStage(host.value)
     if (dead) { stage.dispose(); stage = null; return }
     prev = resolve(props.scene, props.state, null)
-    cells = (prev?.kind === 'rows' ? createRows : createCells)(stage)
+    const make = { cells: createCells, rows: createRows, grid: createGrid, line: createLine }
+    cells = (make[prev?.kind] ?? createCells)(stage)
     if (prev) cells.update(prev, { instant: true })
     stage.start()
   } catch (e) {

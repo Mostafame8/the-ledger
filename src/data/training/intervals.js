@@ -24,7 +24,8 @@ export default node('intervals', {
             out[-1][1] = max(out[-1][1], end)
         else:
             out.append([start, end])
-    return out` }),
+    return out`, scene: { kind: 'line', axis: [0, 8], lanes: [{ label: 'given', bars: [[1, 3], [2, 4], [6, 7]] }, { label: 'kept', bars: 'out', init: [] }], span: ['start', 'end'],
+        states: [{ start: 1, end: 3, out: [] }, { start: 1, end: 3, out: [[1, 3]] }, { start: 2, end: 4, out: [[1, 4]] }, { start: 6, end: 7, out: [[1, 4], [6, 7]] }] } }),
     trace(
 `def merge(intervals):
     intervals = sorted(intervals)
@@ -41,7 +42,7 @@ export default node('intervals', {
         { line: 6, state: { start: 2, end: 4, out: [[1, 4]] }, ask: 'out', note: 'The second shift starts at 2, which is at or before the block’s end of 3, so the floor was never empty. Only the end moves. Note that it moved to max(3, 4) and not simply to 4, which is the line that survives a short shift nested inside a long one.' },
         { line: 8, state: { start: 6, end: 7, out: [[1, 4], [6, 7]] }, ask: 'out', note: '6 is after 4, so minutes 4 to 6 had nobody on the floor. The old block is closed for good and a new one opens. Two blocks now, and the gap between them is the thing Dax spent all night looking for.' },
         { line: 9, state: { start: 6, end: 7, returns: [[1, 4], [6, 7]] }, ask: 'returns', note: 'Three cards in, two stretches out, one pass over them. The pass was cheap; the sort was the price, and you paid it once instead of walking six hundred minutes.' },
-      ]),
+      ], { scene: { kind: 'line', axis: [0, 8], lanes: [{ label: 'given', bars: [[1, 3], [2, 4], [6, 7]] }, { label: 'kept', bars: 'out', init: [] }], span: ['start', 'end'] } }),
     spot('Forty guard shifts and Marguerite wants the merged stretches of covered night. Dax sorts the cards by when each shift ends rather than when it starts, then walks them holding one block exactly as before. What breaks?',
       ['Nothing. Merging works from either end as long as you walk every card',
        'A card can now start before the block you are holding, so the block’s start is no longer the earliest minute of the stretch',
