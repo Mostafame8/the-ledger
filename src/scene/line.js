@@ -16,7 +16,10 @@ export function createLine(stage) {
   const xOf = v => (v - (axis[0] + axis[1]) / 2) * UNIT
   const zOfLane = (i, n) => -(n - i) * LANE_STEP        // lanes behind the rail; first lane farthest
 
-  const freeFixed = () => { for (const o of fixed) { group.remove(o); o.geometry?.dispose?.(); o.material?.dispose?.() } fixed = [] }
+  const freeFixed = () => {
+    for (const o of fixed) { group.remove(o); if (o.isMesh) { o.geometry.dispose(); o.material.dispose() } }
+    fixed = []
+  }
   const freeBars = L => { for (const b of L.bars) { group.remove(b.mesh); b.mesh.geometry.dispose(); b.mesh.material.dispose() } L.bars = [] }
   const freeLanes = () => { for (const L of lanes) { freeBars(L); if (L.label) group.remove(L.label) } lanes = [] }
 
