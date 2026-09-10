@@ -137,9 +137,11 @@ export function createRow(stage, parent, { label = null } = {}) {
       baseLook(cell)
       if (!snap && r.changed.includes(i)) cell.flashT = FLASH
     })
-    const seen = new Set(), onCell = new Map()
+    const seen = new Set(), onCell = new Map(), reps = new Map()
     for (const p of r.pointers) {
-      const pin = pinFor(p.key); seen.add(p.key)
+      const n = (reps.get(p.key) ?? 0) + 1; reps.set(p.key, n)
+      const id = n === 1 ? p.key : `${p.key}#${n}`
+      const pin = pinFor(id); seen.add(id)
       const target = pinTarget(p.index, count)
       pin.group.rotation.z = pile ? -Math.PI / 2 : 0
       if (pin.label !== p.label) { pin.sprite.material = makeText(THREE, cache, p.label, '#c9b8ff', 44); pin.label = p.label }
@@ -178,7 +180,6 @@ export function createRow(stage, parent, { label = null } = {}) {
   })
 
   const setPosition = (x, z) => { group.position.set(x, 0, z) }
-  const extent = () => extentOf({ pile, chain, cells })
 
   function dispose() {
     off?.()
@@ -193,5 +194,5 @@ export function createRow(stage, parent, { label = null } = {}) {
     parent.remove(group)
   }
 
-  return { update, setPosition, extent, dispose }
+  return { update, setPosition, dispose }
 }

@@ -25,7 +25,7 @@ export default node('knapsack-dp', {
       scene: { kind: 'rows', rows: [
         { label: 'weights', data: [1, 2], pointers: ['i'] },
         { label: 'values', data: [1, 3], pointers: ['i'] },
-        { label: 'row', data: 'row', init: [0, 0, 0, 0], pointers: ['c'] },
+        { label: 'row', data: 'row', init: [], pointers: ['c'] },
       ], states: [{ row: [0, 0, 0, 0] }, { i: 0, c: 1, row: [0, 1, 1, 1] }, { i: 1, c: 2, row: [0, 1, 3, 4] }] },
     }),
     trace(
@@ -45,7 +45,7 @@ export default node('knapsack-dp', {
       { scene: { kind: 'rows', rows: [
         { label: 'weights', data: [1, 2], pointers: ['i'] },
         { label: 'values', data: [1, 3], pointers: ['i'] },
-        { label: 'row', data: 'row', init: [0, 0, 0, 0], pointers: ['c'] },
+        { label: 'row', data: 'row', init: [], pointers: ['c'] },
       ] } }),
     spot('Dax rewrites the inner sweep as range(weights[i], cap + 1) — capacities climbing instead of falling. The code runs and the numbers come out too big. What has he actually written?',
       ['A version that reads boxes still holding noughts, so the answer comes back too small rather than too large',

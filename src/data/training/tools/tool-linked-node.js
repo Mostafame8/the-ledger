@@ -20,7 +20,7 @@ a.val             # 'meet'
 a.next.val        # 'pay'
 b.next            # None, the chain ends here
 a.next.next.val   # AttributeError: 'NoneType' object has no attribute 'val'`,
-      scene: { kind: 'cells', chain: true, data: ['meet', 'pay', 'burn'], at: ['a.next.val', 'b.next.val'], labels: { 'a.next.val': 'a.next', 'b.next.val': 'b.next' },
+      scene: { kind: 'cells', chain: true, data: ['meet', 'pay', 'burn'], at: ['a.next.val', 'a.next.next.val', 'b.next.val'], labels: { 'a.next.val': 'a.next', 'a.next.next.val': 'a.next.next', 'b.next.val': 'b.next' },
         states: [{ 'a.next.val': 'pay' }, { 'a.next.val': 'pay', 'a.next.next.val': 'burn' }, { 'a.next.val': 'burn', 'b.next.val': 'burn' }] },
     }),
     explain([
@@ -42,7 +42,7 @@ a.next.next.val   # AttributeError: 'NoneType' object has no attribute 'val'`,
         { line: 4, state: { 'a.next.val': 'burn', 'b.next.val': 'burn' }, ask: 'a.next.val', note: 'One more assignment and meet points straight at burn. The pay slip still exists and still holds burn’s address, but nothing points at pay any more, so from meet it has gone. Cutting a slip out of a chain costs exactly one move.' },
         { line: 5, state: { 'a.next.val': 'burn', 'b.next.val': 'burn', returns: 'burn' }, ask: 'returns', note: 'Two slips long now, and nobody ever kept a count. Ask how long the chain is and the only honest answer is to walk it.' },
       ],
-      { scene: { kind: 'cells', chain: true, data: ['meet', 'pay', 'burn'], at: ['a.next.val', 'b.next.val'], labels: { 'a.next.val': 'a.next', 'b.next.val': 'b.next' } } }),
+      { scene: { kind: 'cells', chain: true, data: ['meet', 'pay', 'burn'], at: ['a.next.val', 'a.next.next.val', 'b.next.val'], labels: { 'a.next.val': 'a.next', 'a.next.next.val': 'a.next.next', 'b.next.val': 'b.next' } } }),
     blank('“Two hands on a slip. One writes the address of a second slip onto the first. One reads me what the next slip says, and the last slip in a chain has no next slip. A class Node with val and next is already defined for you.”',
 `def link(a, b):
     ___

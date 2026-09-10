@@ -118,7 +118,7 @@ explain, as in wave 1. Twenty items in all.
 src/scene/
   model.js     resolve() handles kinds cells (with at/pile/chain) and rows
   validate.js  rules above; a shared per-row checker
-  stage.js     frame({ width, depth, height }) replaces frameCells(count) (kept as a wrapper); onTick returns an unsubscribe
+  stage.js     frame({ width, depth, height }) replaces frameCells(count); onTick returns an unsubscribe
   row.js       createRow(stage, parent, { label }) — the block renderer, moved out of cells.js; pile/chain come from the resolved row passed to update(), position via setPosition(x, z)
   cells.js     createCells(stage): one row at z = 0
   rows.js      createRows(stage): lanes front to back, piles at the right end

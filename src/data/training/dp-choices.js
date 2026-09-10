@@ -24,7 +24,7 @@ export default node('dp-choices', {
             if c <= a:
                 table[a] += table[a - c]
     return table[amount]`,
-      scene: { kind: 'cells', data: 'table', init: [1, 0, 0, 0, 0], pointers: ['a'],
+      scene: { kind: 'cells', data: 'table', init: [0, 0, 0, 0, 0], pointers: ['a'],
         states: [{ table: [1, 0, 0, 0, 0] }, { a: 1, table: [1, 1, 0, 0, 0] }, { a: 2, table: [1, 1, 2, 0, 0] }, { a: 3, table: [1, 1, 2, 3, 0] }, { a: 4, table: [1, 1, 2, 3, 5] }] },
     }),
     trace(
@@ -44,7 +44,7 @@ export default node('dp-choices', {
         { line: 7, state: { amount: 4, a: 3, c: 2, table: [1, 1, 2, 3, 0] }, ask: 'table', note: 'Ending with a 1 brought 2 from box 2, ending with a 2 brought 1 from box 1. Three orders for 3, and every box it read was finished before the loop arrived here.' },
         { line: 7, state: { amount: 4, a: 4, c: 2, table: [1, 1, 2, 3, 5] }, ask: 'table', note: 'Five orders to pay a toll of four in ones and twos. Four amounts, eight additions, and the table is the working — which is the only reason anyone believes the answer. A toll of a thousand costs two thousand additions.' },
       ],
-      { scene: { kind: 'cells', data: 'table', init: [1, 0, 0, 0, 0], pointers: ['a'] } }),
+      { scene: { kind: 'cells', data: 'table', init: [0, 0, 0, 0, 0], pointers: ['a'] } }),
     spot('The border man changes his mind: he wants the fewest notes rather than the number of orders, and the crew is carrying threes and fives. Which of these is right?',
       ['Hand over the largest note that fits, then repeat with what is left',
        'The same table, one box per amount, but the box holds the fewest notes reaching that amount and each denomination proposes one plus the box for the remainder, keeping the smallest',

@@ -435,7 +435,7 @@ git commit -m "feat(scene): validator — per-row checker, at/pile/chain rules, 
 
 **Interfaces:**
 - `stage.frame({ width, depth, height })` — width in cell units, depth in lanes, height in pile cells.
-- `createRow(stage, parent, { label }) → { update(resolvedRow, { instant }), setPosition(x, z), extent() → { width, height }, dispose() }` — `parent` is the `THREE.Object3D` the row group is added to.
+- `createRow(stage, parent, { label }) → { update(resolvedRow, { instant }), setPosition(x, z), dispose() }` — `parent` is the `THREE.Object3D` the row group is added to.
 - `createCells(stage)` / `createRows(stage)` → `{ update(resolved, { instant }), dispose() }` (unchanged contract for SceneView).
 
 - [ ] **Step 1: `stage.frame`**

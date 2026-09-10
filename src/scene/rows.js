@@ -22,7 +22,10 @@ export function createRows(stage) {
       if (x.pile) { rows[i].setPosition(widest / 2 + 1.5 + pileN * PILE_STEP_X, frontZ); pileN++ }
       else { rows[i].setPosition(0, (lane - (L - 1) / 2) * LANE_STEP); lane++ }
     })
-    return { width: widest + piles.length * PILE_STEP_X, depth: Math.max(1, L), height: Math.max(1, ...piles.map(x => x.cells.length)) }
+    const left = widest / 2 + 1.2                                          // lane label sprite
+    const right = piles.length ? widest / 2 + 1.5 + (piles.length - 1) * PILE_STEP_X + 0.4 : widest / 2
+    root.position.x = -(right - left) / 2
+    return { width: left + right, depth: Math.max(1, L), height: Math.max(1, ...piles.map(x => x.cells.length)) }
   }
 
   return {

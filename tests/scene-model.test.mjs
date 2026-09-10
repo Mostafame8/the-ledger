@@ -4,7 +4,7 @@ import { KINDS, CELL_TEXT_MAX, cellText, normalize, resolve, dataIsKey, resolveR
 
 const two = { kind: 'cells', data: [1, 3, 4, 6, 9], pointers: ['i', 'j'], labels: { i: 'small hand' } }
 
-test('constants: cells is the one wave-1 kind; text caps at six', () => {
+test('constants: KINDS is cells and rows; text caps at six', () => {
   assert.deepEqual(KINDS, ['cells', 'rows'])
   assert.equal(CELL_TEXT_MAX, 6)
 })
@@ -89,10 +89,6 @@ test('normalize: pointer object becomes keys plus a one-state loop; arrays pass 
   assert.deepEqual(m.pointers, [])
   assert.deepEqual(normalize(two).states, [{}])
   assert.deepEqual(normalize({ ...two, states: [{ i: 1 }] }).states, [{ i: 1 }])
-})
-
-test('KINDS: cells and rows', () => {
-  assert.deepEqual(KINDS, ['cells', 'rows'])
 })
 
 test('dataIsKey: identifier, or any string when init is present; literals otherwise', () => {
