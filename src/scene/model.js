@@ -1,7 +1,7 @@
 // Pure: turn a scene descriptor plus one frame's state into a picture the renderer can draw.
 // No DOM, no three. See docs/superpowers/specs/2026-09-09-training-3d-scenes-design.md.
 
-export const KINDS = ['cells', 'rows']
+export const KINDS = ['cells', 'rows', 'grid', 'line']
 export const CELL_TEXT_MAX = 6
 // A string `data` is a state key when it looks like an identifier, or when the row gives an `init`
 // (the list before the first frame). Content literals ('HB4417', 'ok go', '(()') have no init.
@@ -97,6 +97,66 @@ export function resolveRow(row, state = {}, prev = null) {
   return { kind: 'cells', label: row.label ?? null, pile: !!row.pile, chain: !!row.chain, cells, pointers, ranges, marks, changed, source }
 }
 
+const isGrid = v => Array.isArray(v) && v.every(Array.isArray)
+const pairs = v => Array.isArray(v) && v.every(p => Array.isArray(p) && p.length === 2)
+
+// The grid for this frame: literal; else the frame's own grid, else the previous frame's, else init.
+function gridFor(scene, state, prev) {
+  if (isGrid(scene.data)) return scene.data
+  const v = state?.[scene.data]
+  if (isGrid(v)) return v
+  if (prev?.source !== undefined) return prev.source
+  return scene.init ?? []
+}
+
+export function resolveGrid(scene, state = {}, prev = null) {
+  const source = gridFor(scene, state, prev)
+  const rows = source.length, cols = rows ? Math.max(...source.map(r => r.length)) : 0
+  const tiles = []
+  source.forEach((row, r) => row.forEach((v, c) => tiles.push({ r, c, text: cellText(v), bool: v === true ? true : v === false ? false : null })))
+  let cursor = null
+  if (Array.isArray(scene.cursor) && scene.cursor.length === 2) {
+    const [rk, ck] = scene.cursor, r = state[rk], c = state[ck]
+    if (Number.isInteger(r) && Number.isInteger(c) && r >= 0 && r < rows && c >= 0 && c < cols) cursor = { r, c, label: `${captioned(scene, rk)}, ${captioned(scene, ck)}` }
+  }
+  const marks = []
+  for (const key of scene.marks || []) {
+    if (!present(state, key)) continue
+    const t = cellText(state[key])
+    for (const tl of tiles) if (tl.text === t) marks.push([tl.r, tl.c])
+  }
+  const before = prev?.kind === 'grid' ? new Map(prev.tiles.map(t => [`${t.r},${t.c}`, t.text])) : null
+  const changed = tiles.filter(tl => !before || before.get(`${tl.r},${tl.c}`) !== tl.text).map(tl => [tl.r, tl.c])
+  return { kind: 'grid', rows, cols, tiles, cursor, marks, changed, heads: scene.heads ?? null, source }
+}
+
+function barsFor(lane, state, prevLane) {
+  if (pairs(lane.bars)) return lane.bars
+  const v = state?.[lane.bars]
+  if (pairs(v)) return v
+  if (prevLane?.source !== undefined) return prevLane.source
+  return lane.init ?? []
+}
+
+export function resolveLine(scene, state = {}, prev = null) {
+  const lanes = (scene.lanes || []).map((lane, i) => {
+    const prevLane = prev?.kind === 'line' ? prev.lanes[i] ?? null : null
+    const source = barsFor(lane, state, prevLane)
+    const bars = source.map(([from, to]) => ({ from, to }))
+    const changed = []
+    bars.forEach((b, k) => { const pb = prevLane?.bars[k]; if (!pb || pb.from !== b.from || pb.to !== b.to) changed.push(k) })
+    return { label: lane.label ?? null, bars, changed, source }
+  })
+  let span = null
+  if (Array.isArray(scene.span) && scene.span.length === 2) {
+    const a = state[scene.span[0]], b = state[scene.span[1]]
+    if (Number.isInteger(a) && Number.isInteger(b)) span = { from: Math.min(a, b), to: Math.max(a, b) }
+  }
+  const pins = []
+  for (const key of scene.pins || []) { const v = state[key]; if (Number.isInteger(v)) pins.push({ key, at: v, label: captioned(scene, key) }) }
+  return { kind: 'line', axis: scene.axis, lanes, ticks: scene.ticks ?? [], span, pins }
+}
+
 export function resolve(scene, state = {}, prev = null) {
   if (!scene) return null
   if (scene.kind === 'cells') return resolveRow(scene, state, prev?.kind === 'cells' ? prev : null)
@@ -104,5 +164,7 @@ export function resolve(scene, state = {}, prev = null) {
     const rows = (scene.rows || []).map((row, i) => resolveRow(row, state, prev?.kind === 'rows' ? prev.rows[i] ?? null : null))
     return { kind: 'rows', rows }
   }
+  if (scene.kind === 'grid') return resolveGrid(scene, state, prev?.kind === 'grid' ? prev : null)
+  if (scene.kind === 'line') return resolveLine(scene, state, prev?.kind === 'line' ? prev : null)
   return null
 }

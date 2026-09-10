@@ -1,11 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { KINDS, CELL_TEXT_MAX, cellText, normalize, resolve, dataIsKey, resolveRow } from '../src/scene/model.js'
+import { KINDS, CELL_TEXT_MAX, cellText, normalize, resolve, dataIsKey, resolveRow, resolveGrid, resolveLine } from '../src/scene/model.js'
 
 const two = { kind: 'cells', data: [1, 3, 4, 6, 9], pointers: ['i', 'j'], labels: { i: 'small hand' } }
 
-test('constants: KINDS is cells and rows; text caps at six', () => {
-  assert.deepEqual(KINDS, ['cells', 'rows'])
+test('constants: KINDS is cells, rows, grid, line; text caps at six', () => {
+  assert.deepEqual(KINDS, ['cells', 'rows', 'grid', 'line'])
   assert.equal(CELL_TEXT_MAX, 6)
 })
 
@@ -163,4 +163,65 @@ test('resolveRow: a row carries its label and defaults', () => {
   assert.equal(r.pile, false)
   assert.equal(r.chain, false)
   assert.equal(resolveRow({ data: [9] }, {}, null).label, null)
+})
+
+test('resolveGrid: literal grid → tiles by row/col; bools flagged; text otherwise', () => {
+  const r = resolve({ kind: 'grid', data: [[1, 2], [true, false]] }, {})
+  assert.equal(r.kind, 'grid'); assert.equal(r.rows, 2); assert.equal(r.cols, 2)
+  assert.deepEqual(r.tiles.map(t => [t.r, t.c, t.text, t.bool]), [[0, 0, '1', null], [0, 1, '2', null], [1, 0, 'True', true], [1, 1, 'False', false]])
+  assert.equal(r.cursor, null); assert.deepEqual(r.marks, []); assert.equal(r.changed.length, 4)
+})
+
+test('resolveGrid: keyed grid reads the frame, falls back to prev then init; changed by position', () => {
+  const sc = { kind: 'grid', data: 'grid', init: [[0, 0], [0, 0]], cursor: ['r', 'c'] }
+  const r0 = resolve(sc, { r: 0, c: 0 })
+  assert.deepEqual(r0.tiles.map(t => t.text), ['0', '0', '0', '0'])
+  assert.deepEqual(r0.cursor, { r: 0, c: 0, label: 'r, c' })
+  const r1 = resolve(sc, { r: 1, c: 0, grid: [[5, 0], [0, 0]] }, r0)
+  assert.deepEqual(r1.changed, [[0, 0]])
+  const r2 = resolve(sc, { r: 1, c: 1 }, r1)
+  assert.deepEqual(r2.tiles.map(t => t.text), ['5', '0', '0', '0']); assert.deepEqual(r2.changed, [])
+})
+
+test('resolveGrid: cursor hidden when a key is missing, None, or out of range; labels caption the keys', () => {
+  const sc = { kind: 'grid', data: [[0, 0, 0], [0, 1, 0]], cursor: ['r', 'c'], labels: { r: 'row', c: 'col' } }
+  assert.equal(resolve(sc, { r: 1 }).cursor, null)
+  assert.equal(resolve(sc, { r: 1, c: null }).cursor, null)
+  assert.equal(resolve(sc, { r: 2, c: 0 }).cursor, null)
+  assert.deepEqual(resolve(sc, { r: 1, c: 2 }).cursor, { r: 1, c: 2, label: 'r · row, c · col' })
+})
+
+test('resolveGrid: marks by value; heads pass through', () => {
+  const r = resolve({ kind: 'grid', data: [[1, 2], [3, 2]], marks: ['v'], heads: { rows: ['x', 'y'], cols: ['p', 'q'] } }, { v: 2 })
+  assert.deepEqual(r.marks, [[0, 1], [1, 1]])
+  assert.deepEqual(r.heads, { rows: ['x', 'y'], cols: ['p', 'q'] })
+})
+
+test('resolveLine: literal and keyed lanes, span, pins, ticks; changed bars per lane', () => {
+  const sc = { kind: 'line', axis: [0, 8], lanes: [{ label: 'given', bars: [[1, 3], [2, 4], [6, 7]] }, { label: 'kept', bars: 'out', init: [] }], span: ['start', 'end'], pins: ['mid'], ticks: [3, 6] }
+  const r0 = resolve(sc, { start: 1, end: 3 })
+  assert.equal(r0.kind, 'line'); assert.deepEqual(r0.axis, [0, 8]); assert.deepEqual(r0.ticks, [3, 6])
+  assert.deepEqual(r0.lanes[0].bars, [{ from: 1, to: 3 }, { from: 2, to: 4 }, { from: 6, to: 7 }])
+  assert.deepEqual(r0.lanes[1].bars, []); assert.deepEqual(r0.span, { from: 1, to: 3 }); assert.deepEqual(r0.pins, [])
+  const r1 = resolve(sc, { start: 2, end: 4, out: [[1, 3]], mid: 5 }, r0)
+  assert.deepEqual(r1.lanes[1].bars, [{ from: 1, to: 3 }]); assert.deepEqual(r1.lanes[1].changed, [0]); assert.deepEqual(r1.lanes[0].changed, [])
+  assert.deepEqual(r1.pins, [{ key: 'mid', at: 5, label: 'mid' }])
+  const r2 = resolve(sc, { start: 6, end: 7 }, r1)
+  assert.deepEqual(r2.lanes[1].bars, [{ from: 1, to: 3 }]); assert.deepEqual(r2.lanes[1].changed, [])
+  const r3 = resolve(sc, { start: 6, end: 7, out: [[1, 4]] }, r2)
+  assert.deepEqual(r3.lanes[1].changed, [0])
+})
+
+test('resolveLine: span needs both keys as ints and is ordered; pins hide on missing/None', () => {
+  const sc = { kind: 'line', axis: [0, 12], lanes: [{ label: 'a', bars: [] }], span: ['s', 'e'], pins: ['lo', 'hi'], labels: { lo: 'low' } }
+  assert.equal(resolve(sc, { s: 2 }).span, null)
+  assert.deepEqual(resolve(sc, { s: 5, e: 2 }).span, { from: 2, to: 5 })
+  assert.deepEqual(resolve(sc, { lo: 1, hi: null }).pins, [{ key: 'lo', at: 1, label: 'lo · low' }])
+})
+
+test('resolveLine: a lane whose key is missing keeps the previous bars', () => {
+  const sc = { kind: 'line', axis: [0, 5], lanes: [{ label: 'k', bars: 'out', init: [[0, 1]] }] }
+  const r0 = resolve(sc, {}); assert.deepEqual(r0.lanes[0].bars, [{ from: 0, to: 1 }])
+  const r1 = resolve(sc, { out: [[2, 3]] }, r0); const r2 = resolve(sc, {}, r1)
+  assert.deepEqual(r2.lanes[0].bars, [{ from: 2, to: 3 }])
 })
