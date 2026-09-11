@@ -37,5 +37,40 @@ open_all(locks, 'A7')          # 1`),
     'Write class Dispatcher built with a channel, any object that has send(text). Its alert(text) sends "ALERT: " + text through the channel and returns the string it sent. Also write class Log with a sent list and a send(text) that appends to it. Stretch: write a channel that only counts sends and plug it in without touching Dispatcher.',
     'Dispatcher stores the channel it was handed and calls channel.send. It never builds a channel itself. The tests plug in a fake, so keep the shape exact.'),
 ]},
+{ name:'Arc II — The forge', sub:'Rigs get made here. Nobody says the rig\'s name at the window.', gates:[
+  g('rigfactory','E',60,'creation','Three rigs, one window','Factory',
+    ['The fence runs her shop through one window. You say cutter, torch or jammer. You do not say how it gets made, and she does not tell you.',
+     'Dax has three constructors scattered through the plan and a comment that reads: if you add a rig, grep for these.',
+     '“One window,” Marguerite says. “Everyone asks it by name. Whoever adds a rig changes the window once, and nobody who asks ever knows.”'],
+    'Write classes Cutter, Torch and Jammer, each with use() returning "cutting", "burning" and "jamming". Then class RigFactory whose make(kind) returns a new instance for "cutter", "torch" or "jammer" and raises ValueError for anything else. Stretch: add register(kind, cls) so a fourth rig needs no edit to make.',
+    'A dict from kind to class is the window. make looks the kind up and calls whatever it finds; a miss raises. No chain of ifs.',
+`f = RigFactory()
+f.make('torch').use()               # 'burning'
+type(f.make('cutter')).__name__     # 'Cutter'
+f.make('drill')                     # ValueError`),
+  g('rigbuilder','E',70,'creation','Piece by piece','Builder',
+    ['The rig for the next job gets ordered over three phone calls. Battery on Monday. Blade on Wednesday. Silent running, maybe, if the budget stretches.',
+     'Dax\'s Rig takes eleven arguments, and every caller passes ten Nones to set the eleventh.',
+     '“Take the order piece by piece,” Marguerite says. “Each call adds one thing and hands the order back. build() at the end turns the order into a rig. Nobody counts Nones.”'],
+    'Write class Rig with battery (default 20), blade (default "steel") and silent (default False), and describe() returning "<blade> blade, <battery>Ah, silent" or "<blade> blade, <battery>Ah, loud". Then class RigBuilder with battery(n), blade(name) and silent(), each setting one thing and returning self, and build() returning a Rig. Stretch: two builders must never share state.',
+    'The builder holds the three choices as fields. Each setter writes one field and returns self so the calls chain. build() hands the fields to Rig.'),
+  g('oneradio','D',90,'creation','The only channel','Singleton',
+    ['On the Halden job two radios came up on the same channel and talked over each other for eleven seconds. Eleven seconds is a guard.',
+     'Dax: “So we pass the one radio to everybody.” “Through forty functions? No. There is one radio. Anyone who asks for it gets that one.”',
+     '“Radio.get() hands back the same object every time. Build it on the first ask, remember it, never build another. And give the tests a way to put it back in the box.”'],
+    'Write class Radio with an attribute freq (None to start), a method tune(freq) that stores it, a class method get() that returns the one shared instance (creating it on the first call), and a class method reset() that forgets the instance so the next get() builds a fresh one. Stretch: make Radio() itself return the shared instance.',
+    'Keep the instance in a class attribute, not on any one object. get() checks it, builds once if it is empty, and returns it. reset() puts None back.',
+`Radio.get() is Radio.get()   # True
+Radio.get().tune(446.0)
+Radio.get().freq             # 446.0
+Radio.reset()
+Radio.get().freq             # None`),
+  g('catalogue','D',100,'creation','The parts catalogue','Factory with a registry',
+    ['The fence\'s parts catalogue is a ring binder. New pages get pasted in. The clerk at the counter never changes; she reads the page for the name you say.',
+     'Dax wants the factory to know every part. “Then the factory changes every week,” Marguerite says, “and the clerk is the one who breaks.”',
+     '“Let the parts register themselves. A decorator on the class pastes its page in. build(kind, ...) reads the binder and calls what it finds.”'],
+    'Write class Catalogue with register(kind), usable as a decorator on a class (@cat.register("cutter")), that records the class under kind and returns the class unchanged; kinds() returning the registered kinds sorted; and build(kind, **kw) constructing the registered class with the keyword arguments, raising KeyError for an unknown kind. Stretch: let register accept a plain function as a maker too.',
+    'register(kind) returns a function that takes the class, stores it in a dict under kind, and returns it. That returned function is what the decorator syntax calls.'),
+]},
 ];
 export const ARCS_DATA = ARCS;

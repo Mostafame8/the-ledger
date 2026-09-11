@@ -48,4 +48,61 @@ check("a counting channel plugs straight in", _t_c.n, 3)
 check("empty text still sends", Dispatcher(Log()).alert(''), 'ALERT: ')
 _t_log2 = Log(); Dispatcher(_t_log2).alert('x')
 check("a fresh log holds one line", _t_log2.sent, ['ALERT: x'])`,
+
+rigfactory: `_t_f = RigFactory()
+check("kind names pick the class", [type(_t_f.make(k)).__name__ for k in ('cutter', 'torch', 'jammer')], ['Cutter', 'Torch', 'Jammer'])
+check("each rig uses its own way", [_t_f.make(k).use() for k in ('cutter', 'torch', 'jammer')], ['cutting', 'burning', 'jamming'])
+def _t_raises(thunk):
+    try:
+        thunk()
+    except Exception as e:
+        return type(e).__name__
+    return None
+check("an unknown kind raises ValueError", _t_raises(lambda: _t_f.make('drill')), 'ValueError')
+check("wrong case is unknown too", _t_raises(lambda: _t_f.make('Cutter')), 'ValueError')
+check("two makes give two rigs", _t_f.make('torch') is _t_f.make('torch'), False)
+check("Cutter().use()", 'cutting')`,
+
+rigbuilder: `check("RigBuilder().build().describe()", 'steel blade, 20Ah, loud')
+check("RigBuilder().battery(40).blade('diamond').silent().build().describe()", 'diamond blade, 40Ah, silent')
+check("order of calls does not matter", RigBuilder().silent().blade('diamond').battery(40).build().describe(), 'diamond blade, 40Ah, silent')
+_t_b = RigBuilder().battery(60)
+check("build twice gives the same description", _t_b.build().describe() == _t_b.build().describe(), True)
+check("silent flips only the flag", RigBuilder().silent().build().battery, 20)
+check("battery is stored as a number", RigBuilder().battery(40).build().battery, 40)`,
+
+oneradio: `Radio.reset()
+check("Radio.get() is Radio.get()", True)
+Radio.get().tune(446.0)
+check("tuning shows through another get", Radio.get().freq, 446.0)
+Radio.get().tune(462.5)
+check("the last tune wins", Radio.get().freq, 462.5)
+_t_old = Radio.get()
+Radio.reset()
+check("reset forgets the frequency", Radio.get().freq, None)
+check("reset gives a different object", Radio.get() is _t_old, False)
+Radio.reset(); Radio.reset()
+check("reset twice is safe", Radio.get().freq, None)`,
+
+catalogue: `_t_cat = Catalogue()
+@_t_cat.register('cutter')
+class _t_Cutter:
+    def __init__(self, blade='steel'): self.blade = blade
+@_t_cat.register('torch')
+class _t_Torch:
+    def __init__(self, fuel=10): self.fuel = fuel
+check("kinds are sorted", _t_cat.kinds(), ['cutter', 'torch'])
+check("build returns the registered class", type(_t_cat.build('torch')).__name__, '_t_Torch')
+check("keyword args reach the constructor", _t_cat.build('cutter', blade='diamond').blade, 'diamond')
+def _t_raises(thunk):
+    try:
+        thunk()
+    except Exception as e:
+        return type(e).__name__
+    return None
+check("an unknown kind raises KeyError", _t_raises(lambda: _t_cat.build('drill')), 'KeyError')
+class _t_Plain:
+    pass
+check("the decorator hands the class back unchanged", _t_cat.register('plain')(_t_Plain) is _t_Plain, True)
+check("two catalogues are independent", Catalogue().kinds(), [])`,
 }
