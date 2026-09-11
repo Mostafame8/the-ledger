@@ -31,7 +31,9 @@ export default node('caches', {
                 del store[order.pop(0)]
             store[key] = val
             order.append(key)
-    return order` }),
+    return order`,
+      scene: { kind: 'rows', rows: [{ label: 'store', data: 'store', init: {}, at: ['key'] }, { label: 'order', data: 'order', init: [], at: ['key'] }],
+        states: [{ key: 1, store: { 1: 1 }, order: [1] }, { key: 2, store: { 1: 1, 2: 2 }, order: [1, 2] }, { key: 1, store: { 1: 1, 2: 2 }, order: [2, 1] }, { key: 3, store: { 1: 1, 3: 3 }, order: [1, 3] }] } }),
     trace(
 `def run(ops, cap):
     store = {}
@@ -51,12 +53,12 @@ export default node('caches', {
     return order`,
       "run([('put', 1, 1), ('put', 2, 2), ('get', 1, None), ('put', 3, 3), ('get', 2, None)], 2)",
       [
-        { line: 15, state: { cap: 2, key: 1, store: { py: '{1: 1}' }, order: [1] }, ask: 'order', note: 'First name in. Room for two, so nothing is evicted, and the name goes to the back of the order because it was just used. Front is oldest, back is newest — fix that in your head now, because every line below depends on which end is which.' },
-        { line: 15, state: { cap: 2, key: 2, store: { py: '{1: 1, 2: 2}' }, order: [1, 2] }, ask: 'order', note: 'Second name in and she is now full. Name 1 sits at the front, which makes it the one on the way out, and nothing has been evicted yet only because the capacity was exactly reached rather than exceeded.' },
-        { line: 8, state: { cap: 2, key: 1, store: { py: '{1: 1, 2: 2}' }, order: [2, 1] }, ask: 'order', note: 'A use of name 1. The dictionary did not change at all — the value was already there — but the order flipped, and that is the entire point of this step. Name 2 is now at the front and name 1 is safe.' },
-        { line: 15, state: { cap: 2, key: 3, store: { py: '{1: 1, 3: 3}' }, order: [1, 3] }, ask: 'order', note: 'A new name with no room. Line 13 took the front of the order — name 2 — and deleted it from the dictionary in the same breath, then name 3 went in at the back. Had the use on the previous step not happened, name 1 would have been the one forgotten.' },
-        { line: 6, state: { cap: 2, key: 2, store: { py: '{1: 1, 3: 3}' }, order: [1, 3] }, ask: 'order', note: 'A use of name 2, which she no longer has. The test on line 6 fails, nothing is promoted, and the order is untouched — a miss must never reorder anything, or a name nobody can reach would keep pushing real names out.' },
-      ]),
+        { line: 15, state: { cap: 2, key: 1, store: { py: '{1: 1}', val: { 1: 1 } }, order: [1] }, ask: 'order', note: 'First name in. Room for two, so nothing is evicted, and the name goes to the back of the order because it was just used. Front is oldest, back is newest — fix that in your head now, because every line below depends on which end is which.' },
+        { line: 15, state: { cap: 2, key: 2, store: { py: '{1: 1, 2: 2}', val: { 1: 1, 2: 2 } }, order: [1, 2] }, ask: 'order', note: 'Second name in and she is now full. Name 1 sits at the front, which makes it the one on the way out, and nothing has been evicted yet only because the capacity was exactly reached rather than exceeded.' },
+        { line: 8, state: { cap: 2, key: 1, store: { py: '{1: 1, 2: 2}', val: { 1: 1, 2: 2 } }, order: [2, 1] }, ask: 'order', note: 'A use of name 1. The dictionary did not change at all — the value was already there — but the order flipped, and that is the entire point of this step. Name 2 is now at the front and name 1 is safe.' },
+        { line: 15, state: { cap: 2, key: 3, store: { py: '{1: 1, 3: 3}', val: { 1: 1, 3: 3 } }, order: [1, 3] }, ask: 'order', note: 'A new name with no room. Line 13 took the front of the order — name 2 — and deleted it from the dictionary in the same breath, then name 3 went in at the back. Had the use on the previous step not happened, name 1 would have been the one forgotten.' },
+        { line: 6, state: { cap: 2, key: 2, store: { py: '{1: 1, 3: 3}', val: { 1: 1, 3: 3 } }, order: [1, 3] }, ask: 'order', note: 'A use of name 2, which she no longer has. The test on line 6 fails, nothing is promoted, and the order is untouched — a miss must never reorder anything, or a name nobody can reach would keep pushing real names out.' },
+      ], { scene: { kind: 'rows', rows: [{ label: 'store', data: 'store', init: {}, at: ['key'] }, { label: 'order', data: 'order', init: [], at: ['key'] }] } }),
     spot('Marguerite times the list version and it costs the length of the order on every single use. Which fix actually makes a use constant time?',
       ['Store each name next to its position in the order, so the position can be looked up instead of searched for',
        'Keep the order sorted by last-used time and sort it again before each eviction',

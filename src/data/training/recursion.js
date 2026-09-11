@@ -19,7 +19,9 @@ export default node('recursion', {
 `def sum_digits(n):
     if n == 0:
         return 0
-    return n % 10 + sum_digits(n // 10)` }),
+    return n % 10 + sum_digits(n // 10)`,
+      scene: { kind: 'rows', rows: [{ label: 'calls', data: 'calls', init: [], pile: true, at: ['n'] }],
+        states: [{ n: 123, calls: [123] }, { n: 12, calls: [123, 12] }, { n: 1, calls: [123, 12, 1] }, { n: 0, calls: [123, 12, 1, 0] }, { n: 123, calls: [123] }] } }),
     trace(
 `def sum_digits(n):
     if n == 0:
@@ -27,11 +29,11 @@ export default node('recursion', {
     return n % 10 + sum_digits(n // 10)`,
       'sum_digits(123)',
       [
-        { line: 3, state: { n: 0, returns: 0 }, ask: 'returns', note: 'Nothing comes back at all until the note runs out. 123 asked 12, which asked 1, which asked 0, and only here does a line answer without asking anybody. An empty note adds up to nought.' },
-        { line: 4, state: { n: 1, returns: 1 }, ask: 'returns', note: 'This is the frame that asked about 0. It takes the 0 it was handed, adds its own last digit, 1 % 10, and answers 1. It knows nothing about 12 or 123; it was only ever asked one question.' },
-        { line: 4, state: { n: 12, returns: 3 }, ask: 'returns', note: 'Its own last digit is 2, and the shorter note came back 1. Notice the addition happens on the way back up: three frames were opened before a single sum was worked out.' },
-        { line: 4, state: { n: 123, returns: 6 }, ask: 'returns', note: '3 plus the 3 from below. Four frames, four subtractions of one digit, and not one loop. The stack of paperwork was the counting; when it unwinds, the answer is the last thing left.' },
-      ]),
+        { line: 3, state: { n: 0, calls: [123, 12, 1, 0], returns: 0 }, ask: 'returns', note: 'Nothing comes back at all until the note runs out. 123 asked 12, which asked 1, which asked 0, and only here does a line answer without asking anybody. An empty note adds up to nought.' },
+        { line: 4, state: { n: 1, calls: [123, 12, 1], returns: 1 }, ask: 'returns', note: 'This is the frame that asked about 0. It takes the 0 it was handed, adds its own last digit, 1 % 10, and answers 1. It knows nothing about 12 or 123; it was only ever asked one question.' },
+        { line: 4, state: { n: 12, calls: [123, 12], returns: 3 }, ask: 'returns', note: 'Its own last digit is 2, and the shorter note came back 1. Notice the addition happens on the way back up: three frames were opened before a single sum was worked out.' },
+        { line: 4, state: { n: 123, calls: [123], returns: 6 }, ask: 'returns', note: '3 plus the 3 from below. Four frames, four subtractions of one digit, and not one loop. The stack of paperwork was the counting; when it unwinds, the answer is the last thing left.' },
+      ], { scene: { kind: 'rows', rows: [{ label: 'calls', data: 'calls', init: [], pile: true, at: ['n'] }] } }),
     spot('Dax writes his own digit adder: take the last digit, add it to whatever the same function says about the rest. He runs it and Python answers with a wall of red about a recursion depth. What did he leave out?',
       ['A loop. Recursion cannot add a list of numbers up on its own',
        'A line that answers the smallest note outright, without asking anybody, so the asking has somewhere to stop',

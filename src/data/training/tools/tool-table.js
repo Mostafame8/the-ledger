@@ -19,7 +19,9 @@ for r in range(len(t)):
 
 bad = [[0] * cols] * rows               # one row, listed twice
 bad[1][2] = 7
-bad                                     # [[0, 0, 7], [0, 0, 7]]. Both moved` }),
+bad                                     # [[0, 0, 7], [0, 0, 7]]. Both moved`,
+      scene: { kind: 'grid', grids: [{ label: 'good', data: 'good', init: [[0, 0, 0], [0, 0, 0]] }, { label: 'bad', data: 'bad', init: [[0, 0, 0], [0, 0, 0]] }],
+        states: [{ good: [[0, 0, 0], [0, 0, 0]], bad: [[0, 0, 0], [0, 0, 0]] }, { good: [[0, 0, 0], [0, 0, 7]], bad: [[0, 0, 0], [0, 0, 0]] }, { good: [[0, 0, 0], [0, 0, 7]], bad: [[0, 0, 7], [0, 0, 7]] }] } }),
     explain([
       '“Rule it with the comprehension: [[0] * cols for _ in range(rows)]. The loop runs once per row and makes a fresh crate every time, so the rows are separate things.”',
       '“Never [[0] * cols] * rows. That takes a page of one row and lists it rows times over, so every row in there is the same crate, and writing one figure writes it into all of them. It is the one mistake this thing invites, and it never announces itself.”',
@@ -40,7 +42,7 @@ bad                                     # [[0, 0, 7], [0, 0, 7]]. Both moved` })
         { line: 4, state: { good: [[0, 0, 0], [0, 0, 7]], bad: [[0, 0, 0], [0, 0, 0]] }, ask: 'good', note: 'Row 1, then column 2, in that order always. One cell took the 7 and the other row did not notice.' },
         { line: 5, state: { good: [[0, 0, 0], [0, 0, 7]], bad: [[0, 0, 7], [0, 0, 7]] }, ask: 'bad', note: 'The identical write into bad puts a 7 into both rows, because there is only one row in there and it is listed twice. No error, no warning, just a page that is quietly wrong.' },
         { line: 6, state: { good: [[0, 0, 0], [0, 0, 7]], bad: [[0, 0, 7], [0, 0, 7]], returns: [[[0, 0, 0], [0, 0, 7]], [[0, 0, 7], [0, 0, 7]]] }, ask: 'returns', note: 'One line apart and two different pages. Use the comprehension every single time and this never happens to you.' },
-      ]),
+      ], { scene: { kind: 'grid', grids: [{ label: 'good', data: 'good', init: [[0, 0, 0], [0, 0, 0]] }, { label: 'bad', data: 'bad', init: [[0, 0, 0], [0, 0, 0]] }] } }),
     blank('“Two hands on the page. One rules me a fresh page of noughts, rows by columns, with the rows kept separate. One writes a figure into one cell.”',
 `def new_page(rows, cols):
     return ___

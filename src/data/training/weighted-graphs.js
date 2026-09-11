@@ -31,7 +31,9 @@ def shortest(n, adj, src):
             if d + w < dist[nxt]:
                 dist[nxt] = d + w
                 heapq.heappush(heap, (dist[nxt], nxt))
-    return dist` }),
+    return dist`,
+      scene: { kind: 'graph', adj: [[[1, 1], [2, 4]], [[0, 1], [2, 2]], [[0, 4], [1, 2], [3, 1]], [[2, 1]]], pos: [[0, 0], [2, 0], [1, 2], [3, 2]], at: ['node', 'nxt'], badges: 'dist',
+        states: [{ node: 0, nxt: 2, dist: [0, 1, 4, { py: 'inf' }] }, { node: 1, nxt: 2, dist: [0, 1, 3, { py: 'inf' }] }, { node: 2, nxt: 3, dist: [0, 1, 3, 4] }] } }),
     trace(
 `import heapq
 
@@ -51,12 +53,12 @@ def shortest(n, adj, src):
     return dist`,
       'shortest(4, [[(1, 1), (2, 4)], [(0, 1), (2, 2)], [(0, 4), (1, 2), (3, 1)], [(2, 1)]], 0)',
       [
-        { line: 14, state: { node: 0, d: 0, nxt: 2, w: 4, dist: { py: '[0, 1, 4, inf]' } }, ask: 'dist', note: 'Both streets out of junction 0 are priced in: 1 to junction 1, 4 to junction 2. Junction 3 is still inf, which is not a mistake — it means no route there has been found yet, and inf loses every comparison against a real price it meets.' },
-        { line: 9, state: { d: 1, node: 1, dist: { py: '[0, 1, 4, inf]' }, heap: { py: '[(4, 2)]' } }, ask: 'node', note: 'The heap held (1, 1) and (4, 2) and handed back the cheaper. Junction 1 is settled at 1 minute now and for good. Had this been a plain queue it would have handed back whichever went in first, which is the whole difference.' },
-        { line: 14, state: { node: 1, d: 1, nxt: 2, w: 2, dist: { py: '[0, 1, 3, inf]' } }, ask: 'dist', note: 'Two hops through junction 1 cost 3, which beats the 4 the direct street quoted. The best price for junction 2 is overwritten and the junction is pushed again — now as (3, 2), while the stale (4, 2) is still sitting in the heap.' },
-        { line: 9, state: { d: 4, node: 2, dist: { py: '[0, 1, 3, 4]' }, heap: { py: '[(4, 3)]' } }, ask: 'node', note: 'Here is the stale entry, arriving with a price of 4 for a junction whose best is 3. Junction 2 was settled two pops ago. Line 10 catches it, line 11 drops it, and nothing was ever deleted from the middle of a heap.' },
-        { line: 16, state: { dist: { py: '[0, 1, 3, 4]' } }, ask: 'dist', note: 'Four junctions, five pops, one of them wasted. The route to junction 3 costs 4 and goes the long way round through 1 and 2 — three streets, cheaper than the two-street route the rings would have sold you.' },
-      ]),
+        { line: 14, state: { node: 0, d: 0, nxt: 2, w: 4, dist: { py: '[0, 1, 4, inf]', val: [0, 1, 4, { py: 'inf' }] } }, ask: 'dist', note: 'Both streets out of junction 0 are priced in: 1 to junction 1, 4 to junction 2. Junction 3 is still inf, which is not a mistake — it means no route there has been found yet, and inf loses every comparison against a real price it meets.' },
+        { line: 9, state: { d: 1, node: 1, dist: { py: '[0, 1, 4, inf]', val: [0, 1, 4, { py: 'inf' }] }, heap: { py: '[(4, 2)]' } }, ask: 'node', note: 'The heap held (1, 1) and (4, 2) and handed back the cheaper. Junction 1 is settled at 1 minute now and for good. Had this been a plain queue it would have handed back whichever went in first, which is the whole difference.' },
+        { line: 14, state: { node: 1, d: 1, nxt: 2, w: 2, dist: { py: '[0, 1, 3, inf]', val: [0, 1, 3, { py: 'inf' }] } }, ask: 'dist', note: 'Two hops through junction 1 cost 3, which beats the 4 the direct street quoted. The best price for junction 2 is overwritten and the junction is pushed again — now as (3, 2), while the stale (4, 2) is still sitting in the heap.' },
+        { line: 9, state: { d: 4, node: 2, dist: { py: '[0, 1, 3, 4]', val: [0, 1, 3, 4] }, heap: { py: '[(4, 3)]' } }, ask: 'node', note: 'Here is the stale entry, arriving with a price of 4 for a junction whose best is 3. Junction 2 was settled two pops ago. Line 10 catches it, line 11 drops it, and nothing was ever deleted from the middle of a heap.' },
+        { line: 16, state: { dist: { py: '[0, 1, 3, 4]', val: [0, 1, 3, 4] } }, ask: 'dist', note: 'Four junctions, five pops, one of them wasted. The route to junction 3 costs 4 and goes the long way round through 1 and 2 — three streets, cheaper than the two-street route the rings would have sold you.' },
+      ], { scene: { kind: 'graph', adj: [[[1, 1], [2, 4]], [[0, 1], [2, 2]], [[0, 4], [1, 2], [3, 1]], [[2, 1]]], pos: [[0, 0], [2, 0], [1, 2], [3, 2]], at: ['node', 'nxt'], badges: 'dist' } }),
     spot('Marguerite adds a junction where a contact hands you back six minutes: the street into it costs 2 and the street out of it is priced at minus 6. Dax runs the cheapest-route code on the new map and gets an answer that is plainly too expensive. Why?',
       ['The heap cannot hold negative numbers, so the entry sorts to the wrong place',
        'Settling a junction the first time it comes off the heap assumes no route can get cheaper later, which a negative price breaks; that map needs a method that relaxes every street repeatedly instead',

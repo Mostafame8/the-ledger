@@ -19,7 +19,7 @@ export default node('frequency', {
     tally = {}
     for ch in s:
         tally[ch] = tally.get(ch, 0) + 1
-    return tally` }),
+    return tally`, scene: { kind: 'cells', data: 'tally', init: {}, at: ['ch'], states: [{ ch: 'a', tally: { a: 1 } }, { ch: 'b', tally: { a: 1, b: 1 } }, { ch: 'a', tally: { a: 2, b: 1 } }] } }),
     trace(
 `def counts(s):
     tally = {}
@@ -31,7 +31,7 @@ export default node('frequency', {
         { line: 4, state: { ch: 'a', tally: { a: 1 } }, ask: 'tally', note: "'a' has no card, so tally.get('a', 0) hands back the fallback 0, and one is added to that." },
         { line: 4, state: { ch: 'b', tally: { a: 1, b: 1 } }, ask: 'tally', note: "'b' is new too, so it starts the same way. Cards keep the order they were first filed in." },
         { line: 5, state: { ch: 'a', tally: { a: 2, b: 1 } }, ask: 'tally', note: "The second 'a' finds its card at 1 and makes it 2. Its place in the box does not change, only the number on it." },
-      ]),
+      ], { scene: { kind: 'cells', data: 'tally', init: {}, at: ['ch'] } }),
     spot('Two badge strings. Are they the same letters in a different order? Dax wants to try every rearrangement of the first one and compare.',
       ['Try every rearrangement', 'Reverse one of them and compare', 'Count each letter in both and compare the two tallies', 'Compare them character by character'],
       2, 'Every rearrangement is factorial work for a question one pass answers. Reversing and comparing straight through both test the order, and the order is precisely what a scramble is allowed to change: “ab” and “ba” would both fail. The tally is the part the scrambling cannot touch.'),

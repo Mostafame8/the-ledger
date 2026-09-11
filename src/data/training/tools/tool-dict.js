@@ -17,7 +17,8 @@ book['mole']               # KeyError. There is no such card
 book.get('mole')           # None instead of a crash
 book.get('mole', '0000')   # '0000', the default you named
 len(book)                  # 3
-for name, num in book.items(): ...` }),
+for name, num in book.items(): ...`,
+      scene: { kind: 'cells', data: 'counts', init: {}, at: ['n'], states: [{ n: 'dax', counts: { dax: 1 } }, { n: 'fence', counts: { dax: 1, fence: 1 } }, { n: 'dax', counts: { dax: 2, fence: 1 } }] } }),
     explain([
       '“Say a name and the drawer goes straight to the card. Reading, writing and asking in cost one move each, near enough, and the size of the book does not come into it.”',
       '“The price is that a missing name is a KeyError, not a shrug. get(name) hands back None, and get(name, 0) hands back the default you chose, which is how every tally you will ever write begins.”',
@@ -35,7 +36,7 @@ for name, num in book.items(): ...` }),
         { line: 4, state: { n: 'fence', counts: { dax: 1, fence: 1 } }, ask: 'counts', note: 'A second name, a second card. The dax card was not disturbed and nothing was searched to find that out.' },
         { line: 4, state: { n: 'dax', counts: { dax: 2, fence: 1 } }, ask: 'counts', note: 'dax comes round again. This time get finds the card, so 1 becomes 2 and the card is written over. The order of the cards is filing order, not count order.' },
         { line: 5, state: { n: 'dax', counts: { dax: 2, fence: 1 }, returns: 2 }, ask: 'returns', note: 'Three names read, three moves spent. Dax would have flipped through the whole book for each one.' },
-      ]),
+      ], { scene: { kind: 'cells', data: 'counts', init: {}, at: ['n'] } }),
     blank('“Two hands on the rolodex. One gives me the number for a name and hands back nothing at all when there is no card, no crash. One files a card, over the top of any card already under that name.”',
 `def number_for(book, name):
     return ___
