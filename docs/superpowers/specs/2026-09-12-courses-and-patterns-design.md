@@ -1,7 +1,7 @@
 # Courses — one app, many jobs; first new course: design patterns
 
 Date: 2026-09-12
-Status: approved in brainstorm, awaiting implementation plans
+Status: plan 1 (course plumbing) implemented on branch courses-plumbing; plans 2–3 pending
 Builds on: the training room (2026-09-08), save slots, the table (waves 1–2c)
 
 ## Purpose
