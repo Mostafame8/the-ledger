@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { KINDS, CELL_TEXT_MAX, cellText, normalize, resolve, dataIsKey, resolveRow, resolveGrid, resolveLine, valueOf, read, isDict, resolveGraph } from '../src/scene/model.js'
+import { KINDS, CELL_TEXT_MAX, cellText, normalize, resolve, dataIsKey, resolveRow, resolveGrid, resolveLine, valueOf, read, isDict, resolveGraph, layoutTree, resolveTree } from '../src/scene/model.js'
 
 const two = { kind: 'cells', data: [1, 3, 4, 6, 9], pointers: ['i', 'j'], labels: { i: 'small hand' } }
 
@@ -77,7 +77,7 @@ test('resolve: marks light every cell whose text equals the value', () => {
 })
 
 test('resolve: unknown kind is null', () => {
-  assert.equal(resolve({ kind: 'tree', data: [] }, {}), null)
+  assert.equal(resolve({ kind: 'blob', data: [] }, {}), null)
 })
 
 test('normalize: pointer object becomes keys plus a one-state loop; arrays pass through', () => {
@@ -320,4 +320,39 @@ test('resolveGraph: keyed adjacency grows; only new edges are changed; missing k
   const r3 = resolve(sc, {}, r2); assert.deepEqual(r3.edges.map(e => [e.u, e.v]), [[0, 1], [1, 2]])
   const d = resolve({ kind: 'graph', adj: [[1], [0]], pos: [[0, 0], [1, 0]], directed: true }, {})
   assert.deepEqual(d.edges.map(e => [e.u, e.v]), [[0, 1], [1, 0]]); assert.equal(d.directed, true)
+})
+
+test('layoutTree: binary tree — ids by L/R path, parent centred over children, leaves one unit wide', () => {
+  const t = layoutTree({ val: 1, left: { val: 2 }, right: { val: 3 } })
+  assert.deepEqual(t.nodes.map(n => [n.id, n.text, n.depth, n.parent, n.x, n.end]), [['', '1', 0, null, 1, false], ['L', '2', 1, '', 0.5, false], ['R', '3', 1, '', 1.5, false]])
+  assert.equal(t.width, 2); assert.equal(t.height, 2)
+  const one = layoutTree({ val: 'a', left: { val: 'b' } })         // a lone left child keeps its side
+  assert.deepEqual(one.nodes.map(n => [n.id, n.x]), [['', 1], ['L', 0.5]]); assert.equal(one.width, 2)
+})
+
+test('layoutTree: map tree — keys are node text and id steps; a true child lights its parent; empty root is one node', () => {
+  const t = layoutTree({ t: { o: { '#': true }, e: { a: { '#': true } } } })
+  assert.deepEqual(t.nodes.map(n => [n.id, n.text, n.depth, n.end]), [['', '·', 0, false], ['t', 't', 1, false], ['t.o', 'o', 2, true], ['t.e', 'e', 2, false], ['t.e.a', 'a', 3, true]])
+  assert.equal(t.width, 2); assert.equal(t.height, 4)
+  assert.deepEqual(layoutTree({}).nodes.map(n => n.id), [''])
+})
+
+test('resolveTree: literal data with pins by text; marks by text', () => {
+  const sc = { kind: 'tree', data: { val: 1, left: { val: 2 }, right: { val: 3 } }, at: ['root.val'], marks: ['hit'], labels: { 'root.val': 'here' } }
+  const r = resolve(sc, { 'root.val': 2, hit: 3 })
+  assert.equal(r.kind, 'tree'); assert.deepEqual(r.pins, [{ key: 'root.val', id: 'L', label: 'root.val · here' }]); assert.deepEqual(r.marks, ['R'])
+  assert.deepEqual(resolve(sc, { 'root.val': null }).pins, [])
+  assert.deepEqual(resolve(sc, {}).changed, ['', 'L', 'R'])
+})
+
+test('resolveTree: keyed data grows with stable ids; only new nodes are changed; missing key or py-only keeps the previous tree', () => {
+  const sc = { kind: 'tree', data: 'root', init: {}, at: ['ch'] }
+  const r0 = resolve(sc, { root: { py: '{}', val: {} } })
+  assert.deepEqual(r0.nodes.map(n => n.id), [''])
+  const r1 = resolve(sc, { root: { py: "{'t': {'o': {'#': True}}}", val: { t: { o: { '#': true } } } } }, r0)
+  assert.deepEqual(r1.changed, ['t', 't.o']); assert.equal(r1.nodes.find(n => n.id === 't.o').end, true)
+  const r2 = resolve(sc, { ch: 'e', root: { py: 'x', val: { t: { o: { '#': true }, e: {} } } } }, r1)
+  assert.deepEqual(r2.changed, ['t.e']); assert.deepEqual(r2.pins, [{ key: 'ch', id: 't.e', label: 'ch' }])
+  const r3 = resolve(sc, { root: { py: 'x' } }, r2)
+  assert.deepEqual(r3.nodes.map(n => n.id), ['', 't', 't.o', 't.e']); assert.deepEqual(r3.changed, [])
 })

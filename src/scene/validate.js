@@ -1,5 +1,5 @@
 // Content-time checks for a step's `scene`. Pure; used by scripts/check-training.mjs and tests.
-import { KINDS, dataIsKey, normalize, resolveGrid, resolveRow, read, isDict } from './model.js'
+import { KINDS, dataIsKey, normalize, resolveGrid, resolveRow, read, isDict, isTree } from './model.js'
 
 const isList = v => Array.isArray(v) || typeof v === 'string'
 const keyish = v => typeof v === 'string'
@@ -212,6 +212,55 @@ function graphErrors(sc, states, where) {
   return errs
 }
 
+// Walk one tree literal. Returns messages; counts nodes and depth.
+function treeShape(root) {
+  const errs = [], bad = m => errs.push(m)
+  let count = 0
+  const walk = (nd, id, depth) => {
+    if (nd === null || nd === undefined || typeof nd !== 'object' || Array.isArray(nd)) { bad(`node '${id}' must be an object or null`); return }
+    count++
+    if (depth >= 6) { bad(`node '${id}' is deeper than 6 levels`); return }
+    if ('val' in nd) {
+      if (Object.keys(nd).some(k => !['val', 'left', 'right'].includes(k))) bad(`node '${id}' has val and other keys; a binary node is { val, left?, right? }`)
+      for (const s of ['left', 'right']) if (nd[s] !== undefined && nd[s] !== null) walk(nd[s], id ? `${id}.${s[0].toUpperCase()}` : s[0].toUpperCase(), depth + 1)
+    } else {
+      if ('py' in nd) { bad(`node '${id}' is Python text`); return }
+      for (const [k, c] of Object.entries(nd)) {
+        if (!k || /\s/.test(k)) bad(`key '${k}' under node '${id}' must be non-empty with no whitespace`)
+        if (c === true) continue
+        walk(c, id ? `${id}.${k}` : k, depth + 1)
+      }
+    }
+  }
+  walk(root, '', 0)
+  if (count > 31) bad(`tree has more than 31 nodes (${count})`)
+  return errs
+}
+
+function treeErrors(sc, states, where) {
+  const errs = [], bad = m => errs.push(m)
+  const isKey = typeof sc.data === 'string'
+  if (!isKey && !isTree(sc.data)) bad('data must be a tree object or a state key')
+  if (isKey && sc.init === undefined) bad(`data is the state key '${sc.data}' so init (the tree before the first frame) is required`)
+  else for (const m of treeShape(isKey ? sc.init : sc.data)) bad(m)
+  if (sc.at !== undefined && !strings(sc.at)) bad('at must be an array of state keys')
+  if (sc.marks !== undefined && !strings(sc.marks)) bad('marks must be an array of state keys')
+  const pinKeys = [...(Array.isArray(sc.at) ? sc.at : []), ...(Array.isArray(sc.marks) ? sc.marks : [])]
+  for (const k of Object.keys(sc.labels || {})) if (!pinKeys.includes(k)) bad(`labels names '${k}' which is not an at or marks key`)
+  if (errs.length) return errs
+  const keyed = [...pinKeys, ...(isKey ? [sc.data] : [])]
+  for (const k of new Set(keyed)) if (!states.some(st => k in st)) bad(`'${k}' never appears in any ${where}`)
+  if (isKey) states.forEach((st, k) => {
+    if (!(sc.data in st)) return
+    if (pyOnly(st[sc.data])) { bad(`'${sc.data}' at ${where} ${k} is Python text; add a val beside py`); return }
+    const v = read(st, sc.data)
+    if (v === null || v === undefined) return
+    if (!isTree(v)) { bad(`'${sc.data}' at ${where} ${k} must be a tree object`); return }
+    for (const m of treeShape(v)) bad(`'${sc.data}' at ${where} ${k}: ${m}`)
+  })
+  return errs
+}
+
 export function sceneErrors(step) {
   const sc = step?.scene
   if (!sc) return []
@@ -236,6 +285,7 @@ export function sceneErrors(step) {
   if (sc.kind === 'grid') { for (const m of gridErrors(sc, walkStates(), explain ? 'state' : 'frame')) bad(m); return errs }
   if (sc.kind === 'line') { for (const m of lineErrors(sc, walkStates(), explain ? 'state' : 'frame')) bad(m); return errs }
   if (sc.kind === 'graph') { for (const m of graphErrors(sc, walkStates(), explain ? 'state' : 'frame')) bad(m); return errs }
+  if (sc.kind === 'tree') { for (const m of treeErrors(sc, walkStates(), explain ? 'state' : 'frame')) bad(m); return errs }
 
   // rows
   if (!Array.isArray(sc.rows) || sc.rows.length < 1 || sc.rows.length > 4) { bad('rows must be an array of 1 to 4 rows'); return errs }

@@ -204,3 +204,24 @@ test('graph: keyed adj needs init and appears; per-frame at range, marks lists, 
   assert.match(sceneErrors(GR(k, { adj: { py: '[[1]]' }, seen: [0], dist: [0, 0, 0, 0] }, { u: 0, v: 1 }, { u: 1, v: 2 }))[0], /'adj' at frame 0 is Python text/)
   assert.match(sceneErrors(GR(k, { seen: [0], dist: [0, 0, 0, 0] }, { u: 0, v: 1 }, { u: 1, v: 2 }))[0], /'adj' never/)
 })
+
+const T = (sc, ...states) => tr({ kind: 'tree', ...sc }, ...states)
+
+test('tree: binary or map nodes; bad node shapes, deep or big trees rejected; keyed data needs init; labels ⊆ at ∪ marks', () => {
+  assert.deepEqual(sceneErrors(T({ data: { val: 1, left: { val: 2 }, right: { val: 3 } }, at: ['root.val'] }, { 'root.val': 2 }, { x: 1 }, { 'root.val': 1 })), [])
+  assert.deepEqual(sceneErrors(T({ data: 'root', init: {}, at: ['ch'] }, { root: {} }, { ch: 'e', root: { t: { e: {} } } }, { root: { t: { '#': true } } })), [])
+  assert.match(sceneErrors(T({ data: { val: 1, kids: [] } }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /node '' has val and other keys/)
+  assert.match(sceneErrors(T({ data: { 'a b': {} } }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /key 'a b'/)
+  assert.match(sceneErrors(T({ data: { val: 1, left: 5 } }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /node 'L' must be an object or null/)
+  assert.match(sceneErrors(T({ data: { a: { b: { c: { d: { e: { f: { g: {} } } } } } } } }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /deeper than 6/)
+  assert.match(sceneErrors(T({ data: 'root' }, { root: {} }, { x: 1 }, { x: 1 }))[0], /init/)
+  assert.match(sceneErrors(T({ data: 'root', init: {} }, { root: [1] }, { x: 1 }, { x: 1 }))[0], /'root' at frame 0 must be a tree/)
+  assert.match(sceneErrors(T({ data: 'root', init: {} }, { root: { py: '{}' } }, { x: 1 }, { x: 1 }))[0], /'root' at frame 0 is Python text/)
+  assert.match(sceneErrors(T({ data: { val: 1 }, at: ['a'], labels: { q: 'x' } }, { a: 1 }, { a: 1 }, { a: 1 }))[0], /labels/)
+  assert.match(sceneErrors(T({ data: { val: 1 }, at: ['a'] }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /'a' never/)
+})
+
+test('tree: at most 31 nodes', () => {
+  const wide = Object.fromEntries(Array.from({ length: 32 }, (_, i) => [`k${i}`, {}]))
+  assert.match(sceneErrors(T({ data: wide }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /more than 31 nodes/)
+})

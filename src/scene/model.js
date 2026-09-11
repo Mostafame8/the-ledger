@@ -222,9 +222,70 @@ export function resolveGraph(scene, state = {}, prev = null) {
   return { kind: 'graph', directed, nodes, edges, pins, source }
 }
 
+const isBinary = nd => !!nd && typeof nd === 'object' && !Array.isArray(nd) && 'val' in nd
+const isMap = nd => !!nd && typeof nd === 'object' && !Array.isArray(nd) && !('val' in nd) && !('py' in nd)
+export const isTree = v => isBinary(v) || isMap(v)
+
+// Flatten a tree to nodes with path ids and a tidy layout: a leaf is one unit wide, a binary node with any
+// child reserves both sides, a parent sits centred over its span. Root depth 0, x from the left edge.
+export function layoutTree(root) {
+  const nodes = []
+  function walk(nd, id, text, depth, parent, x0) {
+    const node = { id, text, depth, parent, x: 0, end: false }
+    nodes.push(node)
+    let w = 0
+    if (isBinary(nd)) {
+      const sides = [['L', nd.left], ['R', nd.right]]
+      if (sides.some(([, c]) => c !== null && c !== undefined)) for (const [s, c] of sides) {
+        w += (c === null || c === undefined) ? 1 : walk(c, id ? `${id}.${s}` : s, cellText(c.val), depth + 1, id, x0 + w)
+      }
+    } else {
+      for (const [k, c] of Object.entries(nd)) {
+        if (c === true) { node.end = true; continue }
+        w += walk(c, id ? `${id}.${k}` : k, k, depth + 1, id, x0 + w)
+      }
+    }
+    w = Math.max(1, w)
+    node.x = x0 + w / 2
+    return w
+  }
+  const width = isTree(root) ? walk(root, '', isBinary(root) ? cellText(root.val) : '·', 0, null, 0) : 0
+  const height = nodes.length ? Math.max(...nodes.map(n => n.depth)) + 1 : 0
+  return { nodes, width, height }
+}
+
+// The tree for this frame: literal; else the frame's own tree, else the previous frame's, else init.
+function treeFor(scene, state, prev) {
+  if (isTree(scene.data)) return scene.data
+  const v = read(state, scene.data)
+  if (isTree(v)) return v
+  if (prev?.source !== undefined) return prev.source
+  return scene.init ?? {}
+}
+
+export function resolveTree(scene, state = {}, prev = null) {
+  const source = treeFor(scene, state, prev)
+  const { nodes, width, height } = layoutTree(source)
+  const pins = [], marks = []
+  for (const key of scene.at || []) {
+    if (!present(state, key)) continue
+    const t = cellText(read(state, key))
+    for (const nd of nodes) if (nd.text === t) pins.push({ key, id: nd.id, label: captioned(scene, key) })
+  }
+  for (const key of scene.marks || []) {
+    if (!present(state, key)) continue
+    const t = cellText(read(state, key))
+    for (const nd of nodes) if (nd.text === t && !marks.includes(nd.id)) marks.push(nd.id)
+  }
+  const before = prev?.kind === 'tree' ? new Map(prev.nodes.map(n => [n.id, n.text])) : null
+  const changed = nodes.filter(n => !before || before.get(n.id) !== n.text).map(n => n.id)
+  return { kind: 'tree', nodes, pins, marks, changed, width, height, source }
+}
+
 export function resolve(scene, state = {}, prev = null) {
   if (!scene) return null
   if (scene.kind === 'graph') return resolveGraph(scene, state, prev?.kind === 'graph' ? prev : null)
+  if (scene.kind === 'tree') return resolveTree(scene, state, prev?.kind === 'tree' ? prev : null)
   if (scene.kind === 'cells') return resolveRow(scene, state, prev?.kind === 'cells' ? prev : null)
   if (scene.kind === 'rows') {
     const rows = (scene.rows || []).map((row, i) => resolveRow(row, state, prev?.kind === 'rows' ? prev.rows[i] ?? null : null))
