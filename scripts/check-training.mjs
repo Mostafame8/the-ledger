@@ -1,124 +1,131 @@
-// Validates training content: schema, prerequisites, gate refs, step mix, trace and spot sanity.
-import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID } from '../src/courses/algorithms/training/index.js'
-import { GATES } from '../src/courses/algorithms/index.js'
+// Validates training content for every course: schema, prerequisites, gate refs, step mix,
+// trace and spot sanity.
+import { COURSES } from '../src/courses/index.js'
 import { MOVES } from '../src/training/node.js'
 import { sceneErrors, stateErrors } from '../src/scene/validate.js'
 
 const XP = { F: [40, 60], E: [60, 80], D: [90, 100], C: [120, 140], B: [160, 180], A: [200, 240], S: [280, 400] }
-const gateIds = new Set(GATES.map(g => g.id))
 let errors = 0
-const fail = m => { console.error('✗', m); errors++ }
+let totalNodes = 0, totalTools = 0
 
-// Per-step schema checks, shared by lessons and tools.
-function validateStep(ownerId, s, i) {
-  const at = `${ownerId}[${i}] ${s.type}`
-  for (const e of sceneErrors(s)) fail(`${at}: ${e}`)
-  for (const e of stateErrors(s)) fail(`${at}: ${e}`)
-  switch (s.type) {
-    case 'explain':
-      if (!Array.isArray(s.lines) || s.lines.length < 2 || s.lines.length > 5) fail(`${at}: 2–5 lines`)
-      if (s.move && !MOVES.includes(s.move)) fail(`${at}: unknown move ${s.move}`)
-      break
-    case 'trace': {
-      if (!s.code || !s.input) fail(`${at}: needs code and input`)
-      const lineCount = (s.code || '').split('\n').length
-      if (!Array.isArray(s.frames) || s.frames.length < 3) fail(`${at}: needs 3+ frames`)
-      for (const [k, f] of (s.frames || []).entries()) {
-        if (!(f.line >= 1 && f.line <= lineCount)) fail(`${at} frame ${k}: line ${f.line} outside code`)
-        if (!f.state || !(f.ask in f.state)) fail(`${at} frame ${k}: ask '${f.ask}' not in state`)
-        if (!f.note) fail(`${at} frame ${k}: missing note`)
+for (const c of COURSES) {
+  const { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID } = c.training
+  const gateIds = new Set(c.gates.map(g => g.id))
+  const fail = m => { console.error('✗', `${c.id}: ${m}`); errors++ }
+
+  // Per-step schema checks, shared by lessons and tools.
+  function validateStep(ownerId, s, i) {
+    const at = `${ownerId}[${i}] ${s.type}`
+    for (const e of sceneErrors(s)) fail(`${at}: ${e}`)
+    for (const e of stateErrors(s)) fail(`${at}: ${e}`)
+    switch (s.type) {
+      case 'explain':
+        if (!Array.isArray(s.lines) || s.lines.length < 2 || s.lines.length > 5) fail(`${at}: 2–5 lines`)
+        if (s.move && !MOVES.includes(s.move)) fail(`${at}: unknown move ${s.move}`)
+        break
+      case 'trace': {
+        if (!s.code || !s.input) fail(`${at}: needs code and input`)
+        const lineCount = (s.code || '').split('\n').length
+        if (!Array.isArray(s.frames) || s.frames.length < 3) fail(`${at}: needs 3+ frames`)
+        for (const [k, f] of (s.frames || []).entries()) {
+          if (!(f.line >= 1 && f.line <= lineCount)) fail(`${at} frame ${k}: line ${f.line} outside code`)
+          if (!f.state || !(f.ask in f.state)) fail(`${at} frame ${k}: ask '${f.ask}' not in state`)
+          if (!f.note) fail(`${at} frame ${k}: missing note`)
+        }
+        break
       }
-      break
+      case 'spot':
+        if (!s.problem || !s.why) fail(`${at}: needs problem and why`)
+        if (!Array.isArray(s.options) || s.options.length < 3 || s.options.length > 4) fail(`${at}: 3–4 options`)
+        if (!(Number.isInteger(s.answer) && s.answer >= 0 && s.answer < (s.options || []).length)) fail(`${at}: answer out of range`)
+        break
+      case 'blank': {
+        if (!s.intro) fail(`${at}: missing intro`)
+        if (!s.template?.includes('___')) fail(`${at}: template has no ___ marker`)
+        if (!s.tests?.includes('check(')) fail(`${at}: tests never call check()`)
+        const n2 = (s.tests?.match(/check\(/g) || []).length
+        if (n2 < 4 || n2 > 7) fail(`${at}: ${n2} checks, want 4–7`)
+        break
+      }
+      case 'mini': {
+        if (!s.mission || !s.hint) fail(`${at}: needs mission and hint`)
+        if (!/\b[a-z_][a-z0-9_]*\(/.test(s.mission)) fail(`${at}: mission must name a function like foo(...)`)
+        if (!s.tests?.includes('check(')) fail(`${at}: tests never call check()`)
+        const n2 = (s.tests?.match(/check\(/g) || []).length
+        if (n2 < 4 || n2 > 7) fail(`${at}: ${n2} checks, want 4–7`)
+        break
+      }
+      default: fail(`${at}: unknown step type`)
     }
-    case 'spot':
-      if (!s.problem || !s.why) fail(`${at}: needs problem and why`)
-      if (!Array.isArray(s.options) || s.options.length < 3 || s.options.length > 4) fail(`${at}: 3–4 options`)
-      if (!(Number.isInteger(s.answer) && s.answer >= 0 && s.answer < (s.options || []).length)) fail(`${at}: answer out of range`)
-      break
-    case 'blank': {
-      if (!s.intro) fail(`${at}: missing intro`)
-      if (!s.template?.includes('___')) fail(`${at}: template has no ___ marker`)
-      if (!s.tests?.includes('check(')) fail(`${at}: tests never call check()`)
-      const n2 = (s.tests?.match(/check\(/g) || []).length
-      if (n2 < 4 || n2 > 7) fail(`${at}: ${n2} checks, want 4–7`)
-      break
-    }
-    case 'mini': {
-      if (!s.mission || !s.hint) fail(`${at}: needs mission and hint`)
-      if (!/\b[a-z_][a-z0-9_]*\(/.test(s.mission)) fail(`${at}: mission must name a function like foo(...)`)
-      if (!s.tests?.includes('check(')) fail(`${at}: tests never call check()`)
-      const n2 = (s.tests?.match(/check\(/g) || []).length
-      if (n2 < 4 || n2 > 7) fail(`${at}: ${n2} checks, want 4–7`)
-      break
-    }
-    default: fail(`${at}: unknown step type`)
-  }
-}
-
-const seen = new Set()
-for (const n of NODES) {
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(n.id)) fail(`${n.id}: id must be lowercase kebab-case`)
-  if (seen.has(n.id)) fail(`duplicate id ${n.id}`); seen.add(n.id)
-  if (!XP[n.tier]) fail(`${n.id}: bad tier ${n.tier}`)
-  else if (n.xp < XP[n.tier][0] || n.xp > XP[n.tier][1]) fail(`${n.id}: xp ${n.xp} outside ${XP[n.tier].join('–')} for tier ${n.tier}`)
-  for (const f of ['title', 'algo']) if (!n[f]) fail(`${n.id}: missing ${f}`)
-  if (!Array.isArray(n.requires)) fail(`${n.id}: requires must be an array`)
-  else for (const r of n.requires) if (!NODE_BY_ID[r]) fail(`${n.id}: requires unknown node ${r}`)
-  if (!Array.isArray(n.gates)) fail(`${n.id}: gates must be an array`)
-  else for (const g of n.gates) if (!gateIds.has(g)) fail(`${n.id}: unknown gate ${g}`)
-  if (n.id !== 'method' && !n.gates?.length) fail(`${n.id}: should list the gates it prepares`)
-  if (!Array.isArray(n.tools)) fail(`${n.id}: tools must be an array`)
-  else {
-    for (const t of n.tools) if (!TOOL_BY_ID[t]) fail(`${n.id}: requires unknown tool ${t}`)
-    if ((n.tools || []).length > 2) fail(`${n.id}: at most two tools, found ${n.tools.length}`)
   }
 
-  const types = (n.steps || []).map(s => s.type)
-  if (!types.length) fail(`${n.id}: no steps`)
-  const need = n.id === 'method' ? ['explain', 'spot'] : ['trace', 'spot', 'blank', 'mini']
-  for (const t of need) if (!types.includes(t)) fail(`${n.id}: needs at least one ${t} step`)
-  if (n.id === 'method' && types.some(t => !['explain', 'spot'].includes(t))) fail(`method: explain and spot steps only`)
-  if (n.id !== 'method') {
-    const order = ['explain', 'explain', 'trace', 'spot', 'blank', 'mini']
-    if (types.length !== order.length || !order.every((t, i) => types[i] === t)) fail(`${n.id}: step order must be explain, explain, trace, spot, blank, mini`)
+  const seen = new Set()
+  for (const n of NODES) {
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(n.id)) fail(`${n.id}: id must be lowercase kebab-case`)
+    if (seen.has(n.id)) fail(`duplicate id ${n.id}`); seen.add(n.id)
+    if (!XP[n.tier]) fail(`${n.id}: bad tier ${n.tier}`)
+    else if (n.xp < XP[n.tier][0] || n.xp > XP[n.tier][1]) fail(`${n.id}: xp ${n.xp} outside ${XP[n.tier].join('–')} for tier ${n.tier}`)
+    for (const f of ['title', 'algo']) if (!n[f]) fail(`${n.id}: missing ${f}`)
+    if (!Array.isArray(n.requires)) fail(`${n.id}: requires must be an array`)
+    else for (const r of n.requires) if (!NODE_BY_ID[r]) fail(`${n.id}: requires unknown node ${r}`)
+    if (!Array.isArray(n.gates)) fail(`${n.id}: gates must be an array`)
+    else for (const g of n.gates) if (!gateIds.has(g)) fail(`${n.id}: unknown gate ${g}`)
+    if (n.id !== 'method' && !n.gates?.length) fail(`${n.id}: should list the gates it prepares`)
+    if (!Array.isArray(n.tools)) fail(`${n.id}: tools must be an array`)
+    else {
+      for (const t of n.tools) if (!TOOL_BY_ID[t]) fail(`${n.id}: requires unknown tool ${t}`)
+      if ((n.tools || []).length > 2) fail(`${n.id}: at most two tools, found ${n.tools.length}`)
+    }
+
+    const types = (n.steps || []).map(s => s.type)
+    if (!types.length) fail(`${n.id}: no steps`)
+    const need = n.id === 'method' ? ['explain', 'spot'] : ['trace', 'spot', 'blank', 'mini']
+    for (const t of need) if (!types.includes(t)) fail(`${n.id}: needs at least one ${t} step`)
+    if (n.id === 'method' && types.some(t => !['explain', 'spot'].includes(t))) fail(`method: explain and spot steps only`)
+    if (n.id !== 'method') {
+      const order = ['explain', 'explain', 'trace', 'spot', 'blank', 'mini']
+      if (types.length !== order.length || !order.every((t, i) => types[i] === t)) fail(`${n.id}: step order must be explain, explain, trace, spot, blank, mini`)
+    }
+
+    n.steps?.forEach((s, i) => validateStep(n.id, s, i))
+
+    const spoken = (n.steps || []).some(s => s.type === 'explain' && s.lines?.some(l => l.startsWith('“')))
+    if (!spoken) fail(`${n.id}: no spoken line in any explain step`)
   }
 
-  n.steps?.forEach((s, i) => validateStep(n.id, s, i))
+  // Armoury tools: flat drills reusing the lesson step engine, no rank/requires/gates.
+  if (TOOLS.length < 1) fail('a course needs at least one tool')
+  const toolIdRe = /^tool-[a-z0-9]+(-[a-z0-9]+)*$/
+  for (const t of TOOLS) {
+    if (!toolIdRe.test(t.id)) fail(`${t.id}: id must match ${toolIdRe}`)
+    if (seen.has(t.id)) fail(`duplicate id ${t.id} (collides with a lesson or tool)`); seen.add(t.id)
+    if (!(t.xp >= 20 && t.xp <= 40)) fail(`${t.id}: xp ${t.xp} outside 20–40`)
+    for (const f of ['title', 'algo']) if (!t[f]) fail(`${t.id}: missing ${f}`)
+    for (const f of ['tier', 'requires', 'gates']) if (t[f] !== undefined) fail(`${t.id}: must not carry ${f}`)
 
-  const spoken = (n.steps || []).some(s => s.type === 'explain' && s.lines?.some(l => l.startsWith('“')))
-  if (!spoken) fail(`${n.id}: no spoken line in any explain step`)
+    const types = (t.steps || []).map(s => s.type)
+    const order = ['explain', 'explain', 'trace', 'blank']
+    if (types.length !== order.length || !order.every((ty, i) => types[i] === ty)) fail(`${t.id}: step order must be explain, explain, trace, blank`)
+
+    t.steps?.forEach((s, i) => validateStep(t.id, s, i))
+
+    const spoken = (t.steps || []).some(s => s.type === 'explain' && s.lines?.some(l => l.startsWith('“')))
+    if (!spoken) fail(`${t.id}: no spoken line in any explain step`)
+  }
+
+  // Prerequisites must form a DAG.
+  const state = {}
+  const visit = (id, path = []) => {
+    if (state[id] === 'done') return
+    if (state[id] === 'active') { fail(`prerequisite cycle: ${[...path, id].join(' -> ')}`); return }
+    state[id] = 'active'
+    for (const r of NODE_BY_ID[id]?.requires || []) visit(r, [...path, id])
+    state[id] = 'done'
+  }
+  for (const n of NODES) visit(n.id)
+
+  totalNodes += NODES.length; totalTools += TOOLS.length
 }
 
-// Armoury tools: flat drills reusing the lesson step engine, no rank/requires/gates.
-if (TOOLS.length !== 12) fail(`expected exactly 12 tools, found ${TOOLS.length}`)
-const toolIdRe = /^tool-[a-z0-9]+(-[a-z0-9]+)*$/
-for (const t of TOOLS) {
-  if (!toolIdRe.test(t.id)) fail(`${t.id}: id must match ${toolIdRe}`)
-  if (seen.has(t.id)) fail(`duplicate id ${t.id} (collides with a lesson or tool)`); seen.add(t.id)
-  if (!(t.xp >= 20 && t.xp <= 40)) fail(`${t.id}: xp ${t.xp} outside 20–40`)
-  for (const f of ['title', 'algo']) if (!t[f]) fail(`${t.id}: missing ${f}`)
-  for (const f of ['tier', 'requires', 'gates']) if (t[f] !== undefined) fail(`${t.id}: must not carry ${f}`)
-
-  const types = (t.steps || []).map(s => s.type)
-  const order = ['explain', 'explain', 'trace', 'blank']
-  if (types.length !== order.length || !order.every((ty, i) => types[i] === ty)) fail(`${t.id}: step order must be explain, explain, trace, blank`)
-
-  t.steps?.forEach((s, i) => validateStep(t.id, s, i))
-
-  const spoken = (t.steps || []).some(s => s.type === 'explain' && s.lines?.some(l => l.startsWith('“')))
-  if (!spoken) fail(`${t.id}: no spoken line in any explain step`)
-}
-
-// Prerequisites must form a DAG.
-const state = {}
-const visit = (id, path = []) => {
-  if (state[id] === 'done') return
-  if (state[id] === 'active') { fail(`prerequisite cycle: ${[...path, id].join(' -> ')}`); return }
-  state[id] = 'active'
-  for (const r of NODE_BY_ID[id]?.requires || []) visit(r, [...path, id])
-  state[id] = 'done'
-}
-for (const n of NODES) visit(n.id)
-
-console.log(errors ? `${errors} problem(s)` : `✓ ${NODES.length} training nodes and ${TOOLS.length} tools look good`)
+console.log(errors ? `${errors} problem(s)` : `✓ ${totalNodes} training nodes and ${totalTools} tools across ${COURSES.length} course(s) look good`)
 process.exit(errors ? 1 : 0)
