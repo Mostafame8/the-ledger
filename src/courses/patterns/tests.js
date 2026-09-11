@@ -218,4 +218,68 @@ _t_fn = lambda p: _t_got.append(('street', p))
 _t_bus.on('street', _t_fn); _t_bus.off('street', _t_fn)
 check("off removes the subscriber", _t_bus.emit('street', 'quiet'), 0)
 check("other kinds unaffected", _t_bus.emit('vault', 'code'), 1)`,
+
+readtheroom: `_t_m = Mark()
+check("a fresh mark is calm", _t_m.mood, 'calm')
+check("calm talk", _t_m.talk(), 'small talk')
+_t_m.nudge()
+check("one nudge makes him wary", (_t_m.mood, _t_m.talk()), ('wary', 'short answers'))
+_t_m.nudge()
+check("two nudges and he is alarmed", (_t_m.mood, _t_m.talk()), ('alarmed', 'calls it in'))
+_t_m.nudge()
+check("alarmed stays alarmed", _t_m.mood, 'alarmed')
+check("Calm().next().name", 'wary')
+check("Alarmed().next().name", 'alarmed')`,
+
+runsheet: `check("VaultJob().run()", ['gear checked', 'vault emptied', 'wiped down'])
+check("SafehouseJob().run()", ['keys copied', 'files copied', 'wiped down'])
+def _t_raises(thunk):
+    try:
+        thunk()
+    except Exception as e:
+        return type(e).__name__
+    return None
+check("the bare sheet cannot run", _t_raises(lambda: Job().run()), 'NotImplementedError')
+check("cleanup is shared", VaultJob().cleanup() == SafehouseJob().cleanup(), True)
+_t_v = VaultJob()
+check("run twice, same sheet", _t_v.run() == _t_v.run(), True)
+class _t_Quick(Job):
+    def execute(self): return 'in and out'
+check("a new job only writes its middle line", _t_Quick().run(), ['gear checked', 'in and out', 'wiped down'])`,
+
+roombyroom: `_t_v = Vault([('lobby', False), ('cage', True), ('safe', True), ('exit', False)])
+check("list(_t_v)", ['lobby', 'cage', 'safe', 'exit'])
+check("list(open_rooms(_t_v))", ['lobby', 'exit'])
+check("first_locked(_t_v)", 'cage')
+check("first_locked(Vault([('lobby', False)]))", None)
+check("list(Vault([]))", [])
+check("walking twice gives the same rooms", list(_t_v) == list(_t_v), True)
+check("type(open_rooms(_t_v)).__name__", 'generator')`,
+
+wholerig: `class _t_Driver:
+    pass
+class _t_Route:
+    def path(self, city): return city + ' -> harbour'
+_t_c = Crew()
+_t_c.register('driver', _t_Driver)
+_t_hired = []
+_t_c.on('hired', lambda who: _t_hired.append(type(who).__name__))
+_t_d = _t_c.hire('driver')
+check("hire builds the registered class", type(_t_d).__name__, '_t_Driver')
+check("hiring tells the wire", _t_hired, ['_t_Driver'])
+def _t_raises(thunk):
+    try:
+        thunk()
+    except Exception as e:
+        return type(e).__name__
+    return None
+check("an unknown role raises KeyError", _t_raises(lambda: _t_c.hire('pilot')), 'KeyError')
+_t_c.plan(_t_Route())
+check("go follows the planned route", _t_c.go('bank'), 'bank -> harbour')
+class _t_Other:
+    def path(self, city): return city + ' -> airstrip'
+_t_c.plan(_t_Other())
+check("a new plan, a new way out", _t_c.go('bank'), 'bank -> airstrip')
+check("an event nobody asked for is silence", _t_c.emit('rain', None), 0)
+check("two crews are independent", _t_raises(lambda: Crew().hire('driver')), 'KeyError')`,
 }
