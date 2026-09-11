@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID, TIERS } from '../data/training/index.js'
-import { depthOf } from '../data/training/progress.js'
+import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID, TIERS } from '../courses/algorithms/training/index.js'
+import { depthOf } from '../training/progress.js'
 import { useStore } from '../store.js'
 const s = useStore()
 

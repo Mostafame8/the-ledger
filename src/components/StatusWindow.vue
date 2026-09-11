@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { NODES, TOOLS } from '../data/training/index.js'
+import { NODES, TOOLS } from '../courses/algorithms/training/index.js'
 import { useStore } from '../store.js'
 const s = useStore()
 const rankPct = computed(() => {

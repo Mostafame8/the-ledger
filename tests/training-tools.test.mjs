@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID } from '../src/data/training/index.js'
+import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID } from '../src/courses/algorithms/training/index.js'
 
 test('exactly twelve tools exist', () => {
   assert.equal(TOOLS.length, 12)

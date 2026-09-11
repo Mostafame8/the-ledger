@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { ARCS } from '../data/index.js'
+import { ARCS } from '../courses/algorithms/index.js'
 import { useStore } from '../store.js'
 const s = useStore()
 const arc = computed(() => ARCS[s.tab.value])

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useStore } from '../store.js'
-import { pyLiteral, sameLiteral } from '../data/training/answers.js'
+import { pyLiteral, sameLiteral } from '../training/answers.js'
 import SceneView from './SceneView.vue'
 const props = defineProps({ step: { type: Object, required: true } })
 const s = useStore()

@@ -9,8 +9,8 @@ import { readFileSync, readdirSync, writeFileSync, mkdtempSync, rmSync } from 'n
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
-import { GATES } from '../src/data/index.js'
-import { NODES, TOOLS } from '../src/data/training/index.js'
+import { GATES } from '../src/courses/algorithms/index.js'
+import { NODES, TOOLS } from '../src/courses/algorithms/training/index.js'
 
 const PYTHON = process.env.PYTHON || 'python'
 const root = new URL('..', import.meta.url)
@@ -27,8 +27,8 @@ function loadSolutions(dirUrl) {
   }
   return map
 }
-const gateSolutions = loadSolutions(new URL('scripts/solutions/', root))
-const trainingSolutions = loadSolutions(new URL('scripts/solutions/training/', root))
+const gateSolutions = loadSolutions(new URL('scripts/solutions/algorithms/', root))
+const trainingSolutions = loadSolutions(new URL('scripts/solutions/algorithms/training/', root))
 
 const only = process.argv.slice(2)
 const gates = only.length ? GATES.filter(g => only.includes(g.id)) : GATES

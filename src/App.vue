@@ -1,6 +1,6 @@
 <script setup>
-import { ARCS, GATES } from './data/index.js'
-import { NODES } from './data/training/index.js'
+import { ARCS, GATES } from './courses/algorithms/index.js'
+import { NODES } from './courses/algorithms/training/index.js'
 import { useStore } from './store.js'
 import StatusWindow from './components/StatusWindow.vue'
 import GateList from './components/GateList.vue'

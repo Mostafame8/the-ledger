@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { pyLiteral, normalize, sameLiteral } from '../src/data/training/answers.js'
+import { pyLiteral, normalize, sameLiteral } from '../src/training/answers.js'
 
 test('pyLiteral renders JS values as Python source', () => {
   assert.equal(pyLiteral(3), '3')

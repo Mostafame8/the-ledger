@@ -1,7 +1,7 @@
 // Validates training content: schema, prerequisites, gate refs, step mix, trace and spot sanity.
-import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID } from '../src/data/training/index.js'
-import { GATES } from '../src/data/index.js'
-import { MOVES } from '../src/data/training/node.js'
+import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID } from '../src/courses/algorithms/training/index.js'
+import { GATES } from '../src/courses/algorithms/index.js'
+import { MOVES } from '../src/training/node.js'
 import { sceneErrors, stateErrors } from '../src/scene/validate.js'
 
 const XP = { F: [40, 60], E: [60, 80], D: [90, 100], C: [120, 140], B: [160, 180], A: [200, 240], S: [280, 400] }

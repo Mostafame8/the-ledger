@@ -1,5 +1,5 @@
 // Validates gate data: unique ids, required fields, rank/xp sanity, arc sizes.
-import { ARCS } from '../src/data/index.js'
+import { ARCS } from '../src/courses/algorithms/index.js'
 const RANKS = ['F','E','D','C','B','A','S'], STATS = ['logic','speed','memory']
 let errors = 0
 const fail = m => { console.error('✗', m); errors++ }

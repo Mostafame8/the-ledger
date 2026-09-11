@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { rankFor, rankProgress, isOpen, depthOf } from '../src/data/training/progress.js'
+import { rankFor, rankProgress, isOpen, depthOf } from '../src/training/progress.js'
 
 const N = (id, tier, xp, requires = []) => ({ id, tier, xp, requires, gates: [], steps: [] })
 const nodes = [

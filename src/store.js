@@ -1,8 +1,8 @@
 import { ref, computed, watch } from 'vue'
-import { ARCS, GATES, XP_PER_LEVEL, titleFor } from './data/index.js'
+import { ARCS, GATES, XP_PER_LEVEL, titleFor } from './courses/algorithms/index.js'
 import { runTests, runtime, warm } from './runner.js'
-import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID, TIERS } from './data/training/index.js'
-import { rankFor, rankProgress, isOpen } from './data/training/progress.js'
+import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID, TIERS } from './courses/algorithms/training/index.js'
+import { rankFor, rankProgress, isOpen } from './training/progress.js'
 
 import { SAVES_KEY, LEGACY_KEY, migrateLegacy, createSlot, selectSlot, deleteSlot, renameSlot, writeSlot, currentSlot, exportSlot, parseImport, importSlot } from './saves.js'
 
