@@ -1,7 +1,7 @@
 # Training room — 3D scenes, wave 2c: dicts, graphs, trees, the call stack
 
 Date: 2026-09-11
-Status: approved, not yet implemented (branch training-3d-wave2c)
+Status: implemented (branch training-3d-wave2c)
 Builds on: wave 1 (`cells`), wave 2a (`at`, `pile`, `chain`, `rows`), wave 2b (`grid`, `line`)
 
 ## Purpose
@@ -223,7 +223,12 @@ src/components/SceneView.vue  dispatch map gains graph, tree
 ### Behaviour
 
 - Node count, adjacency shape, tree shape or grid size change → rebuild; pins slide; new
-  edges, nodes and tiles flash.
+  edges, nodes and tiles flash. A tree rebuilds every block on any shape change (the tidy
+  layout moves siblings when a branch grows) while `changed` still flags only new or renamed
+  nodes, so only those flash after the rebuild.
+- Implementation notes: tree levels are `1.5` apart (1.1 left the blocks touching) and the
+  tree camera drops to a near-frontal eye after `frame()`; the graph camera frames
+  `width + 0.5`, `depth × 0.5 + 1` so a 2×2 layout fills the view.
 - Disposal frees every rod, block, sprite and pin.
 - Explain loops, the WebGL fallback and trace-step masking carry over unchanged: a stop that
   asks for a key hides only that key's pin, mark or badge for that stop.
