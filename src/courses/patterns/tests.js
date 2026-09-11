@@ -159,4 +159,63 @@ _t_n = []
 def _t_never(): _t_n.append(1); return None
 check("retry gives up with None", _t_never(), None)
 check("after exactly times tries", len(_t_n), 3)`,
+
+threeways: `check("Sewer().path('bank')", 'bank -> sewer')
+check("Rooftop().path('bank')", 'bank -> rooftop')
+check("Cab().path('bank')", 'bank -> cab')
+_t_e = Escape(Sewer())
+check("go delegates to the route", _t_e.go('bank'), 'bank -> sewer')
+_t_e.switch(Cab())
+check("switch then go uses the new route", _t_e.go('bank'), 'bank -> cab')
+class _t_Boat:
+    def path(self, start): return start + ' -> boat'
+_t_e.switch(_t_Boat())
+check("any route-shaped thing works", _t_e.go('pier'), 'pier -> boat')
+check("switch returns nothing", Escape(Sewer()).switch(Rooftop()), None)`,
+
+hearthewire: `check("Tripwire().trip('fence')", 0)
+_t_heard = []
+_t_w = Tripwire()
+_t_w.subscribe(lambda where: _t_heard.append('driver:' + where))
+check("one subscriber is called", _t_w.trip('fence'), 1)
+check("with the place", _t_heard, ['driver:fence'])
+_t_second = _t_w.subscribe(lambda where: _t_heard.append('lookout:' + where))
+_t_heard.clear(); _t_w.trip('gate')
+check("two hear it in order", _t_heard, ['driver:gate', 'lookout:gate'])
+_t_w.unsubscribe(_t_second)
+check("unsubscribe removes one", _t_w.trip('gate'), 1)
+_t_w.unsubscribe(lambda where: None)
+check("unsubscribing a stranger is safe", _t_w.trip('gate'), 1)
+_t_fn = lambda where: None
+check("subscribe returns the callback", Tripwire().subscribe(_t_fn) is _t_fn, True)`,
+
+takeitback: `check("Move(1, 2).do((0, 0))", (1, 2))
+check("Move(1, 2).undo((1, 2))", (0, 0))
+_t_r = Recorder()
+_t_p = _t_r.run(Move(1, 0), (0, 0))
+_t_p = _t_r.run(Move(0, 5), _t_p)
+check("two moves recorded", _t_p, (1, 5))
+_t_p = _t_r.undo(_t_p)
+check("undo reverses the last move", _t_p, (1, 0))
+check("undo with an empty history leaves pos alone", Recorder().undo((3, 3)), (3, 3))
+_t_p = _t_r.redo(_t_p)
+check("redo re-applies it", _t_p, (1, 5))
+check("nothing left to redo", _t_r.redo(_t_p), (1, 5))
+_t_p = _t_r.undo(_t_p); _t_p = _t_r.run(Move(2, 2), _t_p)
+check("a new run after undo clears redo", _t_r.redo(_t_p), (3, 2))`,
+
+wireboard: `check("Bus().emit('door', 1)", 0)
+_t_got = []
+_t_bus = Bus()
+_t_bus.on('door', lambda p: _t_got.append(('door', p)))
+_t_bus.on('vault', lambda p: _t_got.append(('vault', p)))
+check("emit reaches one kind", _t_bus.emit('door', 'open'), 1)
+check("and only that kind", _t_got, [('door', 'open')])
+_t_bus.on('door', lambda p: _t_got.append(('door2', p)))
+_t_got.clear(); _t_bus.emit('door', 'shut')
+check("two on one kind, in order", _t_got, [('door', 'shut'), ('door2', 'shut')])
+_t_fn = lambda p: _t_got.append(('street', p))
+_t_bus.on('street', _t_fn); _t_bus.off('street', _t_fn)
+check("off removes the subscriber", _t_bus.emit('street', 'quiet'), 0)
+check("other kinds unaffected", _t_bus.emit('vault', 'code'), 1)`,
 }
