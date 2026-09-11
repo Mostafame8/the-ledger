@@ -27,7 +27,9 @@ def build(words):
                 node[ch] = {}
             node = node[ch]
         node[END] = True
-    return root` }),
+    return root`,
+      scene: { kind: 'tree', data: 'root', init: {}, at: ['ch'],
+        states: [{ root: {} }, { root: { t: {} } }, { root: { t: { o: { '#': true } } } }, { ch: 'e', root: { t: { o: { '#': true }, e: {} } } }, { root: { t: { o: { '#': true }, e: { a: { '#': true } } } } }] } }),
     trace(
 `END = '#'
 
@@ -43,11 +45,11 @@ def build(words):
     return root`,
       "build(['to', 'tea'])",
       [
-        { line: 4, state: { root: { py: '{}' } }, ask: 'root', note: 'The rack before anything is on it: one empty dictionary. Every word on the list will hang off this one object, and nothing about the list is stored anywhere else.' },
-        { line: 11, state: { word: 'to', root: { py: "{'t': {'o': {'#': True}}}" } }, ask: 'root', note: 'One word in, two steps deep, and the mark at the bottom says a word ends here. Read it as a path rather than a nest: t, then o, then stop.' },
-        { line: 9, state: { word: 'tea', ch: 'e', root: { py: "{'t': {'o': {'#': True}, 'e': {}}}" } }, ask: 'root', note: 'The moment the rack branches. The e is a step after the t, not a second entry beside it — the walk had already moved into the t dictionary before it looked for the e, so the t step now has two ways out. The shared letter was read once and is stored once, which is the whole saving.' },
-        { line: 11, state: { word: 'tea', root: { py: "{'t': {'o': {'#': True}, 'e': {'a': {'#': True}}}}" } }, ask: 'root', note: 'Both words on the rack in five dictionaries instead of two strings, and the t is not duplicated. That is the trade: more objects, and a fragment now costs its own length rather than the length of the list.' },
-      ]),
+        { line: 4, state: { root: { py: '{}', val: {} } }, ask: 'root', note: 'The rack before anything is on it: one empty dictionary. Every word on the list will hang off this one object, and nothing about the list is stored anywhere else.' },
+        { line: 11, state: { word: 'to', root: { py: "{'t': {'o': {'#': True}}}", val: { t: { o: { '#': true } } } } }, ask: 'root', note: 'One word in, two steps deep, and the mark at the bottom says a word ends here. Read it as a path rather than a nest: t, then o, then stop.' },
+        { line: 9, state: { word: 'tea', ch: 'e', root: { py: "{'t': {'o': {'#': True}, 'e': {}}}", val: { t: { o: { '#': true }, e: {} } } } }, ask: 'root', note: 'The moment the rack branches. The e is a step after the t, not a second entry beside it — the walk had already moved into the t dictionary before it looked for the e, so the t step now has two ways out. The shared letter was read once and is stored once, which is the whole saving.' },
+        { line: 11, state: { word: 'tea', root: { py: "{'t': {'o': {'#': True}, 'e': {'a': {'#': True}}}}", val: { t: { o: { '#': true }, e: { a: { '#': true } } } } } }, ask: 'root', note: 'Both words on the rack in five dictionaries instead of two strings, and the t is not duplicated. That is the trade: more objects, and a fragment now costs its own length rather than the length of the list.' },
+      ], { scene: { kind: 'tree', data: 'root', init: {}, at: ['ch'] } }),
     spot('Dax will ask, thousands of times a night, how many code words start with a given fragment. The rack is built once. Which answers a fragment fastest?',
       ['Walk the fragment down the rack, then collect every word beneath it into a list and take the length of the list',
        'Keep a count on every step, raised as each word is inserted past it, so a fragment is one walk down and one number read',

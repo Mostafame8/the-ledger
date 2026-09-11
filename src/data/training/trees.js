@@ -19,7 +19,8 @@ export default node('trees', {
 `def depth(root):
     if root is None:
         return 0
-    return 1 + max(depth(root.left), depth(root.right))` }),
+    return 1 + max(depth(root.left), depth(root.right))`,
+      scene: { kind: 'tree', data: { val: 1, left: { val: 2 }, right: { val: 3 } }, at: ['root.val'], states: [{ 'root.val': 1 }, { 'root.val': 2 }, { 'root.val': 3 }, { 'root.val': 1 }] } }),
     trace(
 `def depth(root):
     if root is None:
@@ -31,7 +32,7 @@ export default node('trees', {
         { line: 4, state: { 'root.val': 2, returns: 1 }, ask: 'returns', note: 'Both sides of name 2 came back 0, so the deeper side is 0, plus one for name 2 itself. Name 2 answers the question it was asked and forgets everything.' },
         { line: 4, state: { 'root.val': 3, returns: 1 }, ask: 'returns', note: 'Name 3 is the same shape as name 2 and answers the same way. The two sides never learn about each other; each one only ever hears from its own children.' },
         { line: 4, state: { 'root.val': 1, returns: 2 }, ask: 'returns', note: 'The top name takes the deeper of the two answers, 1, and adds itself. Two levels. Seven calls in all, one comparison and one addition each, and not a single row counted.' },
-      ]),
+      ], { scene: { kind: 'tree', data: { val: 1, left: { val: 2 }, right: { val: 3 } }, at: ['root.val'] } }),
     spot('Marguerite wants every name on the chart with nobody reporting to it, because those are the people who actually touch the money. Which shape of code?',
       ['One loop over the names from the top of the chart to the bottom',
        'A function that answers for one name by asking itself about that name’s left and right, and stops at an empty seat',
