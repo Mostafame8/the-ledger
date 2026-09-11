@@ -110,34 +110,40 @@ export function resolveRow(row, state = {}, prev = null) {
 const isGrid = v => Array.isArray(v) && v.every(Array.isArray)
 const pairs = v => Array.isArray(v) && v.every(p => Array.isArray(p) && p.length === 2)
 
+// The grid entries of a scene: `grids` as given, or the single form as one unlabelled entry.
+const gridEntries = scene => Array.isArray(scene.grids) ? scene.grids : [{ label: null, data: scene.data, init: scene.init }]
+
 // The grid for this frame: literal; else the frame's own grid, else the previous frame's, else init.
-function gridFor(scene, state, prev) {
-  if (isGrid(scene.data)) return scene.data
-  const v = read(state, scene.data)
+function gridFor(g, state, prev) {
+  if (isGrid(g.data)) return g.data
+  const v = read(state, g.data)
   if (isGrid(v)) return v
   if (prev?.source !== undefined) return prev.source
-  return scene.init ?? []
+  return g.init ?? []
 }
 
+// One or two grids. The top-level rows/cols/tiles/marks/changed/source mirror entry 0 (the single form).
 export function resolveGrid(scene, state = {}, prev = null) {
-  const source = gridFor(scene, state, prev)
-  const rows = source.length, cols = rows ? Math.max(...source.map(r => r.length)) : 0
-  const tiles = []
-  source.forEach((row, r) => row.forEach((v, c) => tiles.push({ r, c, text: cellText(v), bool: v === true ? true : v === false ? false : null })))
+  const markTexts = (scene.marks || []).filter(key => present(state, key)).map(key => cellText(read(state, key)))
+  const grids = gridEntries(scene).map((g, i) => {
+    const pg = prev?.kind === 'grid' ? prev.grids?.[i] ?? null : null
+    const source = gridFor(g, state, pg)
+    const rows = source.length, cols = rows ? Math.max(...source.map(r => r.length)) : 0
+    const tiles = []
+    source.forEach((row, r) => row.forEach((v, c) => tiles.push({ r, c, text: cellText(v), bool: v === true ? true : v === false ? false : null })))
+    const marks = []
+    for (const t of markTexts) for (const tl of tiles) if (tl.text === t) marks.push([tl.r, tl.c])
+    const before = pg ? new Map(pg.tiles.map(t => [`${t.r},${t.c}`, t.text])) : null
+    const changed = tiles.filter(tl => !before || before.get(`${tl.r},${tl.c}`) !== tl.text).map(tl => [tl.r, tl.c])
+    return { label: g.label ?? null, rows, cols, tiles, marks, changed, source }
+  })
+  const g0 = grids[0]
   let cursor = null
   if (Array.isArray(scene.cursor) && scene.cursor.length === 2) {
     const [rk, ck] = scene.cursor, r = read(state, rk), c = read(state, ck)
-    if (Number.isInteger(r) && Number.isInteger(c) && r >= 0 && r < rows && c >= 0 && c < cols) cursor = { r, c, label: `${captioned(scene, rk)}, ${captioned(scene, ck)}` }
+    if (Number.isInteger(r) && Number.isInteger(c) && r >= 0 && r < g0.rows && c >= 0 && c < g0.cols) cursor = { r, c, label: `${captioned(scene, rk)}, ${captioned(scene, ck)}` }
   }
-  const marks = []
-  for (const key of scene.marks || []) {
-    if (!present(state, key)) continue
-    const t = cellText(read(state, key))
-    for (const tl of tiles) if (tl.text === t) marks.push([tl.r, tl.c])
-  }
-  const before = prev?.kind === 'grid' ? new Map(prev.tiles.map(t => [`${t.r},${t.c}`, t.text])) : null
-  const changed = tiles.filter(tl => !before || before.get(`${tl.r},${tl.c}`) !== tl.text).map(tl => [tl.r, tl.c])
-  return { kind: 'grid', rows, cols, tiles, cursor, marks, changed, heads: scene.heads ?? null, source }
+  return { kind: 'grid', grids, cursor, heads: scene.heads ?? null, rows: g0.rows, cols: g0.cols, tiles: g0.tiles, marks: g0.marks, changed: g0.changed, source: g0.source }
 }
 
 function barsFor(lane, state, prevLane) {

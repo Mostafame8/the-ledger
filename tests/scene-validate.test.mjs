@@ -167,3 +167,15 @@ test('stateErrors: val only beside py; val never carries py; checked on frames a
   assert.match(stateErrors(ex({ kind: 'cells', data: [1], states: [{ q: { val: 1 } }] }))[0], /'q' at state 0 has val without py/)
   assert.deepEqual(stateErrors({ type: 'spot', options: [] }), [])
 })
+
+test('grid pair: 1–2 entries with unique labels, each rectangular; cursor/heads only in the single form; not both data and grids', () => {
+  const pair = { grids: [{ label: 'good', data: 'good', init: [[0, 0, 0], [0, 0, 0]] }, { label: 'bad', data: 'bad', init: [[0, 0, 0], [0, 0, 0]] }] }
+  assert.deepEqual(sceneErrors(G(pair, { good: [[0, 0, 0], [0, 0, 0]] }, { bad: [[0, 0, 0], [0, 0, 0]] }, { good: [[0, 0, 0], [0, 0, 7]] })), [])
+  assert.match(sceneErrors(G({ grids: [...pair.grids, { label: 'c', data: [[1]] }] }, { good: [[1]] }, { bad: [[1]] }, { x: 1 }))[0], /1 or 2 grids/)
+  assert.match(sceneErrors(G({ grids: [pair.grids[0], { ...pair.grids[1], label: 'good' }] }, { good: [[1]] }, { bad: [[1]] }, { x: 1 }))[0], /unique/)
+  assert.match(sceneErrors(G({ grids: [{ label: 'a', data: [[1, 2], [3]] }] }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /grid 'a'.*rectangular/)
+  assert.match(sceneErrors(G({ ...pair, cursor: ['r', 'c'] }, { r: 0, c: 0, good: [[1]] }, { bad: [[1]] }, { x: 1 }))[0], /cursor belongs to the single-grid form/)
+  assert.match(sceneErrors(G({ ...pair, heads: { rows: ['a', 'b'] } }, { good: [[1]] }, { bad: [[1]] }, { x: 1 }))[0], /heads belong to the single-grid form/)
+  assert.match(sceneErrors(G({ ...pair, data: [[1]] }, { good: [[1]] }, { bad: [[1]] }, { x: 1 }))[0], /data and grids/)
+  assert.match(sceneErrors(G({ grids: [{ label: 'g', data: 'g', init: [[0]] }] }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /'g' never/)
+})

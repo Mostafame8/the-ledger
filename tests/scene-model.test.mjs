@@ -268,3 +268,20 @@ test('resolveRow: list rows keep keyed false and no key on cells', () => {
   const r = resolve({ kind: 'cells', data: [1, 2] }, {})
   assert.equal(r.keyed, false); assert.equal('key' in r.cells[0], false)
 })
+
+test('resolveGrid: grids pair — two entries side by side, each with its own tiles, marks and changed; top level mirrors entry 0', () => {
+  const sc = { kind: 'grid', grids: [{ label: 'good', data: 'good', init: [[0, 0], [0, 0]] }, { label: 'bad', data: 'bad', init: [[0, 0], [0, 0]] }], marks: ['v'] }
+  const r0 = resolve(sc, { good: [[0, 0], [0, 0]] })
+  assert.equal(r0.grids.length, 2); assert.deepEqual(r0.grids.map(g => g.label), ['good', 'bad'])
+  assert.equal(r0.rows, 2); assert.deepEqual(r0.tiles, r0.grids[0].tiles)
+  const r1 = resolve(sc, { good: [[0, 0], [0, 7]], bad: [[0, 7], [0, 7]], v: 7 }, r0)
+  assert.deepEqual(r1.grids[0].changed, [[1, 1]]); assert.deepEqual(r1.grids[1].changed, [[0, 1], [1, 1]])
+  assert.deepEqual(r1.grids[0].marks, [[1, 1]]); assert.deepEqual(r1.grids[1].marks, [[0, 1], [1, 1]]); assert.deepEqual(r1.marks, [[1, 1]])
+  const r2 = resolve(sc, { v: 7 }, r1)
+  assert.deepEqual(r2.grids[1].tiles.map(t => t.text), ['0', '7', '0', '7']); assert.deepEqual(r2.grids[1].changed, [])
+})
+
+test('resolveGrid: the single form is one unlabelled entry', () => {
+  const r = resolve({ kind: 'grid', data: [[1, 2]] }, {})
+  assert.equal(r.grids.length, 1); assert.equal(r.grids[0].label, null); assert.deepEqual(r.grids[0].tiles, r.tiles)
+})

@@ -79,6 +79,29 @@ const pairsOk = v => Array.isArray(v) && v.every(p => Array.isArray(p) && p.leng
 
 function gridErrors(sc, states, where) {
   const errs = [], bad = m => errs.push(m)
+  if (sc.grids !== undefined) {                                   // the side-by-side pair
+    if (sc.data !== undefined) bad('data and grids cannot both be given')
+    if (sc.cursor !== undefined) bad('cursor belongs to the single-grid form')
+    if (sc.heads !== undefined) bad('heads belong to the single-grid form')
+    if (!Array.isArray(sc.grids) || sc.grids.length < 1 || sc.grids.length > 2) { bad('grids must be an array of 1 or 2 grids'); return errs }
+    const labels = new Set()
+    sc.grids.forEach((g, i) => {
+      const tag = `grid ${typeof g?.label === 'string' ? `'${g.label}'` : i}`
+      if (typeof g?.label !== 'string' || !g.label) bad(`${tag}: needs a string label`)
+      else if (labels.has(g.label)) bad(`${tag}: labels must be unique`)
+      labels.add(g?.label)
+      const k = typeof g?.data === 'string'
+      if (!k && !rect(g?.data)) bad(`${tag}: data must be a rectangular 2-D list or a state key`)
+      if (k && !rect(g.init)) bad(`${tag}: data is the state key '${g.data}' so a rectangular init is required`)
+    })
+    if (sc.marks !== undefined && !strings(sc.marks)) bad('marks must be an array of state keys')
+    if (Object.keys(sc.labels || {}).length) bad('labels belong to the single-grid form')
+    if (errs.length) return errs
+    const keyed = [...(sc.marks || []), ...sc.grids.filter(g => typeof g.data === 'string').map(g => g.data)]
+    for (const k of new Set(keyed)) if (!states.some(st => k in st)) bad(`'${k}' never appears in any ${where}`)
+    states.forEach((st, k) => { for (const g of sc.grids) if (typeof g.data === 'string' && pyOnly(st[g.data])) bad(`'${g.data}' at ${where} ${k} is Python text; add a val beside py`) })
+    return errs
+  }
   const isKey = typeof sc.data === 'string'
   if (!isKey && !rect(sc.data)) bad('data must be a rectangular 2-D list or a state key')
   if (isKey && !rect(sc.init)) bad(`data is the state key '${sc.data}' so a rectangular init is required`)
