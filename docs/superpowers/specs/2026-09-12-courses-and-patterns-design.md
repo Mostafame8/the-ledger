@@ -1,7 +1,7 @@
 # Courses — one app, many jobs; first new course: design patterns
 
 Date: 2026-09-12
-Status: plan 1 (course plumbing) implemented on branch courses-plumbing; plans 2–3 pending
+Status: plans 1–2 implemented (courses plumbing; patterns kit and heist); plan 3 (patterns lessons) pending
 Builds on: the training room (2026-09-08), save slots, the table (waves 1–2c)
 
 ## Purpose
@@ -219,9 +219,11 @@ Three plans, one branch each, in order:
 1. **Course plumbing.** Move `src/data` to `src/courses/algorithms`, add the registry, store
    and saves changes, the course screen, validators over courses, move solutions. Ships with
    algorithms as the only course; no content change; all existing tests pass.
-2. **Patterns training room.** Course file, six tools, eighteen lessons, reference solutions.
-3. **Patterns heist.** Twenty gates in five arcs, reference solutions, CLAUDE.md "Courses"
-   section (course object, folder layout, per-course rules).
+2. **Patterns kit and heist.** Course file, six tools, twenty gates in five arcs, reference
+   solutions, CLAUDE.md layout and story lines. Gates come before lessons because every
+   lesson lists the gate ids it prepares and the validator rejects unknown or empty lists.
+3. **Patterns training room.** Eighteen lessons with their reference solutions; CLAUDE.md
+   per-course content rules.
 
 ## Risks
 
