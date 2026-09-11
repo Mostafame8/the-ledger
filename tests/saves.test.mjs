@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { emptyFile, migrateLegacy, createSlot, selectSlot, deleteSlot, renameSlot, writeSlot, currentSlot, cleanName } from '../src/saves.js'
+import { emptyFile, migrateLegacy, createSlot, selectSlot, deleteSlot, renameSlot, writeSlot, currentSlot, cleanName, upgradeData, upgradeFile } from '../src/saves.js'
 
 const T0 = 1_000, T1 = 2_000
 const legacy = { player: { name: 'Hunter', xp: 120, stats: { logic: 1, speed: 2, memory: 0 } }, cleared: ['a', 'b'], notes: {}, tab: 0 }
@@ -99,7 +99,7 @@ test('exportSlot: a labelled JSON document carrying the whole slot', () => {
   const f = migrateLegacy(legacy, T0)
   const doc = JSON.parse(exportSlot(f.slots[0]))
   assert.equal(doc.format, 'ledger-save')
-  assert.equal(doc.version, 1)
+  assert.equal(doc.version, 2)
   assert.deepEqual(doc.slot, f.slots[0])
 })
 
@@ -109,7 +109,7 @@ test('parseImport: round-trips an export into a slot with a fresh id, same name 
   assert.equal(r.ok, true)
   assert.notEqual(r.slot.id, f.slots[0].id)
   assert.equal(r.slot.name, 'Hunter')
-  assert.deepEqual(r.slot.data, legacy)
+  assert.deepEqual(r.slot.data, upgradeData(legacy))   // v1 data inside the file is upgraded on import
   assert.equal(r.slot.updated, T0)        // "last played" travels with the file
 })
 
@@ -135,4 +135,56 @@ test('importSlot: appends the slot and selects it, never replacing an existing o
   assert.equal(f1.current, r.slot.id)
   assert.deepEqual(f1.slots[0], f0.slots[0])
   assert.equal(f0.slots.length, 1)
+})
+
+// ── Version 2 slot data: one block per course ────────────────────────────────────
+const v1 = { player: { name: 'Hunter', xp: 120, stats: { logic: 1, speed: 2, memory: 0 } }, cleared: ['a', 'b'], notes: { a: 'x' }, tab: 1, mode: 'training', training: { xp: 40, nodes: { loops: { step: 0, cleared: true } }, tools: {}, active: null, code: {}, tab: 'F' } }
+
+test('upgradeData: null stays null', () => {
+  assert.equal(upgradeData(null), null)
+  assert.equal(upgradeData(undefined), null)
+})
+
+test('upgradeData: v1 data moves under courses.algorithms, name stays on player', () => {
+  const d = upgradeData(v1)
+  assert.deepEqual(d.player, { name: 'Hunter' })
+  assert.equal(d.course, 'algorithms')
+  assert.deepEqual(Object.keys(d.courses), ['algorithms'])
+  assert.deepEqual(d.courses.algorithms, {
+    xp: 120, stats: { logic: 1, speed: 2, memory: 0 }, cleared: ['a', 'b'], notes: { a: 'x' },
+    tab: 1, mode: 'training', training: v1.training,
+  })
+})
+
+test('upgradeData: v1 data with missing fields gets defaults', () => {
+  const d = upgradeData({ player: { name: 'Zed' } })
+  assert.deepEqual(d.courses.algorithms, { xp: 0, stats: { logic: 0, speed: 0, memory: 0 }, cleared: [], notes: {}, tab: null, mode: 'heist', training: null })
+})
+
+test('upgradeData: v2 data is returned unchanged, unknown course blocks kept', () => {
+  const d2 = { player: { name: 'Hunter' }, course: 'sql', courses: { algorithms: { xp: 1 }, sql: { xp: 9 } } }
+  assert.equal(upgradeData(d2), d2)
+})
+
+test('upgradeFile: every slot upgraded, ids and selection untouched', () => {
+  const f0 = migrateLegacy(v1, T0)
+  const f1 = upgradeFile(f0)
+  assert.equal(f1.current, f0.current)
+  assert.equal(f1.slots[0].id, f0.slots[0].id)
+  assert.equal(f1.slots[0].data.course, 'algorithms')
+  const { file: f2 } = createSlot(f1, 'Fresh', T1)
+  assert.equal(upgradeFile(f2).slots[1].data, null)
+})
+
+test('parseImport: a version 1 export comes back upgraded', () => {
+  const text = JSON.stringify({ format: 'ledger-save', version: 1, slot: { name: 'Old', created: 5, updated: 6, data: v1 } })
+  const r = parseImport(text, T1)
+  assert.equal(r.ok, true)
+  assert.equal(r.slot.data.course, 'algorithms')
+  assert.equal(r.slot.data.courses.algorithms.xp, 120)
+})
+
+test('exportSlot: writes version 2', () => {
+  const s = migrateLegacy(v1, T0).slots[0]
+  assert.equal(JSON.parse(exportSlot(s)).version, 2)
 })

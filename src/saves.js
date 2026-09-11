@@ -1,12 +1,39 @@
 // Save files. Pure functions over a plain "file" object; the store owns storage.
 //   file = { current: <slot id | null>, slots: [ { id, name, created, updated, data } ] }
-//   data = the game payload ({ player, cleared, notes, tab, mode, training }) or null for a fresh slot.
+//   data = null for a fresh slot, or version 2:
+//     { player: { name }, course: <course id | null>, courses: { <course id>: block } }
+//     block = { xp, stats, cleared, notes, tab, mode, training }
+//   Version 1 data (everything at the top level, xp and stats inside player) is upgraded on read.
 // Every function returns a new file and leaves its input untouched.
 
 export const SAVES_KEY = 'ledger-saves-v1'
 export const LEGACY_KEY = 'ledger-save-v2'
 export const DEFAULT_NAME = 'Hunter'
 const MAX_NAME = 24
+
+// This module stays free of src/courses so it is pure and cheap to test.
+export const DEFAULT_COURSE = 'algorithms'
+const V1_STATS = { logic: 0, speed: 0, memory: 0 }
+
+// Pure. null stays null; version 2 is returned as is (unknown course blocks kept); version 1 is wrapped.
+export function upgradeData(data) {
+  if (data === null || data === undefined) return null
+  if (data.courses && typeof data.courses === 'object') return data
+  if (!data.player || typeof data.player !== 'object') return data   // not ours; validData rejects it
+  const p = data.player
+  const block = {
+    xp: p.xp ?? 0,
+    stats: p.stats ?? { ...V1_STATS },
+    cleared: data.cleared ?? [],
+    notes: data.notes ?? {},
+    tab: data.tab ?? null,
+    mode: data.mode === 'training' ? 'training' : 'heist',
+    training: data.training ?? null,
+  }
+  return { player: { name: p.name }, course: DEFAULT_COURSE, courses: { [DEFAULT_COURSE]: block } }
+}
+
+export const upgradeFile = file => ({ ...file, slots: file.slots.map(s => ({ ...s, data: upgradeData(s.data) })) })
 
 export const emptyFile = () => ({ current: null, slots: [] })
 
@@ -58,7 +85,7 @@ export const currentSlot = file => file.slots.find(s => s.id === file.current) ?
 
 // ── Export / import: move a slot between browsers as a small JSON document ───────
 const FORMAT = 'ledger-save'
-const VERSION = 1
+export const VERSION = 2
 
 export const exportSlot = slot => JSON.stringify({ format: FORMAT, version: VERSION, slot }, null, 2)
 
@@ -73,7 +100,7 @@ export function parseImport(text, now) {
     return { ok: false, error: 'That is not a Ledger save file.' }
   }
   const s = doc.slot
-  const data = s.data === undefined ? null : s.data
+  const data = upgradeData(s.data === undefined ? null : s.data)
   if (!validData(data)) return { ok: false, error: 'That save file has no player in it.' }
   const created = Number.isFinite(s.created) ? s.created : now
   const updated = Number.isFinite(s.updated) ? s.updated : created
