@@ -37,6 +37,8 @@
   .status{position:sticky;top:20px}
   .status .body{padding:16px 18px}
   .name{font-size:26px;font-weight:700;line-height:1.1}
+  .course-line{color:var(--dim);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+  .course-line small{color:var(--faint);letter-spacing:0;text-transform:none;font-size:12px;margin-left:6px}
   .role{color:var(--dim);margin-bottom:14px}
   .lvl{display:flex;align-items:baseline;gap:8px;margin:6px 0 4px}
   .lvl b{font-size:44px;color:var(--glow);line-height:1;text-shadow:0 0 18px rgba(127,212,255,.6)}

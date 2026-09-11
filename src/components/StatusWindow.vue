@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from 'vue'
-import { NODES, TOOLS } from '../courses/algorithms/training/index.js'
 import { useStore } from '../store.js'
 const s = useStore()
+const T = computed(() => s.course.value.training)
 const rankPct = computed(() => {
   const p = s.trainingProgress.value
   if (p.ceil === null) return 100
@@ -18,15 +18,16 @@ const rankPct = computed(() => {
         <button role="tab" :class="{ active: s.mode.value === 'heist' }" :aria-selected="s.mode.value === 'heist'" @click="s.setMode('heist')">Heist</button>
         <button role="tab" :class="{ active: s.mode.value === 'training' }" :aria-selected="s.mode.value === 'training'" @click="s.setMode('training')">Training</button>
       </nav>
+      <div class="course-line">{{ s.course.value.title }} <small>{{ s.course.value.algo }}</small></div>
       <div class="name">{{ s.player.value.name }}</div>
 
       <template v-if="s.mode.value === 'heist'">
         <div class="role">{{ s.level.value === 0 ? 'Unranked. Nobody knows your name yet.' : "Marguerite's crew" }}</div>
         <div class="lvl"><b>{{ s.level.value }}</b><small>level</small></div>
-        <div class="bar" role="progressbar" :aria-valuenow="s.xpInLevel.value" :aria-valuemax="s.xpPerLevel">
+        <div class="bar" role="progressbar" :aria-valuenow="s.xpInLevel.value" :aria-valuemax="s.xpPerLevel.value">
           <i :style="{ width: s.xpPct.value + '%' }"></i>
         </div>
-        <div class="xp"><span>{{ s.xpInLevel.value }} / {{ s.xpPerLevel }} xp</span><span>{{ s.player.value.xp }} total</span></div>
+        <div class="xp"><span>{{ s.xpInLevel.value }} / {{ s.xpPerLevel.value }} xp</span><span>{{ s.player.value.xp }} total</span></div>
         <div class="stats">
           <div class="stat" v-for="st in s.statList.value" :key="st.key">
             <span>{{ st.label }}</span>
@@ -48,10 +49,10 @@ const rankPct = computed(() => {
           <span v-else>Top of the ladder for now</span>
           <span>{{ s.trainingXp.value }} total</span>
         </div>
-        <div class="titles">Lessons trained: <b>{{ s.nodesCleared.value }} / {{ NODES.length }}</b></div>
-        <div class="kit-head">Kit: <b>{{ s.toolsCleared.value }} / {{ TOOLS.length }}</b> &middot; <b>{{ s.kitXp.value }} kit xp</b></div>
+        <div class="titles">Lessons trained: <b>{{ s.nodesCleared.value }} / {{ T.NODES.length }}</b></div>
+        <div class="kit-head">Kit: <b>{{ s.toolsCleared.value }} / {{ T.TOOLS.length }}</b> &middot; <b>{{ s.kitXp.value }} kit xp</b></div>
         <div class="kit-grid">
-          <div v-for="t in TOOLS" :key="t.id" class="kit-tile" :class="{ lit: s.nodeState(t.id) === 'cleared' }" :title="t.algo + ' — ' + t.title">{{ t.algo }}</div>
+          <div v-for="t in T.TOOLS" :key="t.id" class="kit-tile" :class="{ lit: s.nodeState(t.id) === 'cleared' }" :title="t.algo + ' — ' + t.title">{{ t.algo }}</div>
         </div>
       </template>
 

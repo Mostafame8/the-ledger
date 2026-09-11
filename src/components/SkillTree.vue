@@ -1,29 +1,20 @@
 <script setup>
 import { computed } from 'vue'
-import { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID, TIERS } from '../courses/algorithms/training/index.js'
 import { depthOf } from '../training/progress.js'
 import { useStore } from '../store.js'
 const s = useStore()
+const T = computed(() => s.course.value.training)
+const BLURBS = computed(() => s.course.value.tierBlurbs)
 
-const BLURBS = {
-  F: 'Hands on the tools.',
-  E: 'Search, stacks, and shape.',
-  D: 'Windows, sums, links, trees.',
-  C: 'Grids and recursion.',
-  B: 'Graphs, heaps, sorting.',
-  A: 'Weighted roads and the first tables.',
-  S: 'The Ledger itself.',
-}
-
-const tiers = TIERS.filter(t => NODES.some(n => n.tier === t))
-const tabs = ['kit', ...tiers]
-const sealed = tier => tier !== 'kit' && !NODES.some(n => n.tier === tier && s.nodeState(n.id) !== 'locked')
+const tiers = computed(() => T.value.TIERS.filter(t => T.value.NODES.some(n => n.tier === t)))
+const tabs = computed(() => ['kit', ...tiers.value])
+const sealed = tier => tier !== 'kit' && !T.value.NODES.some(n => n.tier === tier && s.nodeState(n.id) !== 'locked')
 
 // Lessons in the selected tier, shallow prerequisites first (stable sort keeps file order).
-const rows = computed(() => NODES.filter(n => n.tier === s.trainingTab.value)
-  .sort((a, b) => depthOf(a, NODE_BY_ID) - depthOf(b, NODE_BY_ID)))
-const needsLessons = n => n.requires.filter(id => s.nodeState(id) !== 'cleared').map(id => NODE_BY_ID[id].title).join(', ')
-const needsTools = n => (n.tools || []).filter(id => s.nodeState(id) !== 'cleared').map(id => TOOL_BY_ID[id]?.algo ?? id).join(', ')
+const rows = computed(() => T.value.NODES.filter(n => n.tier === s.trainingTab.value)
+  .sort((a, b) => depthOf(a, T.value.NODE_BY_ID) - depthOf(b, T.value.NODE_BY_ID)))
+const needsLessons = n => n.requires.filter(id => s.nodeState(id) !== 'cleared').map(id => T.value.NODE_BY_ID[id].title).join(', ')
+const needsTools = n => (n.tools || []).filter(id => s.nodeState(id) !== 'cleared').map(id => T.value.TOOL_BY_ID[id]?.algo ?? id).join(', ')
 const used = n => n.gates.length ? 'used in ' + n.gates.length + ' gate' + (n.gates.length === 1 ? '' : 's') : 'used in every gate'
 const label = n => ({ cleared: 'trained', locked: 'sealed', open: '+' + n.xp + ' xp' })[s.nodeState(n.id)]
 const kitLabel = t => s.nodeState(t.id) === 'cleared' ? 'trained' : '+' + t.xp + ' xp'
@@ -41,7 +32,7 @@ const kitLabel = t => s.nodeState(t.id) === 'cleared' ? 'trained' : '+' + t.xp +
           @click="s.setTrainingTab(t)">
           <template v-if="t === 'kit'">
             <b>Armoury</b>
-            <small>{{ s.toolsCleared.value }} / {{ TOOLS.length }}</small>
+            <small>{{ s.toolsCleared.value }} / {{ T.TOOLS.length }}</small>
           </template>
           <template v-else>
             <b>{{ t }}</b>
@@ -62,7 +53,7 @@ const kitLabel = t => s.nodeState(t.id) === 'cleared' ? 'trained' : '+' + t.xp +
         </template>
       </div>
       <template v-if="s.trainingTab.value === 'kit'">
-        <button v-for="t in TOOLS" :key="t.id" class="gate lesson-row" @click="s.openNode(t.id)">
+        <button v-for="t in T.TOOLS" :key="t.id" class="gate lesson-row" @click="s.openNode(t.id)">
           <div class="kit-badge">tool</div>
           <div>
             <h3>{{ t.title }}</h3>
@@ -79,7 +70,7 @@ const kitLabel = t => s.nodeState(t.id) === 'cleared' ? 'trained' : '+' + t.xp +
             <h3>{{ n.title }}</h3>
             <p>{{ n.algo }}</p>
             <div class="chips" v-if="n.tools?.length">
-              <span v-for="tid in n.tools" :key="tid" class="chip" :class="{ locked: s.nodeState(tid) !== 'cleared' }">{{ TOOL_BY_ID[tid]?.algo ?? tid }}</span>
+              <span v-for="tid in n.tools" :key="tid" class="chip" :class="{ locked: s.nodeState(tid) !== 'cleared' }">{{ T.TOOL_BY_ID[tid]?.algo ?? tid }}</span>
             </div>
             <small class="needs">{{ used(n) }}<template v-if="s.nodeState(n.id) === 'locked'"><template v-if="needsLessons(n)"> &middot; needs: <b>{{ needsLessons(n) }}</b></template><template v-if="needsTools(n)"> &middot; {{ needsLessons(n) ? 'tools: ' : 'needs tools: ' }}<b>{{ needsTools(n) }}</b></template></template></small>
           </div>

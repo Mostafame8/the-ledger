@@ -1,9 +1,9 @@
 <script setup>
 import { computed } from 'vue'
-import { ARCS } from '../courses/algorithms/index.js'
 import { useStore } from '../store.js'
 const s = useStore()
-const arc = computed(() => ARCS[s.tab.value])
+const ARCS = computed(() => s.course.value.arcs)
+const arc = computed(() => ARCS.value[s.tab.value])
 // 'Arc II — Casing the bank' -> ['Arc II', 'Casing the bank']
 const parts = name => name.split(' — ')
 </script>

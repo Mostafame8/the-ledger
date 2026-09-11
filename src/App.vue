@@ -1,6 +1,4 @@
 <script setup>
-import { ARCS, GATES } from './courses/algorithms/index.js'
-import { NODES } from './courses/algorithms/training/index.js'
 import { useStore } from './store.js'
 import StatusWindow from './components/StatusWindow.vue'
 import GateList from './components/GateList.vue'
@@ -15,8 +13,8 @@ const s = useStore()
   <div class="wrap">
     <header class="top">
       <h1>The <span>Ledger</span></h1>
-      <p v-if="s.mode.value === 'heist'">A heist in {{ ARCS.length }} arcs and {{ GATES.length }} gates. Every gate needs a trick. Every trick is an algorithm.</p>
-      <p v-else>{{ NODES.length }} lessons in a back room. Marguerite teaches the trick before the gate demands it.</p>
+      <p v-if="s.mode.value === 'heist'">{{ s.course.value.blurbs.heist }}</p>
+      <p v-else>{{ s.course.value.blurbs.training }}</p>
     </header>
     <StatusWindow />
     <Transition name="swap" mode="out-in">

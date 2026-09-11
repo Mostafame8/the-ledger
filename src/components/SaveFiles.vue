@@ -45,7 +45,7 @@ const imported = async e => {
             <div class="save-main">
               <b class="save-name">{{ slot.name }}</b>
               <span class="save-meta">
-                Level {{ s.summary(slot).level }} · {{ s.summary(slot).gates }} gates ·
+                {{ s.summary(slot).title }} · Level {{ s.summary(slot).level }} · {{ s.summary(slot).gates }} gates ·
                 rank <span class="rank-letter" :class="s.summary(slot).rank">{{ s.summary(slot).rank }}</span> · {{ s.summary(slot).lessons }} lessons
               </span>
               <small class="save-when">Last played {{ when(slot.updated) }}</small>
