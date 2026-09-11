@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { KINDS, CELL_TEXT_MAX, cellText, normalize, resolve, dataIsKey, resolveRow, resolveGrid, resolveLine } from '../src/scene/model.js'
+import { KINDS, CELL_TEXT_MAX, cellText, normalize, resolve, dataIsKey, resolveRow, resolveGrid, resolveLine, valueOf, read, isDict } from '../src/scene/model.js'
 
 const two = { kind: 'cells', data: [1, 3, 4, 6, 9], pointers: ['i', 'j'], labels: { i: 'small hand' } }
 
@@ -224,4 +224,47 @@ test('resolveLine: a lane whose key is missing keeps the previous bars', () => {
   const r0 = resolve(sc, {}); assert.deepEqual(r0.lanes[0].bars, [{ from: 0, to: 1 }])
   const r1 = resolve(sc, { out: [[2, 3]] }, r0); const r2 = resolve(sc, {}, r1)
   assert.deepEqual(r2.lanes[0].bars, [{ from: 2, to: 3 }])
+})
+
+test('valueOf/read: a twin value hands the table its val; everything else passes through', () => {
+  assert.deepEqual(valueOf({ py: '{0, 1}', val: [0, 1] }), [0, 1])
+  assert.deepEqual(valueOf({ py: '(1, 3)' }), { py: '(1, 3)' })
+  assert.equal(valueOf(7), 7); assert.equal(valueOf(null), null)
+  assert.deepEqual(read({ seen: { py: '{0}', val: [0] } }, 'seen'), [0])
+  assert.equal(read(undefined, 'x'), undefined)
+})
+
+test('isDict: plain objects only — not arrays, not py text, not twins', () => {
+  assert.equal(isDict({ a: 1 }), true); assert.equal(isDict({}), true)
+  assert.equal(isDict([1]), false); assert.equal(isDict({ py: '{}' }), false); assert.equal(isDict({ py: '{}', val: {} }), false); assert.equal(isDict(null), false)
+})
+
+test('resolveRow: dict row — entries in order with keys; at matches a key or a value; growth and change flagged', () => {
+  const sc = { kind: 'cells', data: 'tally', init: {}, at: ['ch'] }
+  const r0 = resolve(sc, {})
+  assert.equal(r0.keyed, true); assert.deepEqual(r0.cells, [])
+  const r1 = resolve(sc, { ch: 'a', tally: { a: 1 } }, r0)
+  assert.deepEqual(r1.cells, [{ index: 0, text: '1', key: 'a' }]); assert.deepEqual(r1.changed, [0])
+  assert.deepEqual(r1.pointers, [{ key: 'ch', index: 0, label: 'ch' }])
+  const r2 = resolve(sc, { ch: 'b', tally: { a: 1, b: 1 } }, r1)
+  assert.deepEqual(r2.cells.map(c => c.key), ['a', 'b']); assert.deepEqual(r2.changed, [1])
+  const r3 = resolve(sc, { ch: 'a', tally: { a: 2, b: 1 } }, r2)
+  assert.deepEqual(r3.changed, [0]); assert.deepEqual(r3.pointers.map(p => p.index), [0])
+  const r4 = resolve({ kind: 'cells', data: { x: 5, y: 5 }, at: ['v'] }, { v: 5 })
+  assert.deepEqual(r4.pointers.map(p => p.index), [0, 1])      // value match still works
+})
+
+test('resolveRow: a twin value drives marks and at; a py-only value never becomes the row', () => {
+  const r = resolve({ kind: 'cells', data: [0, 1, 2, 3], marks: ['seen'] }, { seen: { py: '{0, 2}', val: 2 } })
+  assert.deepEqual(r.marks, [2])
+  const sc = { kind: 'cells', data: 'store', init: {} }
+  const r0 = resolve(sc, { store: { py: '{1: 1}', val: { 1: 1 } } })
+  assert.deepEqual(r0.cells, [{ index: 0, text: '1', key: '1' }])
+  const r1 = resolve(sc, { store: { py: '{1: 1, 2: 2}' } }, r0)   // no val: previous row stays
+  assert.deepEqual(r1.cells.map(c => c.key), ['1'])
+})
+
+test('resolveRow: list rows keep keyed false and no key on cells', () => {
+  const r = resolve({ kind: 'cells', data: [1, 2] }, {})
+  assert.equal(r.keyed, false); assert.equal('key' in r.cells[0], false)
 })

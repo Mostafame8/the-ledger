@@ -60,7 +60,7 @@ export function createRow(stage, parent, { label = null } = {}) {
         indexSprite.position.set(p.x, -SIZE / 2 + 0.02, SIZE / 2 + 0.42)
       }
       group.add(mesh, edges, valueSprite, indexSprite)
-      cells.push({ mesh, edges, valueSprite, indexSprite, text: null, flashT: 0, marked: false })
+      cells.push({ mesh, edges, valueSprite, indexSprite, text: null, keyText: null, flashT: 0, marked: false })
     }
     if (chain) for (let i = 0; i < n - 1; i++) {
       const mat = new THREE.MeshStandardMaterial({ color: C.violet, emissive: C.violet, emissiveIntensity: 0.9 })
@@ -106,6 +106,11 @@ export function createRow(stage, parent, { label = null } = {}) {
     r.cells.forEach((c, i) => {
       const cell = cells[i]
       if (cell.text !== c.text) { cell.valueSprite.material = makeText(THREE, cache, c.text, '#d7e6ff'); cell.text = c.text }
+      const want = c.key !== undefined ? c.key : null            // a dict row shows its key where the index sits
+      if (cell.keyText !== want) {
+        cell.indexSprite.material = makeText(THREE, cache, want ?? String(i), want ? '#9fb3d9' : '#6e83a6', 40)
+        cell.keyText = want
+      }
       cell.marked = r.marks.includes(i)
       baseLook(cell)
       if (!snap && r.changed.includes(i)) cell.flashT = FLASH

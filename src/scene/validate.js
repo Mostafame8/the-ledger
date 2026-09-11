@@ -1,18 +1,23 @@
 // Content-time checks for a step's `scene`. Pure; used by scripts/check-training.mjs and tests.
-import { KINDS, dataIsKey, normalize, resolveGrid, resolveRow } from './model.js'
+import { KINDS, dataIsKey, normalize, resolveGrid, resolveRow, read, isDict } from './model.js'
 
 const isList = v => Array.isArray(v) || typeof v === 'string'
 const keyish = v => typeof v === 'string'
 const strings = v => Array.isArray(v) && v.every(keyish)
+const pyOnly = v => !!v && typeof v === 'object' && !Array.isArray(v) && 'py' in v && !('val' in v)
+const size = v => (Array.isArray(v) || typeof v === 'string') ? v.length : Object.keys(v).length
 
 // Shape rules for one row (a `cells` scene or one entry of `rows`). Returns messages.
 function rowShape(row, { explain }) {
   const errs = []
   const bad = m => errs.push(m)
   const isKey = dataIsKey(row)
-  if (!isList(row.data)) bad('data must be a list, a string, or a state key')
-  else if (!isKey && row.data.length === 0) bad('data is empty')
-  if (isKey && !isList(row.init)) bad(`data is the state key '${row.data}' so init (the list before the first frame) is required`)
+  if (!isList(row.data) && !isDict(row.data)) bad('data must be a list, a string, an object, or a state key')
+  else if (!isKey && size(row.data) === 0) bad('data is empty')
+  if (isKey && !isList(row.init) && !isDict(row.init)) bad(`data is the state key '${row.data}' so init (the list or dict before the first frame) is required`)
+  const dictRow = isDict(isKey ? row.init : row.data)
+  if (dictRow && (Array.isArray(row.pointers) ? row.pointers.length : Object.keys(row.pointers || {}).length)) bad('a dict row has no index pointers (use at or marks)')
+  if (dictRow && row.ranges?.length) bad('a dict row has no ranges')
   if (row.pointers !== undefined && !Array.isArray(row.pointers) && !(explain && row.pointers && typeof row.pointers === 'object')) bad('pointers must be an array of state keys' + (explain ? ' or an object of ints' : ''))
   if (row.at !== undefined && !strings(row.at)) bad('at must be an array of state keys')
   if (row.marks !== undefined && !strings(row.marks)) bad('marks must be an array of state keys')
@@ -54,6 +59,15 @@ function rowWalk(row, states, where) {
       const ends = Array.isArray(rg) ? rg : [rg.end]
       for (const x of ends) if (keyish(x) && x in st) check(x, st[x])
       for (const x of ends) if (Number.isInteger(x)) check(String(x), x)
+    }
+    if (dataIsKey(row)) {
+      const raw = st[row.data], v = read(st, row.data)
+      const dictRow = isDict(row.init)
+      if (pyOnly(raw)) bad(`'${row.data}' at ${where} ${k} is Python text; add a val beside py`)
+      else if (v !== undefined && v !== null) {
+        if (dictRow && isList(v)) bad(`'${row.data}' is a list at ${where} ${k} but the row is a dict`)
+        if (!dictRow && isDict(v)) bad(`'${row.data}' is a dict at ${where} ${k} but the row is a list`)
+      }
     }
     prev = r
   })
@@ -169,5 +183,21 @@ export function sceneErrors(step) {
   const states = explain ? normalize(sc).states : (step.frames || []).map(f => f.state || {})
   const where = explain ? 'state' : 'frame'
   for (const row of sc.rows) for (const m of rowWalk(row, states, where)) bad(`row '${row.label}': ${m}`)
+  return errs
+}
+
+// Twin-value rule for every state a step carries: `val` only beside `py`, and never nested in itself.
+export function stateErrors(step) {
+  const errs = []
+  const check = (state, where) => {
+    for (const [k, v] of Object.entries(state || {})) {
+      if (!v || typeof v !== 'object' || Array.isArray(v)) continue
+      if ('val' in v && !('py' in v)) errs.push(`'${k}' at ${where} has val without py`)
+      if ('py' in v && typeof v.py !== 'string') errs.push(`'${k}' at ${where}: py must be a string`)
+      if ('val' in v && v.val && typeof v.val === 'object' && !Array.isArray(v.val) && 'py' in v.val) errs.push(`'${k}' at ${where}: val must not carry py`)
+    }
+  }
+  if (step?.type === 'trace') (step.frames || []).forEach((f, i) => check(f.state, `frame ${i}`))
+  if (step?.type === 'explain') (step.scene?.states || []).forEach((s, i) => check(s, `state ${i}`))
   return errs
 }

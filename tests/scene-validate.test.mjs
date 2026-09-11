@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { sceneErrors } from '../src/scene/validate.js'
+import { sceneErrors, stateErrors } from '../src/scene/validate.js'
 
 const frames = (...states) => states.map(state => ({ line: 1, state, ask: Object.keys(state)[0] ?? 'x', note: 'n' }))
 const tr = (scene, ...states) => ({ type: 'trace', code: 'x', input: 'f()', frames: frames(...states), scene })
@@ -147,4 +147,23 @@ test('line: span two keys; pins within axis at each frame; ticks within axis; la
   assert.match(sceneErrors(L({ ...l, ticks: [14] }, { lo: 1, hi: 2 }, { lo: 1 }, { lo: 1 }))[0], /ticks/)
   assert.match(sceneErrors(L({ ...l, span: ['s'] }, { lo: 1, hi: 2 }, { lo: 1 }, { lo: 1 }))[0], /span/)
   assert.match(sceneErrors(L({ ...l, labels: { q: 'x' } }, { lo: 1, hi: 2 }, { lo: 1 }, { lo: 1 }))[0], /labels/)
+})
+
+test('dict rows: literal object or key with object init; no pointers or ranges; frame shape must match', () => {
+  assert.deepEqual(sceneErrors(tr({ kind: 'cells', data: 'tally', init: {}, at: ['ch'] }, { ch: 'a', tally: { a: 1 } }, { ch: 'b', tally: { a: 1, b: 1 } }, { ch: 'a', tally: { a: 2, b: 1 } })), [])
+  assert.deepEqual(sceneErrors(ex({ kind: 'cells', data: { a: 1, b: 2 }, at: ['k'], states: [{ k: 'a' }] })), [])
+  assert.match(sceneErrors(ex({ kind: 'cells', data: {} }))[0], /empty/)
+  assert.match(sceneErrors(tr({ kind: 'cells', data: 'tally', init: {}, pointers: ['i'] }, { i: 0, tally: {} }, { i: 0 }, { i: 0 }))[0], /dict row has no index pointers/)
+  assert.match(sceneErrors(tr({ kind: 'cells', data: 'tally', init: {}, ranges: [[0, 1]] }, { tally: {} }, { tally: {} }, { tally: {} }))[0], /dict row has no ranges/)
+  assert.match(sceneErrors(tr({ kind: 'cells', data: 'tally', init: {} }, { tally: [1] }, { tally: {} }, { tally: {} }))[0], /'tally' is a list at frame 0/)
+  assert.match(sceneErrors(tr({ kind: 'cells', data: 'nums', init: [] }, { nums: { a: 1 } }, { nums: [] }, { nums: [] }))[0], /'nums' is a dict at frame 0/)
+  assert.match(sceneErrors(tr({ kind: 'cells', data: 'store', init: {} }, { store: { py: '{1: 1}' } }, { store: {} }, { store: {} }))[0], /'store' at frame 0 is Python text/)
+})
+
+test('stateErrors: val only beside py; val never carries py; checked on frames and explain states', () => {
+  assert.deepEqual(stateErrors(tr(undefined, { seen: { py: '{0}', val: [0] } }, { x: 1 }, { x: 1 })), [])
+  assert.match(stateErrors(tr(undefined, { seen: { val: [0] } }, { x: 1 }, { x: 1 }))[0], /'seen' at frame 0 has val without py/)
+  assert.match(stateErrors(tr(undefined, { x: 1 }, { d: { py: '[inf]', val: { py: 'inf' } } }, { x: 1 }))[0], /'d' at frame 1: val must not carry py/)
+  assert.match(stateErrors(ex({ kind: 'cells', data: [1], states: [{ q: { val: 1 } }] }))[0], /'q' at state 0 has val without py/)
+  assert.deepEqual(stateErrors({ type: 'spot', options: [] }), [])
 })

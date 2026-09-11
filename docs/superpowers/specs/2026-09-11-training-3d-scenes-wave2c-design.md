@@ -46,8 +46,10 @@ Examples: `seen: { py: '{0, 1, 2}', val: [0, 1, 2] }`,
 `data` may be a literal object or a state key whose value is a plain object (`init: {}`).
 The row shows one block per entry in entry order, the key's text where the index sprite sits
 and the value's text on top. `at`, `marks`, `pile`, `chain` and `labels` work as on a list
-row; `pointers` and `ranges` are rejected on a dict row because there are no indices. A
-block that appeared since the previous stop flashes; a block whose value changed flashes.
+row; `pointers` and `ranges` are rejected on a dict row because there are no indices. On a
+dict row `at` also matches a block whose key equals the value's text, so `at: ['ch']` pins the
+letter's card. A block that appeared since the previous stop flashes; a block whose value
+changed flashes.
 
 Entry order is JavaScript's: integer-like keys ascending, then string keys in insertion
 order. This is fine for every use in this wave (the `caches` store's order is carried by the
