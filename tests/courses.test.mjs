@@ -2,11 +2,20 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { COURSES, DEFAULT_COURSE, courseById, RUNNERS } from '../src/courses/index.js'
 
-test('algorithms is the first and default course', () => {
-  assert.equal(COURSES[0].id, 'algorithms')
+test('algorithms first, patterns second, algorithms default', () => {
+  assert.deepEqual(COURSES.map(c => c.id), ['algorithms', 'patterns'])
   assert.equal(DEFAULT_COURSE, 'algorithms')
   assert.equal(courseById('algorithms'), COURSES[0])
+  assert.equal(courseById('patterns').title, 'The Blueprint')
+  assert.deepEqual(courseById('patterns').stats, ['structure', 'behaviour', 'creation'])
   assert.equal(courseById('nope'), null)
+})
+
+test('the patterns course never draws the table', () => {
+  const c = courseById('patterns')
+  for (const n of [...c.training.NODES, ...c.training.TOOLS]) {
+    for (const s of n.steps) assert.equal(s.scene, undefined, `${n.id}: no scene allowed`)
+  }
 })
 
 test('course ids are unique kebab-case', () => {

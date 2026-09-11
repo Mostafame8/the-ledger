@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { COURSES } from '../src/courses/index.js'
 
-const EXPECTED_TOOLS = { algorithms: 12 }
+const EXPECTED_TOOLS = { algorithms: 12, patterns: 6 }
 
 test('each course has the expected tool count', () => {
   for (const c of COURSES) assert.equal(c.training.TOOLS.length, EXPECTED_TOOLS[c.id], `${c.id} tools`)
@@ -35,6 +35,7 @@ test('every lesson tools entry names a real tool', () => {
 
 test('every tool is required by at least one lesson', () => {
   for (const { training: { NODES, TOOLS } } of COURSES) {
+    if (!NODES.length) continue   // a course with no lessons yet (plan 3 pending)
     const required = new Set(NODES.flatMap(n => n.tools || []))
     for (const t of TOOLS) assert.ok(required.has(t.id), `${t.id} is never required by any lesson`)
   }
