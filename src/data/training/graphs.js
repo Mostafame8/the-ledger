@@ -24,7 +24,8 @@ export default node('graphs', {
             if nxt not in seen:
                 seen.add(nxt)
                 queue.append(nxt)
-    return sorted(seen)` }),
+    return sorted(seen)`, scene: { kind: 'graph', adj: [[1, 2], [0, 3], [0], [1]], pos: [[0, 0], [2, 0], [0, 2], [2, 2]], at: ['node', 'nxt'], marks: ['seen'],
+      states: [{ node: 0, seen: [0] }, { node: 0, nxt: 2, seen: [0, 1, 2] }, { node: 1, nxt: 3, seen: [0, 1, 2, 3] }, { node: 3, seen: [0, 1, 2, 3] }] } }),
     trace(
 `def reachable(adj, start):
     seen = {start}
@@ -38,12 +39,12 @@ export default node('graphs', {
     return sorted(seen)`,
       'reachable([[1, 2], [0, 3], [0], [1]], 0)',
       [
-        { line: 5, state: { node: 0, seen: { py: '{0}' }, queue: { py: '[]' } }, ask: 'queue', note: 'pop(0) takes the oldest name off the front, so the queue is empty again before a single contact has been looked at. The barman was marked seen on line 2, not when he came out.' },
-        { line: 9, state: { node: 0, nxt: 2, seen: { py: '{0, 1, 2}' }, queue: { py: '[1, 2]' } }, ask: 'seen', note: 'Both of the barman’s contacts went in, and both were marked on the way in. 1 and 2 each talk back to 0, and neither of them can queue him again.' },
-        { line: 5, state: { node: 1, seen: { py: '{0, 1, 2}' }, queue: { py: '[2]' } }, ask: 'queue', note: 'The front of the queue is the first name that went in, so everyone one handoff from the barman comes out before anyone two handoffs away.' },
-        { line: 9, state: { node: 1, nxt: 3, seen: { py: '{0, 1, 2, 3}' }, queue: { py: '[2, 3]' } }, ask: 'seen', note: '1 talks to 0 and to 3. The 0 was already marked, so only the sister goes in. Four names on the napkin, four names marked, and nobody twice.' },
-        { line: 5, state: { node: 3, seen: { py: '{0, 1, 2, 3}' }, queue: { py: '[]' } }, ask: 'queue', note: '2 added nothing and 3 will add nothing, because everyone either of them talks to is marked. The queue is empty, the loop is about to end, and every name was queued exactly once.' },
-      ]),
+        { line: 5, state: { node: 0, seen: { py: '{0}', val: [0] }, queue: { py: '[]' } }, ask: 'queue', note: 'pop(0) takes the oldest name off the front, so the queue is empty again before a single contact has been looked at. The barman was marked seen on line 2, not when he came out.' },
+        { line: 9, state: { node: 0, nxt: 2, seen: { py: '{0, 1, 2}', val: [0, 1, 2] }, queue: { py: '[1, 2]' } }, ask: 'seen', note: 'Both of the barman’s contacts went in, and both were marked on the way in. 1 and 2 each talk back to 0, and neither of them can queue him again.' },
+        { line: 5, state: { node: 1, seen: { py: '{0, 1, 2}', val: [0, 1, 2] }, queue: { py: '[2]' } }, ask: 'queue', note: 'The front of the queue is the first name that went in, so everyone one handoff from the barman comes out before anyone two handoffs away.' },
+        { line: 9, state: { node: 1, nxt: 3, seen: { py: '{0, 1, 2, 3}', val: [0, 1, 2, 3] }, queue: { py: '[2, 3]' } }, ask: 'seen', note: '1 talks to 0 and to 3. The 0 was already marked, so only the sister goes in. Four names on the napkin, four names marked, and nobody twice.' },
+        { line: 5, state: { node: 3, seen: { py: '{0, 1, 2, 3}', val: [0, 1, 2, 3] }, queue: { py: '[]' } }, ask: 'queue', note: '2 added nothing and 3 will add nothing, because everyone either of them talks to is marked. The queue is empty, the loop is about to end, and every name was queued exactly once.' },
+      ], { scene: { kind: 'graph', adj: [[1, 2], [0, 3], [0], [1]], pos: [[0, 0], [2, 0], [0, 2], [2, 2]], at: ['node', 'nxt'], marks: ['seen'] } }),
     spot('Two hundred informants. Each one talks to three or four others, no more. Dax rules a two-hundred-by-two-hundred grid on butcher paper and ticks a box for every pair who talk, so he can walk the network outward from the barman. What is wrong with the butcher paper?',
       ['Nothing. A box per pair is the only honest way to write down who talks to whom',
        'Forty thousand boxes to hold seven hundred ticks, and finding one person’s contacts means reading two hundred boxes to find four. One list per person instead',

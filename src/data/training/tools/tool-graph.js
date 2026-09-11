@@ -18,7 +18,9 @@ adj                            # [[1, 3], [0, 2], [1], [0]]
 adj[1]                         # [0, 2], everyone next door to house 1
 len(adj[1])                    # 2
 for nxt in adj[0]: ...         # every neighbour of house 0
-adj = {'ana': ['boyd'], 'boyd': ['ana']}   # names instead of numbers` }),
+adj = {'ana': ['boyd'], 'boyd': ['ana']}   # names instead of numbers`,
+      scene: { kind: 'graph', adj: 'adj', init: [[], [], [], []], pos: [[0, 0], [2, 0], [2, 2], [0, 2]], at: ['u', 'v'],
+        states: [{ adj: [[], [], [], []] }, { u: 0, v: 1, adj: [[1], [0], [], []] }, { u: 1, v: 2, adj: [[1], [0, 2], [1], []] }, { u: 0, v: 3, adj: [[1, 3], [0, 2], [1], [0]] }] } }),
     explain([
       '“adj[u] is a crate holding every house u can reach by one road. That is the whole structure: one crate per house, and getting a house’s neighbours is one index and then a walk over however many roads it actually has.”',
       '“Building it is one pass over the houses to lay out the empty crates and one pass over the roads to fill them. V plus E, never V times V, and it holds nothing at all for the pairs with no road, which is nearly all of them.”',
@@ -39,7 +41,7 @@ adj = {'ana': ['boyd'], 'boyd': ['ana']}   # names instead of numbers` }),
         { line: 5, state: { u: 1, v: 2, adj: [[1], [0, 2], [1], []] }, ask: 'adj', note: 'Second road. House 1 already had a neighbour, so 2 goes on the back of its crate and the 0 already in there is not disturbed.' },
         { line: 5, state: { u: 0, v: 3, adj: [[1, 3], [0, 2], [1], [0]] }, ask: 'adj', note: 'Third road, and house 0 reaches two places now. Three roads read, six appends spent, and the pairs with no road between them cost nothing because they were never mentioned.' },
         { line: 6, state: { u: 0, v: 3, adj: [[1, 3], [0, 2], [1], [0]], returns: [1, 3] }, ask: 'returns', note: 'adj[0] is house 0’s neighbours and nothing else. Dax’s grid would have made you read the whole of row 0 to find these two, and every other row to find the rest.' },
-      ]),
+      ], { scene: { kind: 'graph', adj: 'adj', init: [[], [], [], []], pos: [[0, 0], [2, 0], [2, 2], [0, 2]], at: ['u', 'v'] } }),
     blank('“Two hands on the map. One writes a two-way road onto it. One reads me every house next door to a given one. The map arrives as a crate of crates, one per house.”',
 `def add_road(adj, u, v):
     adj[u].append(v)
