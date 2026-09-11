@@ -1,11 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { KINDS, CELL_TEXT_MAX, cellText, normalize, resolve, dataIsKey, resolveRow, resolveGrid, resolveLine, valueOf, read, isDict } from '../src/scene/model.js'
+import { KINDS, CELL_TEXT_MAX, cellText, normalize, resolve, dataIsKey, resolveRow, resolveGrid, resolveLine, valueOf, read, isDict, resolveGraph } from '../src/scene/model.js'
 
 const two = { kind: 'cells', data: [1, 3, 4, 6, 9], pointers: ['i', 'j'], labels: { i: 'small hand' } }
 
-test('constants: KINDS is cells, rows, grid, line; text caps at six', () => {
-  assert.deepEqual(KINDS, ['cells', 'rows', 'grid', 'line'])
+test('constants: KINDS is cells, rows, grid, line, graph, tree; text caps at six', () => {
+  assert.deepEqual(KINDS, ['cells', 'rows', 'grid', 'line', 'graph', 'tree'])
   assert.equal(CELL_TEXT_MAX, 6)
 })
 
@@ -284,4 +284,40 @@ test('resolveGrid: grids pair — two entries side by side, each with its own ti
 test('resolveGrid: the single form is one unlabelled entry', () => {
   const r = resolve({ kind: 'grid', data: [[1, 2]] }, {})
   assert.equal(r.grids.length, 1); assert.equal(r.grids[0].label, null); assert.deepEqual(r.grids[0].tiles, r.tiles)
+})
+
+const napkin = { kind: 'graph', adj: [[1, 2], [0, 3], [0], [1]], pos: [[0, 0], [2, 0], [0, 2], [2, 2]], at: ['node', 'nxt'], marks: ['seen'], labels: { nxt: 'next' } }
+
+test('resolveGraph: literal adjacency → merged undirected edges, nodes with pos and default names', () => {
+  const r = resolve(napkin, {})
+  assert.equal(r.kind, 'graph'); assert.equal(r.directed, false)
+  assert.deepEqual(r.nodes.map(n => [n.i, n.name, n.pos, n.badge, n.marked]), [[0, '0', [0, 0], null, false], [1, '1', [2, 0], null, false], [2, '2', [0, 2], null, false], [3, '3', [2, 2], null, false]])
+  assert.deepEqual(r.edges.map(e => [e.u, e.v, e.w]), [[0, 1, null], [0, 2, null], [1, 3, null]])
+  assert.ok(r.edges.every(e => e.changed)); assert.deepEqual(r.pins, [])
+})
+
+test('resolveGraph: pins by node index with labels; the edge between two pinned nodes glows; marks from a twin list', () => {
+  const r = resolve(napkin, { node: 0, nxt: 2, seen: { py: '{0, 1, 2}', val: [0, 1, 2] } })
+  assert.deepEqual(r.pins, [{ key: 'node', node: 0, label: 'node' }, { key: 'nxt', node: 2, label: 'nxt · next' }])
+  assert.deepEqual(r.edges.filter(e => e.glow).map(e => [e.u, e.v]), [[0, 2]])
+  assert.deepEqual(r.nodes.filter(n => n.marked).map(n => n.i), [0, 1, 2])
+  assert.deepEqual(resolve(napkin, { node: 7, nxt: null }).pins, [])
+})
+
+test('resolveGraph: weighted pairs carry w; badges text under each node; names override', () => {
+  const sc = { kind: 'graph', adj: [[[1, 1], [2, 4]], [[0, 1], [2, 2]], [[0, 4], [1, 2], [3, 1]], [[2, 1]]], pos: [[0, 0], [2, 0], [1, 2], [3, 2]], badges: 'dist', names: ['a', 'b', 'c', 'd'] }
+  const r = resolve(sc, { dist: { py: '[0, 1, 4, inf]', val: [0, 1, 4, { py: 'inf' }] } })
+  assert.deepEqual(r.edges.map(e => [e.u, e.v, e.w]), [[0, 1, 1], [0, 2, 4], [1, 2, 2], [2, 3, 1]])
+  assert.deepEqual(r.nodes.map(n => n.badge), ['0', '1', '4', 'inf']); assert.deepEqual(r.nodes.map(n => n.name), ['a', 'b', 'c', 'd'])
+  assert.deepEqual(resolve(sc, {}).nodes.map(n => n.badge), [null, null, null, null])
+})
+
+test('resolveGraph: keyed adjacency grows; only new edges are changed; missing key keeps the previous graph; directed keeps both arrows', () => {
+  const sc = { kind: 'graph', adj: 'adj', init: [[], [], [], []], pos: [[0, 0], [2, 0], [2, 2], [0, 2]] }
+  const r0 = resolve(sc, {}); assert.deepEqual(r0.edges, [])
+  const r1 = resolve(sc, { adj: [[1], [0], [], []] }, r0); assert.deepEqual(r1.edges.map(e => [e.u, e.v, e.changed]), [[0, 1, true]])
+  const r2 = resolve(sc, { adj: [[1], [0, 2], [1], []] }, r1); assert.deepEqual(r2.edges.map(e => [e.u, e.v, e.changed]), [[0, 1, false], [1, 2, true]])
+  const r3 = resolve(sc, {}, r2); assert.deepEqual(r3.edges.map(e => [e.u, e.v]), [[0, 1], [1, 2]])
+  const d = resolve({ kind: 'graph', adj: [[1], [0]], pos: [[0, 0], [1, 0]], directed: true }, {})
+  assert.deepEqual(d.edges.map(e => [e.u, e.v]), [[0, 1], [1, 0]]); assert.equal(d.directed, true)
 })

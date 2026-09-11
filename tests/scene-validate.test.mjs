@@ -12,7 +12,7 @@ test('no scene: no errors; scene on spot/blank/mini: error', () => {
 })
 
 test('unknown kind and bad data fail', () => {
-  assert.match(sceneErrors(ex({ kind: 'tree', data: [1] }))[0], /kind/)
+  assert.match(sceneErrors(ex({ kind: 'blob', data: [1] }))[0], /kind/)
   assert.match(sceneErrors(ex({ kind: 'cells', data: 5 }))[0], /data/)
   assert.match(sceneErrors(ex({ kind: 'cells', data: [] }))[0], /empty/)
 })
@@ -178,4 +178,29 @@ test('grid pair: 1–2 entries with unique labels, each rectangular; cursor/head
   assert.match(sceneErrors(G({ ...pair, heads: { rows: ['a', 'b'] } }, { good: [[1]] }, { bad: [[1]] }, { x: 1 }))[0], /heads belong to the single-grid form/)
   assert.match(sceneErrors(G({ ...pair, data: [[1]] }, { good: [[1]] }, { bad: [[1]] }, { x: 1 }))[0], /data and grids/)
   assert.match(sceneErrors(G({ grids: [{ label: 'g', data: 'g', init: [[0]] }] }, { x: 1 }, { x: 1 }, { x: 1 }))[0], /'g' never/)
+})
+
+const GR = (sc, ...states) => tr({ kind: 'graph', ...sc }, ...states)
+
+test('graph: pos per node; adj length and neighbours in range; no mixed weights; names length; directed boolean', () => {
+  const ok = { adj: [[1, 2], [0, 3], [0], [1]], pos: [[0, 0], [2, 0], [0, 2], [2, 2]], at: ['node'] }
+  assert.deepEqual(sceneErrors(GR(ok, { node: 0 }, { node: 1 }, { node: 3 })), [])
+  assert.match(sceneErrors(GR({ ...ok, pos: [[0, 0], [2, 0]] }, { node: 0 }, { node: 0 }, { node: 0 }))[0], /adj must have 2 entries/)
+  assert.match(sceneErrors(GR({ ...ok, adj: [[1, 9], [0], [0], [1]] }, { node: 0 }, { node: 0 }, { node: 0 }))[0], /neighbour 9/)
+  assert.match(sceneErrors(GR({ ...ok, adj: [[[1, 2]], [0], [], []] }, { node: 0 }, { node: 0 }, { node: 0 }))[0], /mix/)
+  assert.match(sceneErrors(GR({ ...ok, pos: [[0, 0], [2, 0], [0, 2], [2]] }, { node: 0 }, { node: 0 }, { node: 0 }))[0], /pos/)
+  assert.match(sceneErrors(GR({ ...ok, names: ['a'] }, { node: 0 }, { node: 0 }, { node: 0 }))[0], /names must have 4/)
+  assert.match(sceneErrors(GR({ ...ok, directed: 'yes' }, { node: 0 }, { node: 0 }, { node: 0 }))[0], /directed/)
+  assert.match(sceneErrors(GR({ ...ok, labels: { q: 'x' } }, { node: 0 }, { node: 0 }, { node: 0 }))[0], /labels/)
+})
+
+test('graph: keyed adj needs init and appears; per-frame at range, marks lists, badges length; py-only adj named', () => {
+  const k = { adj: 'adj', init: [[], [], [], []], pos: [[0, 0], [2, 0], [2, 2], [0, 2]], at: ['u', 'v'], marks: ['seen'], badges: 'dist' }
+  assert.deepEqual(sceneErrors(GR(k, { adj: [[], [], [], []], seen: [0], dist: [0, 1, 2, 3] }, { u: 0, v: 1, adj: [[1], [0], [], []] }, { u: 1, v: 2 })), [])
+  assert.match(sceneErrors(GR({ ...k, init: undefined }, { adj: [[], [], [], []], seen: [0], dist: [0, 0, 0, 0] }, { u: 0, v: 1 }, { u: 1, v: 2 }))[0], /init/)
+  assert.match(sceneErrors(GR(k, { adj: [[], [], [], []], seen: [0], dist: [0, 0, 0, 0] }, { u: 0, v: 4 }, { u: 1, v: 2 }))[0], /'v' is 4 at frame 1/)
+  assert.match(sceneErrors(GR(k, { adj: [[], [], [], []], seen: [0, 9], dist: [0, 0, 0, 0] }, { u: 0, v: 1 }, { u: 1, v: 2 }))[0], /'seen'.*frame 0/)
+  assert.match(sceneErrors(GR(k, { adj: [[], [], [], []], seen: [0], dist: [0, 0] }, { u: 0, v: 1 }, { u: 1, v: 2 }))[0], /'dist' must have 4 entries at frame 0/)
+  assert.match(sceneErrors(GR(k, { adj: { py: '[[1]]' }, seen: [0], dist: [0, 0, 0, 0] }, { u: 0, v: 1 }, { u: 1, v: 2 }))[0], /'adj' at frame 0 is Python text/)
+  assert.match(sceneErrors(GR(k, { seen: [0], dist: [0, 0, 0, 0] }, { u: 0, v: 1 }, { u: 1, v: 2 }))[0], /'adj' never/)
 })

@@ -165,6 +165,53 @@ function lineErrors(sc, states, where) {
   return errs
 }
 
+// One adjacency list against n nodes. Returns messages; `weighted` is decided by the first entry seen.
+function adjErrors(adj, n, tag) {
+  const errs = [], bad = m => errs.push(m)
+  if (!Array.isArray(adj) || !adj.every(Array.isArray)) { bad(`${tag}: adj must be a list of neighbour lists`); return errs }
+  if (adj.length !== n) { bad(`${tag}: adj must have ${n} entries, one per pos`); return errs }
+  let weighted = null
+  adj.forEach((list, u) => { for (const e of list) {
+    const isPair = Array.isArray(e)
+    if (weighted === null) weighted = isPair
+    else if (weighted !== isPair) { bad(`${tag}: adj must not mix plain neighbours and [neighbour, weight] pairs`); return }
+    const v = isPair ? e[0] : e
+    if (isPair && !(e.length === 2 && Number.isInteger(e[1]))) bad(`${tag}: entry ${JSON.stringify(e)} of node ${u} must be [neighbour, weight]`)
+    if (!(Number.isInteger(v) && v >= 0 && v < n)) bad(`${tag}: neighbour ${JSON.stringify(v)} of node ${u} is outside 0..${n - 1}`)
+  } })
+  return errs
+}
+
+function graphErrors(sc, states, where) {
+  const errs = [], bad = m => errs.push(m)
+  if (!(pairsOk(sc.pos) && sc.pos.length > 0)) { bad('pos must be a non-empty list of [x, z] integer pairs, one per node'); return errs }
+  const n = sc.pos.length
+  const isKey = typeof sc.adj === 'string'
+  if (isKey && sc.init === undefined) bad(`adj is the state key '${sc.adj}' so init is required`)
+  else for (const m of adjErrors(isKey ? sc.init : sc.adj, n, isKey ? 'init' : 'adj')) bad(m)
+  if (sc.names !== undefined && !(strings(sc.names) && sc.names.length === n)) bad(`names must have ${n} entries`)
+  if (sc.directed !== undefined && typeof sc.directed !== 'boolean') bad('directed must be true or false')
+  if (sc.at !== undefined && !strings(sc.at)) bad('at must be an array of state keys')
+  if (sc.marks !== undefined && !strings(sc.marks)) bad('marks must be an array of state keys')
+  if (sc.badges !== undefined && !keyish(sc.badges)) bad('badges must be one state key')
+  const atKeys = Array.isArray(sc.at) ? sc.at : []
+  for (const k of Object.keys(sc.labels || {})) if (!atKeys.includes(k)) bad(`labels names '${k}' which is not an at key`)
+  if (errs.length) return errs
+  const keyed = [...atKeys, ...(sc.marks || []), ...(sc.badges ? [sc.badges] : []), ...(isKey ? [sc.adj] : [])]
+  for (const k of new Set(keyed)) if (!states.some(st => k in st)) bad(`'${k}' never appears in any ${where}`)
+  states.forEach((st, k) => {
+    const at = ` at ${where} ${k}`
+    for (const key of atKeys) { const v = read(st, key); if (key in st && v !== null && v !== undefined && !(Number.isInteger(v) && v >= 0 && v < n)) bad(`'${key}' is ${JSON.stringify(v)}${at}, outside 0..${n - 1}`) }
+    for (const key of sc.marks || []) { const v = read(st, key); if (key in st && v !== null && v !== undefined && !(Array.isArray(v) && v.every(i => Number.isInteger(i) && i >= 0 && i < n))) bad(`'${key}' must be a list of node indices${at}`) }
+    if (sc.badges && sc.badges in st) { const v = read(st, sc.badges); if (v !== null && v !== undefined && !(Array.isArray(v) && v.length === n)) bad(`'${sc.badges}' must have ${n} entries${at}`) }
+    if (isKey && sc.adj in st) {
+      if (pyOnly(st[sc.adj])) bad(`'${sc.adj}'${at} is Python text; add a val beside py`)
+      else { const v = read(st, sc.adj); if (v !== null && v !== undefined) for (const m of adjErrors(v, n, `'${sc.adj}'${at}`)) bad(m) }
+    }
+  })
+  return errs
+}
+
 export function sceneErrors(step) {
   const sc = step?.scene
   if (!sc) return []
@@ -188,6 +235,7 @@ export function sceneErrors(step) {
   const walkStates = () => explain ? normalize(sc).states : (step.frames || []).map(f => f.state || {})
   if (sc.kind === 'grid') { for (const m of gridErrors(sc, walkStates(), explain ? 'state' : 'frame')) bad(m); return errs }
   if (sc.kind === 'line') { for (const m of lineErrors(sc, walkStates(), explain ? 'state' : 'frame')) bad(m); return errs }
+  if (sc.kind === 'graph') { for (const m of graphErrors(sc, walkStates(), explain ? 'state' : 'frame')) bad(m); return errs }
 
   // rows
   if (!Array.isArray(sc.rows) || sc.rows.length < 1 || sc.rows.length > 4) { bad('rows must be an array of 1 to 4 rows'); return errs }

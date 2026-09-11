@@ -1,7 +1,7 @@
 // Pure: turn a scene descriptor plus one frame's state into a picture the renderer can draw.
 // No DOM, no three. See docs/superpowers/specs/2026-09-09-training-3d-scenes-design.md.
 
-export const KINDS = ['cells', 'rows', 'grid', 'line']
+export const KINDS = ['cells', 'rows', 'grid', 'line', 'graph', 'tree']
 export const CELL_TEXT_MAX = 6
 // A string `data` is a state key when it looks like an identifier, or when the row gives an `init`
 // (the list before the first frame). Content literals ('HB4417', 'ok go', '(()') have no init.
@@ -173,8 +173,58 @@ export function resolveLine(scene, state = {}, prev = null) {
   return { kind: 'line', axis: scene.axis, lanes, ticks: scene.ticks ?? [], span, pins }
 }
 
+const isAdj = v => Array.isArray(v) && v.every(Array.isArray)
+// The adjacency for this frame: literal; else the frame's own list, else the previous frame's, else init.
+function adjFor(scene, state, prev) {
+  if (isAdj(scene.adj)) return scene.adj
+  const v = read(state, scene.adj)
+  if (isAdj(v)) return v
+  if (prev?.source !== undefined) return prev.source
+  return scene.init ?? []
+}
+
+// Nodes at authored positions; edges from an adjacency list (plain neighbours or [neighbour, weight]
+// pairs), merged when undirected; pins by node index; the edge joining two pinned nodes glows.
+export function resolveGraph(scene, state = {}, prev = null) {
+  const source = adjFor(scene, state, prev)
+  const n = Array.isArray(scene.pos) ? scene.pos.length : 0
+  const directed = !!scene.directed
+  const edges = [], ids = new Set()
+  source.forEach((list, u) => {
+    if (u >= n) return
+    for (const e of list || []) {
+      const v = Array.isArray(e) ? e[0] : e, w = Array.isArray(e) && Number.isInteger(e[1]) ? e[1] : null
+      if (!Number.isInteger(v) || v < 0 || v >= n) continue
+      const a = directed ? u : Math.min(u, v), b = directed ? v : Math.max(u, v), id = `${a}-${b}`
+      if (ids.has(id)) continue
+      ids.add(id); edges.push({ u: a, v: b, w, glow: false, changed: false })
+    }
+  })
+  const pins = []
+  for (const key of scene.at || []) {
+    const v = read(state, key)
+    if (Number.isInteger(v) && v >= 0 && v < n) pins.push({ key, node: v, label: captioned(scene, key) })
+  }
+  const pinned = new Set(pins.map(p => p.node))
+  for (const e of edges) if (e.u !== e.v && pinned.has(e.u) && pinned.has(e.v)) e.glow = true
+  const marked = new Set()
+  for (const key of scene.marks || []) {
+    const v = read(state, key)
+    if (Array.isArray(v)) for (const i of v) if (Number.isInteger(i) && i >= 0 && i < n) marked.add(i)
+  }
+  const badges = scene.badges ? read(state, scene.badges) : undefined
+  const nodes = Array.from({ length: n }, (_, i) => ({
+    i, name: scene.names?.[i] ?? String(i), pos: scene.pos[i],
+    badge: Array.isArray(badges) && i < badges.length ? cellText(badges[i]) : null, marked: marked.has(i),
+  }))
+  const before = prev?.kind === 'graph' ? new Set(prev.edges.map(e => `${e.u}-${e.v}`)) : null
+  for (const e of edges) e.changed = !before || !before.has(`${e.u}-${e.v}`)
+  return { kind: 'graph', directed, nodes, edges, pins, source }
+}
+
 export function resolve(scene, state = {}, prev = null) {
   if (!scene) return null
+  if (scene.kind === 'graph') return resolveGraph(scene, state, prev?.kind === 'graph' ? prev : null)
   if (scene.kind === 'cells') return resolveRow(scene, state, prev?.kind === 'cells' ? prev : null)
   if (scene.kind === 'rows') {
     const rows = (scene.rows || []).map((row, i) => resolveRow(row, state, prev?.kind === 'rows' ? prev.rows[i] ?? null : null))
