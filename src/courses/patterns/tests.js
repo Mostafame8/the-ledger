@@ -105,4 +105,58 @@ class _t_Plain:
     pass
 check("the decorator hands the class back unchanged", _t_cat.register('plain')(_t_Plain) is _t_Plain, True)
 check("two catalogues are independent", Catalogue().kinds(), [])`,
+
+foreignplug: `check("OldSafe().crack(4417)", True)
+check("SafeAdapter(OldSafe()).open('4417')", True)
+check("SafeAdapter(OldSafe()).open('0000')", False)
+check("SafeAdapter(OldSafe()).open('abcd')", False)
+class _t_New:
+    def __init__(self, code): self.code = code
+    def open(self, code): return code == self.code
+check("open_all over adapters and a native safe", open_all([SafeAdapter(OldSafe()), _t_New('4417'), _t_New('9')], '4417'), 2)
+check("open_all([], '4417')", 0)
+class _t_Spy:
+    def __init__(self): self.opens = 0; self.cracks = 0
+    def open(self, code): self.opens += 1; return False
+    def crack(self, code): self.cracks += 1; return False
+_t_spy = _t_Spy(); open_all([_t_spy], '1')
+check("open_all calls open, never crack", (_t_spy.opens, _t_spy.cracks), (1, 0))`,
+
+layers: `check("Coat().warmth()", 1)
+check("Coat().describe()", 'coat')
+check("Lined(Coat()).warmth()", 3)
+check("Lined(Coat()).describe()", 'lined coat')
+check("Armoured(Lined(Coat())).describe()", 'armoured lined coat')
+check("Lined(Armoured(Coat())).warmth()", 4)
+check("Lined(Lined(Coat())).describe()", 'lined lined coat')
+class _t_Vest:
+    def warmth(self): return 10
+    def describe(self): return 'vest'
+check("layers accept any coat-shaped thing", Armoured(_t_Vest()).describe(), 'armoured vest')`,
+
+frontdesk: `check("Job().run()", ['camera looping', 'guard busy', 'vault open'])
+check("Vault().unlock()", 'vault open')
+check("Guard().distract()", 'guard busy')
+check("Camera().loop()", 'camera looping')
+_t_j = Job()
+check("run twice, same result", _t_j.run() == _t_j.run(), True)
+check("two jobs, same plan", Job().run() == Job().run(), True)`,
+
+wrappedhand: `_t_log = []
+@logged(_t_log)
+def _t_cut(a, b): return a + b
+check("logged returns the value", _t_cut(3, 4), 7)
+check("logged wrote the call", _t_log, ['_t_cut(3,4)'])
+_t_cut(1, 2)
+check("two calls, two lines", len(_t_log), 2)
+_t_tries = []
+@retry(3)
+def _t_flaky(): _t_tries.append(1); return 'ok' if len(_t_tries) >= 2 else None
+check("retry returns the first real result", _t_flaky(), 'ok')
+check("and stopped as soon as it had one", len(_t_tries), 2)
+_t_n = []
+@retry(3)
+def _t_never(): _t_n.append(1); return None
+check("retry gives up with None", _t_never(), None)
+check("after exactly times tries", len(_t_n), 3)`,
 }

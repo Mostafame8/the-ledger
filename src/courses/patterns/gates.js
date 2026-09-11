@@ -72,5 +72,36 @@ Radio.get().freq             # None`),
     'Write class Catalogue with register(kind), usable as a decorator on a class (@cat.register("cutter")), that records the class under kind and returns the class unchanged; kinds() returning the registered kinds sorted; and build(kind, **kw) constructing the registered class with the keyword arguments, raising KeyError for an unknown kind. Stretch: let register accept a plain function as a maker too.',
     'register(kind) returns a function that takes the class, stores it in a dict under kind, and returns it. That returned function is what the decorator syntax calls.'),
 ]},
+{ name:'Arc III — The disguise', sub:'You cannot change what the fence sold you. You can dress it.', gates:[
+  g('foreignplug','D',90,'structure','The wrong-shaped plug','Adapter',
+    ['The fence\'s old safes take a number: crack(4417). The crew\'s hands, every one of them, speak strings: open("4417").',
+     'Dax wants to rewrite the hands. “Forty places,” Marguerite says. “Or one plug.”',
+     '“Wrap the old safe in something that answers open(code) the way the crew expects and turns the string into the number the safe wants. The safe never changes. The hands never know.”'],
+    'Write class OldSafe with crack(code_int) returning True when code_int == 4417. Then class SafeAdapter built with an OldSafe, exposing open(code) that converts the string to an int and delegates to crack, returning False for a string that is not a number. Then open_all(safes, code) returning how many objects in the list opened, calling only open. Stretch: adapt a second old class with a different method name through the same open_all.',
+    'The adapter holds the old safe and translates in one place: int(code) inside a try, then crack. open_all does not know an adapter from a native safe.',
+`old = OldSafe()
+old.crack(4417)                        # True
+SafeAdapter(old).open('4417')          # True
+SafeAdapter(old).open('abcd')          # False
+open_all([SafeAdapter(old)], '4417')   # 1`),
+  g('layers','D',100,'structure','Lining and plates','Decorator',
+    ['One coat for the night. A lining sewn in if the wind is up. Plates strapped on if the guard is the kind who shoots first.',
+     'Dax has LinedCoat, ArmouredCoat, LinedArmouredCoat and ArmouredLinedCoat. “I need a matrix,” he says.',
+     '“You need layers,” Marguerite says. “Each layer takes any coat, adds its bit to the warmth and its word to the description, and is itself a coat. Stack them in any order.”'],
+    'Write class Coat with warmth() returning 1 and describe() returning "coat". Then Lined(coat) and Armoured(coat), each built around any coat-like object: Lined adds 2 to the inner warmth and describes as "lined " + the inner description; Armoured adds 1 and "armoured " + inner. Stretch: add a third layer without touching the first two.',
+    'Each wrapper stores the inner coat and answers both methods by asking the inner one and adjusting. Because the wrapper has the same two methods, it fits inside another wrapper.'),
+  g('frontdesk','C',120,'structure','One desk, many doors','Facade',
+    ['Three things happen when Marguerite says go: the camera loops, the guard gets a phone call, the vault hears the right code. Three systems, three manuals.',
+     'Dax\'s go() is forty lines of calling into all three, in an order he has to look up each time.',
+     '“One desk,” Marguerite says. “Job.run() knows the order and the manuals. The person who says go knows one word.”'],
+    'Write three small classes: Vault with unlock() returning "vault open", Guard with distract() returning "guard busy", Camera with loop() returning "camera looping". Then class Job whose run() does the three in the order camera, guard, vault and returns their three strings as a list. Stretch: add a fourth step to run() without changing anyone who calls it.',
+    'Job builds or is handed the three systems, and run() calls them in order, collecting the strings. Callers never touch a subsystem.'),
+  g('wrappedhand','C',130,'structure','The wrapped hand','Function wrappers',
+    ['Every function on the job needs a line in the log, and the flaky ones need a retry. Dax has typed log.append into thirty functions and got the name wrong in six.',
+     '“Wrap the hand,” Marguerite says. “A wrapper takes a function and hands back a function that does the extra thing and then calls the original. The original never knows.”',
+     '“Two wrappers. One writes the call to the log. One tries again until something comes back.”'],
+    'Write logged(log), which returns a decorator: the decorated function appends "<name>(<args>)" to log, with the positional arguments joined by "," (so cut(3, 4) logs "cut(3,4)"), then calls the original and returns its result. Write retry(times), which returns a decorator: the decorated function is called up to times times and the first result that is not None is returned; if every try gives None, return None. Stretch: keep the wrapped function\'s __name__ with functools.wraps.',
+    'A decorator factory has three layers: the outer takes the setting, the middle takes the function, the inner takes the call\'s arguments and does the work. fn.__name__ gives the log line its name.'),
+]},
 ];
 export const ARCS_DATA = ARCS;
