@@ -6,6 +6,7 @@ import QuestWindow from './components/QuestWindow.vue'
 import SkillTree from './components/SkillTree.vue'
 import LessonWindow from './components/LessonWindow.vue'
 import SaveFiles from './components/SaveFiles.vue'
+import CourseSelect from './components/CourseSelect.vue'
 const s = useStore()
 </script>
 
@@ -27,6 +28,9 @@ const s = useStore()
     </Transition>
     <Transition name="veil">
       <SaveFiles v-if="s.savesOpen.value || !s.currentSave.value" />
+    </Transition>
+    <Transition name="veil">
+      <CourseSelect v-if="s.courseScreen.value && !s.savesOpen.value && s.currentSave.value" />
     </Transition>
     <div v-if="s.flash.value" class="levelup"><div>{{ s.flash.value }}</div></div>
   </div>

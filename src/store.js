@@ -27,6 +27,11 @@ const courseId = ref(DEFAULT_COURSE)
 const course = computed(() => courseById(courseId.value) ?? COURSES[0])
 const T = computed(() => course.value.training)          // { NODES, NODE_BY_ID, TOOLS, TOOL_BY_ID, TIERS }
 const zeroStats = keys => Object.fromEntries(keys.map(k => [k, 0]))
+const coursesOpen = ref(false)             // the course screen, opened from the Status window
+const courseChosen = ref(true)             // false on a fresh slot until the learner picks a job
+const courseScreen = computed(() => coursesOpen.value || (!!currentSave.value && !courseChosen.value))
+const openCourses = () => { coursesOpen.value = true }
+const closeCourses = () => { if (courseChosen.value) coursesOpen.value = false }
 
 const freshTraining = () => ({ xp: 0, nodes: {}, tools: {}, active: null, code: {}, tab: null })
 
@@ -208,15 +213,27 @@ const block = () => ({
 // The whole slot payload: name, active course, every course block with the live one refreshed.
 const snapshot = data => ({
   player: { name: player.value.name },
-  course: courseId.value,
+  course: courseChosen.value ? courseId.value : null,
   courses: { ...(data?.courses || {}), [courseId.value]: block() },
 })
 // Fill every live ref from a slot's data (null = a fresh game named after the slot). Picks the
 // slot's last course, or the default. The watcher then writes the normalised snapshot back,
 // which also stamps "last played".
 function applyData(data, name) {
-  courseId.value = courseById(data?.course) ? data.course : DEFAULT_COURSE
+  courseChosen.value = !!courseById(data?.course)
+  courseId.value = courseChosen.value ? data.course : DEFAULT_COURSE
   applyBlock(data, name)
+}
+// Switch the live refs to another course's block. The watcher has already persisted the
+// current block after every change, so nothing is flushed here.
+function selectCourse(id) {
+  if (!courseById(id) || !currentSave.value) return
+  if (id !== courseId.value || !courseChosen.value) {
+    courseId.value = id
+    courseChosen.value = true
+    applyBlock(currentSave.value.data, currentSave.value.name)
+  }
+  coursesOpen.value = false
 }
 function applyBlock(data, name) {
   const b = data?.courses?.[courseId.value] || {}
@@ -238,12 +255,15 @@ function courseSummary(slot, id) {
   const c = courseById(id)
   const b = slot?.data?.courses?.[id]
   const N = c.training.NODES
+  const lessons = N.filter(n => b?.training?.nodes?.[n.id]?.cleared).length
+  const tools = Object.values(b?.training?.tools || {}).filter(t => t?.cleared).length
+  const started = !!b && ((b.xp || 0) > 0 || (b.cleared || []).length > 0 || (b.training?.xp || 0) > 0 || lessons > 0 || tools > 0)
   return {
-    id, title: c.title, algo: c.algo, started: !!b,
+    id, title: c.title, algo: c.algo, started,
     level: Math.floor((b?.xp || 0) / c.xpPerLevel),
     gates: (b?.cleared || []).length, gatesTotal: c.gates.length,
     rank: rankFor(b?.training?.xp || 0, N),
-    lessons: N.filter(n => b?.training?.nodes?.[n.id]?.cleared).length, lessonsTotal: N.length,
+    lessons, lessonsTotal: N.length,
   }
 }
 function summary(slot) {
@@ -272,7 +292,7 @@ function deleteSave(id) {
   if (!s || !confirm(`Delete the save file "${s.name}"? The heist and the training in it are gone for good.`)) return
   const wasCurrent = id === file.value.current
   commitFile(deleteSlot(file.value, id))
-  if (wasCurrent) { applyData(null, 'Hunter'); savesOpen.value = true }
+  if (wasCurrent) { applyData(null, 'Hunter'); courseChosen.value = true; savesOpen.value = true }
 }
 function renameSave(id, name) {
   commitFile(renameSlot(file.value, id, name))
@@ -302,13 +322,13 @@ watch([player, cleared, notes, tab, mode, training, trainingTab, courseId], () =
   if (!file.value.current) return
   commitFile(writeSlot(file.value, file.value.current, snapshot(currentSave.value?.data), Date.now()))
 }, { deep: true })
-window.addEventListener('keydown', e => { if (e.key === 'Escape') { close(); closeNode(); closeSaves() } })
+window.addEventListener('keydown', e => { if (e.key === 'Escape') { close(); closeNode(); closeSaves(); closeCourses() } })
 
 export function useStore() {
   return { player, cleared, notes, active, flash, gate, level, xpInLevel, xpPct, xpPerLevel,
     clearedCount, title, statList, isDone, isLocked, arcOpen, arcProgress, tab, setTab, open, close, clear,
     run, runtime, test,
-    course, courseId, courses: COURSES, courseSummary,
+    course, courseId, courses: COURSES, courseSummary, courseScreen, courseChosen, openCourses, closeCourses, selectCourse,
     saves, currentSave, savesOpen, openSaves, closeSaves, newSave, loadSave, deleteSave, renameSave, summary, exportSave, importSave,
     mode, setMode, training, trainingXp, trainingRank, trainingProgress, nodesCleared, nodeState,
     toolsCleared, kitXp, trainingTab, setTrainingTab, tierProgress,

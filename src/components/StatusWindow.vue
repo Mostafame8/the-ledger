@@ -56,7 +56,10 @@ const rankPct = computed(() => {
         </div>
       </template>
 
-      <button class="reset" @click="s.openSaves">Save files</button>
+      <div class="row">
+        <button class="reset" @click="s.openCourses">Jobs</button>
+        <button class="reset" @click="s.openSaves">Save files</button>
+      </div>
     </div>
   </aside>
 </template>
