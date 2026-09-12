@@ -2,14 +2,15 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { COURSES, DEFAULT_COURSE, courseById, RUNNERS } from '../src/courses/index.js'
 
-test('algorithms first, then oop, then patterns; algorithms default', () => {
-  assert.deepEqual(COURSES.map(c => c.id), ['algorithms', 'oop', 'patterns'])
+test('algorithms, oop, patterns, sql in that order; algorithms default', () => {
+  assert.deepEqual(COURSES.map(c => c.id), ['algorithms', 'oop', 'patterns', 'sql'])
   assert.equal(DEFAULT_COURSE, 'algorithms')
-  assert.equal(courseById('algorithms'), COURSES[0])
+  assert.deepEqual(RUNNERS, ['python', 'sql'])
+  assert.equal(courseById('sql').title, 'The Books')
+  assert.equal(courseById('sql').runner, 'sql')
+  assert.deepEqual(courseById('sql').stats, ['filter', 'join', 'shape'])
   assert.equal(courseById('oop').title, 'The Manifest')
-  assert.deepEqual(courseById('oop').stats, ['shape', 'kin', 'protocol'])
   assert.equal(courseById('patterns').title, 'The Blueprint')
-  assert.deepEqual(courseById('patterns').stats, ['structure', 'behaviour', 'creation'])
   assert.equal(courseById('nope'), null)
 })
 

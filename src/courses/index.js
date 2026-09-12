@@ -3,8 +3,9 @@
 import { course as algorithms } from './algorithms/course.js'
 import { course as oop } from './oop/course.js'
 import { course as patterns } from './patterns/course.js'
+import { course as sql } from './sql/course.js'
 
-export const COURSES = [algorithms, oop, patterns]
+export const COURSES = [algorithms, oop, patterns, sql]
 export const DEFAULT_COURSE = 'algorithms'
-export const RUNNERS = ['python']
+export const RUNNERS = ['python', 'sql']
 export const courseById = id => COURSES.find(c => c.id === id) ?? null
