@@ -1,7 +1,7 @@
 # Courses — one app, many jobs; first new course: design patterns
 
 Date: 2026-09-12
-Status: plans 1–2 implemented (courses plumbing; patterns kit and heist); plan 3 (patterns lessons) pending
+Status: implemented (plans 1–3: courses plumbing, patterns kit and heist, patterns lessons)
 Builds on: the training room (2026-09-08), save slots, the table (waves 1–2c)
 
 ## Purpose

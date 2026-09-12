@@ -15,6 +15,9 @@ import pickThePlay from './pick-the-play.js'
 import tripwire from './tripwire.js'
 import undoButton from './undo-button.js'
 import moodOfTheMark from './mood-of-the-mark.js'
+import runSheet from './run-sheet.js'
+import walkTheVault from './walk-the-vault.js'
+import wholeRig from './whole-rig.js'
 export { TIERS } from '../../../training/progress.js'
 export { TOOLS, TOOL_BY_ID } from './tools/index.js'
 
@@ -24,5 +27,7 @@ export const NODES = [
   foreignPlug, layersOnTheCoat, frontDesk,
   pickThePlay, tripwire,
   undoButton, moodOfTheMark,
+  runSheet, walkTheVault,
+  wholeRig,
 ]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
