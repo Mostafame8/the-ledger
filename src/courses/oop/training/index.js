@@ -11,6 +11,8 @@ import twoParents from './two-parents.js'
 import sameOrEqual from './same-or-equal.js'
 import putThemInOrder from './put-them-in-order.js'
 import countAndReach from './count-and-reach.js'
+import walkTheBag from './walk-the-bag.js'
+import openAndClose from './open-and-close.js'
 export { TIERS } from '../../../training/progress.js'
 export { TOOLS, TOOL_BY_ID } from './tools/index.js'
 
@@ -18,5 +20,6 @@ export const NODES = [
   theStampedTag, theTagsOwnMoves, readingItBack, sharedInkOwnName, theGuardedField,
   theFamilyLine, callUpTheLine, twoParents,
   sameOrEqual, putThemInOrder, countAndReach,
+  walkTheBag, openAndClose,
 ]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
