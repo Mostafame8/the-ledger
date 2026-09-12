@@ -1,8 +1,15 @@
 // Runs a learner's Python against a gate's tests inside the Pyodide worker.
 import { ref } from 'vue'
 import harness from './harness.py?raw'
+import fixture from './courses/sql/fixture.sql?raw'
+import harnessSql from './courses/sql/harness_sql.py?raw'
+import { wrapSql, bundleSql } from './sqlwrap.js'
 
 export const TIMEOUT_MS = 20_000
+// One worker serves every runner. 'python' sends the learner's code as is; 'sql' wraps the
+// statement as a Python string and bundles the SQL harness and fixture behind harness.py.
+const HARNESS = { python: harness, sql: bundleSql(harness, fixture, harnessSql) }
+const WRAP = { python: code => code, sql: wrapSql }
 // cold: no worker yet · loading: Pyodide downloading · ready · running · failed: could not load
 export const runtime = ref('cold')
 
@@ -46,7 +53,7 @@ function tidy(msg) {
 // Start downloading Pyodide early, e.g. when a quest window opens.
 export function warm() { if (!worker) spawn() }
 
-export async function runTests(code, tests, timeoutMs = TIMEOUT_MS) {
+export async function runTests(code, tests, runner = 'python', timeoutMs = TIMEOUT_MS) {
   if (!worker) spawn()
   try { await ready } catch (err) { return { results: [], stdout: '', error: String(err.message), timedOut: false } }
   const id = ++seq
@@ -59,6 +66,6 @@ export async function runTests(code, tests, timeoutMs = TIMEOUT_MS) {
       runtime.value = 'cold'
     }, timeoutMs)
     pending.set(id, { resolve, timer })
-    worker.postMessage({ id, code, harness, tests })
+    worker.postMessage({ id, code: WRAP[runner](code), harness: HARNESS[runner], tests })
   })
 }

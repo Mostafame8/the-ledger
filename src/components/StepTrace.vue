@@ -5,6 +5,7 @@ import { pyLiteral, sameLiteral } from '../training/answers.js'
 import SceneView from './SceneView.vue'
 const props = defineProps({ step: { type: Object, required: true } })
 const s = useStore()
+const sql = () => s.course.value.runner === 'sql'
 
 const total = props.step.frames.length
 const k = ref(s.satisfied.value ? total : 0)          // frames answered so far
@@ -39,7 +40,7 @@ function submit() {
 <template>
   <div class="mission">
     <h4>Trace it by hand</h4>
-    <p>Call: <code>{{ step.input }}</code>. At each stop, type the value of the highlighted variable exactly as Python would print it.</p>
+    <p>{{ sql() ? 'Query' : 'Call' }}: <code>{{ step.input }}</code>. At each stop, type the value of the highlighted variable exactly as Python would print it{{ sql() ? ' (rows come back as tuples)' : '' }}.</p>
   </div>
   <div class="trace">
     <SceneView v-if="step.scene" :scene="step.scene" :state="sceneState" />

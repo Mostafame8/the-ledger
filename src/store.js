@@ -153,7 +153,7 @@ async function runStepTests() {
   if (!st?.tests || stepRun.value?.status === 'running') return
   const key = codeKey()
   stepRun.value = { status: 'running' }
-  const r = await runTests(stepCode.value, st.tests)
+  const r = await runTests(stepCode.value, st.tests, course.value.runner)
   if (!activeNode.value || codeKey() !== key) return   // learner moved on; drop the stale result
   const passed = !r.error && r.results.length > 0 && r.results.every(t => t.ok)
   stepRun.value = { status: 'done', passed, ...r }
@@ -191,7 +191,7 @@ const run = ref(null)
 async function test(g) {
   if (run.value?.status === 'running') return
   run.value = { status: 'running' }
-  const r = await runTests(notes.value[g.id] || '', g.tests)
+  const r = await runTests(notes.value[g.id] || '', g.tests, course.value.runner)
   const passed = !r.error && r.results.length > 0 && r.results.every(t => t.ok)
   run.value = { status: 'done', passed, ...r }
   if (passed) clear(g)
