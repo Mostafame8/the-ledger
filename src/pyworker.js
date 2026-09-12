@@ -11,9 +11,11 @@ const boot = import(/* @vite-ignore */ INDEX_URL + 'pyodide.mjs')
   .catch(err => postMessage({ type: 'boot-error', error: String(err?.message || err) }))
 
 self.onmessage = async e => {
-  const { id, code, harness, tests } = e.data
+  const { id, code, harness, tests, packages = [] } = e.data
   await boot
   if (!py) return
+  // Unvendored stdlib modules (sqlite3 for the sql runner) load from the same CDN, once.
+  if (packages.length) { try { await py.loadPackage(packages) } catch (err) { postMessage({ type: 'result', id, results: [], stdout: '', error: String(err?.message || err) }); return } }
   const out = []
   py.setStdout({ batched: s => out.push(s) })
   py.setStderr({ batched: s => out.push(s) })

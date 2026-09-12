@@ -10,6 +10,7 @@ export const TIMEOUT_MS = 20_000
 // statement as a Python string and bundles the SQL harness and fixture behind harness.py.
 const HARNESS = { python: harness, sql: bundleSql(harness, fixture, harnessSql) }
 const WRAP = { python: code => code, sql: wrapSql }
+const PACKAGES = { python: [], sql: ['sqlite3'] }
 // cold: no worker yet · loading: Pyodide downloading · ready · running · failed: could not load
 export const runtime = ref('cold')
 
@@ -66,6 +67,6 @@ export async function runTests(code, tests, runner = 'python', timeoutMs = TIMEO
       runtime.value = 'cold'
     }, timeoutMs)
     pending.set(id, { resolve, timer })
-    worker.postMessage({ id, code: WRAP[runner](code), harness: HARNESS[runner], tests })
+    worker.postMessage({ id, code: WRAP[runner](code), harness: HARNESS[runner], tests, packages: PACKAGES[runner] })
   })
 }

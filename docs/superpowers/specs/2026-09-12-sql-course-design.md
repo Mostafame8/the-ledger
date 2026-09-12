@@ -16,7 +16,8 @@ existing Python worker and the existing `check()` result pipeline.
 
 - Scope is querying, F to S: SELECT, WHERE, ORDER BY, aggregates, joins, subqueries, CTEs, set
   operations, CASE, NULL logic, window functions, recursive CTEs. No DDL, no writes, no design.
-- Runner: Pyodide's built-in `sqlite3`. The learner writes one SQL statement; the runner wraps it
+- Runner: Pyodide's `sqlite3` (unvendored in Pyodide 0.26, so the worker loads the `sqlite3`
+  package from the same CDN on first SQL run). The learner writes one SQL statement; the runner wraps it
   as a Python string; a SQL harness loads the fixture into an in-memory database and reports
   through `check()`. No sql.js, no second worker.
 - One fixture database for the whole course: Halden's internal dump plus the Ledger.
@@ -38,7 +39,7 @@ existing Python worker and the existing `check()` result pipeline.
 src/
   runner.js                 runTests(code, tests, runner = 'python'); wraps code and picks the
                             harness bundle by runner; same worker, same result shape
-  pyworker.js               unchanged
+  pyworker.js               accepts `packages` per message and loadPackage()s them once
   harness.py                unchanged (check(), __results)
   courses/index.js          RUNNERS = ['python', 'sql']; COURSES = [algorithms, oop, patterns, sql]
   courses/sql/
