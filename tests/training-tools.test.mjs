@@ -35,7 +35,6 @@ test('every lesson tools entry names a real tool', () => {
 
 test('every tool is required by at least one lesson', () => {
   for (const { training: { NODES, TOOLS } } of COURSES) {
-    if (!NODES.length) continue   // a course with no lessons yet (plan 3 pending)
     const required = new Set(NODES.flatMap(n => n.tools || []))
     for (const t of TOOLS) assert.ok(required.has(t.id), `${t.id} is never required by any lesson`)
   }
