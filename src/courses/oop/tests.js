@@ -129,4 +129,126 @@ _t_w = iter(_t_b)
 check("iter(walker) is the walker", iter(_t_w) is _t_w, True)
 check("names(bag)", names(_t_b), ['torch', 'cutter'])
 check("sum(1 for _ in _t_b)", 2)`,
+
+guardedprice: `def _t_raises(fn):
+    try: fn()
+    except Exception as e: return type(e).__name__
+    return None
+check("Item('a', 5).price", 5)
+_t_i = Item('a', 5); _t_i.price = 7
+check("a good price is stored", _t_i.price, 7)
+check("a negative price is refused", _t_raises(lambda: setattr(_t_i, 'price', -1)), 'ValueError')
+check("and refused at birth", _t_raises(lambda: Item('a', -3)), 'ValueError')
+check("Item('a', 5).label", 'a @ 5')
+check("label follows the price", _t_i.label, 'a @ 7')
+check("label is read-only", _t_raises(lambda: setattr(_t_i, 'label', 'x')), 'AttributeError')`,
+
+fromline: `check("Item.from_line('torch,5').name", 'torch')
+check("Item.from_line('torch,5').price", 5)
+check("Item.parse_price('5')", 5)
+check("Item.parse_price('5.50')", 5.5)
+_t_items = Item.from_lines('a,1\\n\\n b , 2 \\n')
+check("blank lines are skipped", len(_t_items), 2)
+check("spaces are stripped", (_t_items[1].name, _t_items[1].price), ('b', 2))
+check("type(Stolen.from_line('a,1')).__name__", 'Stolen')`,
+
+frozenentry: `def _t_raises(fn):
+    try: fn()
+    except Exception as e: return type(e).__name__
+    return None
+check("Entry(5, 'torch') == Entry(5, 'torch')", True)
+check("sorted([Entry(9, 'x'), Entry(1, 'y')])[0].name", 'y')
+check("frozen", _t_raises(lambda: setattr(Entry(1, 'a'), 'price', 2)), 'FrozenInstanceError')
+check("len({Entry(1, 'a'), Entry(1, 'a')})", 1)
+check("repr(Entry(5, 'torch'))", "Entry(price=5, name='torch', tags=())")
+check("Entry(1, 'a', ('hot',)).tags", ('hot',))
+check("total([Entry(1, 'a'), Entry(2, 'b')])", 3)`,
+
+sealedbag: `def _t_raises(fn):
+    try: fn()
+    except Exception as e: return type(e).__name__
+    return None
+def _t_inside():
+    with Bag() as b:
+        b.add('torch')
+        return (b.sealed, list(b.items))
+def _t_after():
+    with Bag() as b:
+        b.add('torch')
+    return (b.sealed, list(b.items))
+def _t_error():
+    try:
+        with Bag() as b:
+            raise ValueError('mid-meeting')
+    except ValueError:
+        return b.sealed
+check("Bag().sealed", False)
+check("inside the block the bag is open and takes items", _t_inside(), (False, ['torch']))
+check("after the block the bag is sealed and keeps its items", _t_after(), (True, ['torch']))
+_t_b = Bag()
+with _t_b: pass
+check("a sealed bag refuses", _t_raises(lambda: _t_b.add('x')), 'RuntimeError')
+check("an error inside still seals and still climbs", _t_error(), True)
+check("Bag().__exit__(None, None, None)", False)`,
+
+typedfield: `def _t_raises(fn):
+    try: fn()
+    except Exception as e: return type(e).__name__
+    return None
+check("Entry(5, 2).price", 5)
+check("Entry(5, 2).qty", 2)
+check("zero is refused", _t_raises(lambda: setattr(Entry(5, 2), 'price', 0)), 'ValueError')
+check("and refused at birth", _t_raises(lambda: Entry(-1, 1)), 'ValueError')
+_t_a = Entry(5, 2); _t_b = Entry(7, 3); _t_a.price = 9
+check("two entries keep separate values", (_t_a.price, _t_b.price), (9, 7))
+check("type(Entry.price).__name__", 'Positive')
+check("'_price' in vars(Entry(5, 2))", True)`,
+
+attributetrap: `def _t_raises(fn):
+    try: fn()
+    except Exception as e: return type(e).__name__
+    return None
+check("Record(name='torch').name", 'torch')
+check("a missing field refuses properly", _t_raises(lambda: Record().zzz), 'AttributeError')
+_t_r = Record(name='torch'); _t_r.price = 5
+check("set then read", _t_r.price, 5)
+check("changes()", _t_r.changes(), [('price', 5)])
+check("hasattr(Record(), 'zzz')", False)
+check("Record(a=1)._data", {'a': 1})
+_t_s = Record(); _t_s.x = 1
+check("two records keep separate logs", (_t_r.changes(), _t_s.changes()), ([('price', 5)], [('x', 1)]))`,
+
+selfregister: `def _t_raises(fn):
+    try: fn()
+    except Exception as e: return type(e).__name__
+    return None
+check("Entry.kinds['cash'] is Cash", True)
+check("Entry.kinds['stone'] is Gem", True)
+check("'entry' in Entry.kinds", False)
+check("type(Entry.build('cash', 5)).__name__", 'Cash')
+check("Entry.build('stone', 1).amount", 1)
+check("an unknown kind", _t_raises(lambda: Entry.build('air')), 'KeyError')
+class _t_Bond(Entry):
+    def __init__(self, amount): self.amount = amount
+check("a new child signs itself in", Entry.kinds.get('_t_bond') is _t_Bond, True)
+class _t_Note(Cash):
+    pass
+check("a grandchild signs in too", Entry.kinds.get('_t_note') is _t_Note, True)`,
+
+manifest: `def _t_raises(fn):
+    try: fn()
+    except Exception as e: return type(e).__name__
+    return None
+_t_m = Manifest.from_lines('torch,5,2\\ncutter,10,1\\n\\n')
+check("len(m)", len(_t_m), 2)
+check("m.total()", _t_m.total(), 20)
+check("[l.name for l in m]", [l.name for l in _t_m], ['torch', 'cutter'])
+check("'torch' in m", 'torch' in _t_m, True)
+check("m[0].worth", _t_m[0].worth, 10)
+check("a zero price is refused", _t_raises(lambda: Line('a', 0, 1)), 'ValueError')
+with _t_m: pass
+check("the block seals the book", _t_m.sealed, True)
+check("a sealed book refuses", _t_raises(lambda: _t_m.add(Line('x', 1, 1))), 'RuntimeError')
+check("len({Line('a', 1, 1), Line('a', 1, 1)})", 1)
+check("repr(Line('torch', 5, 2))", "Line('torch', 5, 2)")`,
 }
