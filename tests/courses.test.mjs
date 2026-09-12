@@ -2,19 +2,22 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { COURSES, DEFAULT_COURSE, courseById, RUNNERS } from '../src/courses/index.js'
 
-test('algorithms first, patterns second, algorithms default', () => {
-  assert.deepEqual(COURSES.map(c => c.id), ['algorithms', 'patterns'])
+test('algorithms first, then oop, then patterns; algorithms default', () => {
+  assert.deepEqual(COURSES.map(c => c.id), ['algorithms', 'oop', 'patterns'])
   assert.equal(DEFAULT_COURSE, 'algorithms')
   assert.equal(courseById('algorithms'), COURSES[0])
+  assert.equal(courseById('oop').title, 'The Manifest')
+  assert.deepEqual(courseById('oop').stats, ['shape', 'kin', 'protocol'])
   assert.equal(courseById('patterns').title, 'The Blueprint')
   assert.deepEqual(courseById('patterns').stats, ['structure', 'behaviour', 'creation'])
   assert.equal(courseById('nope'), null)
 })
 
-test('the patterns course never draws the table', () => {
-  const c = courseById('patterns')
-  for (const n of [...c.training.NODES, ...c.training.TOOLS]) {
-    for (const s of n.steps) assert.equal(s.scene, undefined, `${n.id}: no scene allowed`)
+test('only the algorithms course draws the table', () => {
+  for (const c of COURSES.filter(c => c.id !== 'algorithms')) {
+    for (const n of [...c.training.NODES, ...c.training.TOOLS]) {
+      for (const s of n.steps) assert.equal(s.scene, undefined, `${c.id}/${n.id}: no scene allowed`)
+    }
   }
 })
 

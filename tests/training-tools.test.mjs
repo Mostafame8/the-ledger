@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { COURSES } from '../src/courses/index.js'
 
-const EXPECTED_TOOLS = { algorithms: 12, patterns: 6 }
+const EXPECTED_TOOLS = { algorithms: 12, oop: 6, patterns: 6 }
 
 test('each course has the expected tool count', () => {
   for (const c of COURSES) assert.equal(c.training.TOOLS.length, EXPECTED_TOOLS[c.id], `${c.id} tools`)
