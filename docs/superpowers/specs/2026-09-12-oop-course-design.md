@@ -1,7 +1,7 @@
 # The Manifest — the object-oriented Python course
 
 Date: 2026-09-12
-Status: approved, not yet implemented
+Status: implemented (plans 1–3: kit and heist, lessons F–D, lessons C–S)
 Builds on: courses plumbing (2026-09-12-courses-and-patterns-design.md), the training room, save slots
 
 ## Purpose

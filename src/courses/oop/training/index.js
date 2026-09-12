@@ -15,6 +15,9 @@ import walkTheBag from './walk-the-bag.js'
 import openAndClose from './open-and-close.js'
 import otherDoorsIn from './other-doors-in.js'
 import theStampedForm from './the-stamped-form.js'
+import theGatekeeper from './the-gatekeeper.js'
+import theAttributeTrap from './the-attribute-trap.js'
+import theClassThatStampsClasses from './the-class-that-stamps-classes.js'
 export { TIERS } from '../../../training/progress.js'
 export { TOOLS, TOOL_BY_ID } from './tools/index.js'
 
@@ -24,5 +27,7 @@ export const NODES = [
   sameOrEqual, putThemInOrder, countAndReach,
   walkTheBag, openAndClose,
   otherDoorsIn, theStampedForm,
+  theGatekeeper, theAttributeTrap,
+  theClassThatStampsClasses,
 ]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
