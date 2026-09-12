@@ -11,6 +11,10 @@ import oneRadio from './one-radio.js'
 import foreignPlug from './foreign-plug.js'
 import layersOnTheCoat from './layers-on-the-coat.js'
 import frontDesk from './front-desk.js'
+import pickThePlay from './pick-the-play.js'
+import tripwire from './tripwire.js'
+import undoButton from './undo-button.js'
+import moodOfTheMark from './mood-of-the-mark.js'
 export { TIERS } from '../../../training/progress.js'
 export { TOOLS, TOOL_BY_ID } from './tools/index.js'
 
@@ -18,5 +22,7 @@ export const NODES = [
   oneJob, boltOn, standIn, theSocket, partsNotBloodlines,
   orderWindow, pieceByPiece, oneRadio,
   foreignPlug, layersOnTheCoat, frontDesk,
+  pickThePlay, tripwire,
+  undoButton, moodOfTheMark,
 ]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
