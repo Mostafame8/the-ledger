@@ -98,4 +98,36 @@ check_query("a transfer on a new day adds a row", "SELECT date(at) AS day, COUNT
 check("six days on the shipped dump", lambda: len(learner()), 6)
 check("the counts add up to every transfer", lambda: sum(n for _, n in learner()), 14)
 check("a day is ten characters, no clock", lambda: all(len(d) == 10 for d, _ in learner()), True)`,
+
+abovemean: `check_cols("two columns, id then amount", ['id', 'amount'])
+check_query("the transfers above the average", "SELECT id, amount FROM transfers WHERE amount > (SELECT AVG(amount) FROM transfers) ORDER BY amount DESC", ordered=True)
+check_query("one giant drags the average up", "SELECT id, amount FROM transfers WHERE amount > (SELECT AVG(amount) FROM transfers) ORDER BY amount DESC", ordered=True,
+            extra="INSERT INTO transfers VALUES (99, 1, 2, 10000000, '2026-03-08 09:00');")
+check("three on the shipped dump", lambda: len(learner()), 3)
+check("largest first", lambda: [a for _, a in learner()] == sorted([a for _, a in learner()], reverse=True), True)
+check("nothing at or below the average", lambda: min(a for _, a in learner()) > 426250, True)`,
+
+neverswiped: `check_cols("two columns, id then name", ['id', 'name'])
+check_query("the staff with no swipe at all", "SELECT id, name FROM staff s WHERE NOT EXISTS (SELECT 1 FROM badges b WHERE b.staff_id = s.id) ORDER BY id", ordered=True)
+check_query("one swipe and a name drops off the list", "SELECT id, name FROM staff s WHERE NOT EXISTS (SELECT 1 FROM badges b WHERE b.staff_id = s.id) ORDER BY id", ordered=True,
+            extra="INSERT INTO badges VALUES (99, 1, 'lobby', '2026-03-08 09:00', 'in');")
+check("two on the shipped dump", lambda: len(learner()), 2)
+check("Bo Lund is one of them", lambda: (11, 'Bo Lund') in learner(), True)
+check("nobody who swiped is here", lambda: all(i not in (2, 3, 4, 5) for i, _ in learner()), True)`,
+
+bucket: `check_cols("three columns, id then amount then band", ['id', 'amount', 'band'])
+check_query("every transfer with its band", "SELECT id, amount, CASE WHEN amount < 50000 THEN 'small' WHEN amount < 500000 THEN 'medium' ELSE 'large' END AS band FROM transfers ORDER BY id", ordered=True)
+check_query("a transfer of exactly 50000 is medium", "SELECT id, amount, CASE WHEN amount < 50000 THEN 'small' WHEN amount < 500000 THEN 'medium' ELSE 'large' END AS band FROM transfers ORDER BY id", ordered=True,
+            extra="INSERT INTO transfers VALUES (99, 1, 2, 50000, '2026-03-08 09:00');")
+check("fourteen rows on the shipped dump", lambda: len(learner()), 14)
+check("two large moves", lambda: sum(1 for _, _, b in learner() if b == 'large'), 2)
+check("only the three words", lambda: set(b for _, _, b in learner()) <= {'small', 'medium', 'large'}, True)`,
+
+twolists: `check_cols("one column named name", ['name'])
+check_query("every name the Ledger touches", "SELECT payer AS name FROM payments UNION SELECT payee FROM payments")
+check_query("a new payer adds a new name", "SELECT payer AS name FROM payments UNION SELECT payee FROM payments",
+            extra="INSERT INTO payments VALUES (99, 'Vela Ord', 'Bo Lund', 5000, '2026-03-08', NULL);")
+check("ten names on the shipped dump", lambda: len(learner()), 10)
+check("no repeats", lambda: len(learner()) == len(set(learner())), True)
+check("Halden Voss appears once, though he is on both sides", lambda: sum(1 for (n,) in learner() if n == 'Halden Voss'), 1)`,
 }
