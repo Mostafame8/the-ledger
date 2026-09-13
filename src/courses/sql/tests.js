@@ -66,4 +66,36 @@ check_query("a new account sends, and shows up named", "SELECT t.id, f.holder AS
 check("fourteen rows on the shipped dump", lambda: len(learner()), 14)
 check("the first is Corvin to Grey for 250000", lambda: learner()[0], (1, 'Corvin Holdings', 'Grey Import Co', 250000))
 check("no transfer has the same name at both ends", lambda: all(s != r for _, s, r, _ in learner()), True)`,
+
+perdept: `check_cols("two columns, dept then n", ['dept', 'n'])
+check_query("headcount per department", "SELECT dept, COUNT(*) AS n FROM staff WHERE dept IS NOT NULL GROUP BY dept")
+check_query("a new vault hire lifts one pile", "SELECT dept, COUNT(*) AS n FROM staff WHERE dept IS NOT NULL GROUP BY dept",
+            extra="INSERT INTO staff VALUES (99, 'Abe Zed', 'vault', '2026-03-08', 2);")
+check("four departments", lambda: len(learner()), 4)
+check("no blank department in the answer", lambda: all(d is not None for d, _ in learner()), True)
+check("the counts add up to eleven", lambda: sum(n for _, n in learner()), 11)`,
+
+heavyhitters: `check_cols("two columns, from_acct then total", ['from_acct', 'total'])
+check_query("the accounts sending over half a million", "SELECT from_acct, SUM(amount) AS total FROM transfers GROUP BY from_acct HAVING SUM(amount) > 500000 ORDER BY total DESC", ordered=True)
+check_query("a big transfer out promotes an account", "SELECT from_acct, SUM(amount) AS total FROM transfers GROUP BY from_acct HAVING SUM(amount) > 500000 ORDER BY total DESC", ordered=True,
+            extra="INSERT INTO transfers VALUES (99, 9, 1, 600000, '2026-03-08 09:00');")
+check("three accounts on the shipped dump", lambda: len(learner()), 3)
+check("every total clears the bar", lambda: all(t > 500000 for _, t in learner()), True)
+check("account 1 leads with 3525000", lambda: learner()[0], (1, 3525000))`,
+
+busiestdoor: `check_cols("two columns, door then n", ['door', 'n'])
+check_query("the door that opens most", "SELECT door, COUNT(*) AS n FROM badges GROUP BY door ORDER BY n DESC LIMIT 1")
+check_query("three more vault swipes and the vault takes it", "SELECT door, COUNT(*) AS n FROM badges GROUP BY door ORDER BY n DESC LIMIT 1",
+            extra="INSERT INTO badges VALUES (99, 4, 'vault', '2026-03-08 09:00', 'in'); INSERT INTO badges VALUES (98, 9, 'vault', '2026-03-08 10:00', 'in'); INSERT INTO badges VALUES (97, 2, 'vault', '2026-03-08 11:00', 'in');")
+check("exactly one row", lambda: len(learner()), 1)
+check("the lobby, six swipes", lambda: learner()[0], ('lobby', 6))
+check("two columns", lambda: len(learner()[0]), 2)`,
+
+byday: `check_cols("two columns, day then n", ['day', 'n'])
+check_query("transfers per day, earliest first", "SELECT date(at) AS day, COUNT(*) AS n FROM transfers GROUP BY date(at) ORDER BY day", ordered=True)
+check_query("a transfer on a new day adds a row", "SELECT date(at) AS day, COUNT(*) AS n FROM transfers GROUP BY date(at) ORDER BY day", ordered=True,
+            extra="INSERT INTO transfers VALUES (99, 1, 2, 1000, '2026-03-08 09:00');")
+check("six days on the shipped dump", lambda: len(learner()), 6)
+check("the counts add up to every transfer", lambda: sum(n for _, n in learner()), 14)
+check("a day is ten characters, no clock", lambda: all(len(d) == 10 for d, _ in learner()), True)`,
 }
