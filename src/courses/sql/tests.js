@@ -130,4 +130,38 @@ check_query("a new payer adds a new name", "SELECT payer AS name FROM payments U
 check("ten names on the shipped dump", lambda: len(learner()), 10)
 check("no repeats", lambda: len(learner()) == len(set(learner())), True)
 check("Halden Voss appears once, though he is on both sides", lambda: sum(1 for (n,) in learner() if n == 'Halden Voss'), 1)`,
+
+runningtotal: `check_cols("three columns, paid_on then amount then running", ['paid_on', 'amount', 'running'])
+check_query("every payment with the total so far", "SELECT paid_on, amount, SUM(amount) OVER (ORDER BY paid_on, id) AS running FROM payments ORDER BY paid_on, id", ordered=True)
+check_query("an early payment shifts every total after it", "SELECT paid_on, amount, SUM(amount) OVER (ORDER BY paid_on, id) AS running FROM payments ORDER BY paid_on, id", ordered=True,
+            extra="INSERT INTO payments VALUES (99, 'Vela Ord', 'Bo Lund', 100000, '2026-01-06', NULL);")
+check("twelve rows, one per payment", lambda: len(learner()), 12)
+check("the first running total is the first payment", lambda: learner()[0][2], 50000)
+check("the last is every payment added up", lambda: learner()[-1][2], 1103000)`,
+
+toppercamera: `check_cols("three columns, floor then zone then installed", ['floor', 'zone', 'installed'])
+check_query("the newest camera on each floor", "SELECT floor, zone, installed FROM (SELECT floor, zone, installed, ROW_NUMBER() OVER (PARTITION BY floor ORDER BY installed DESC) AS rn FROM cameras) AS ranked WHERE rn = 1 ORDER BY floor", ordered=True)
+check_query("a brand new camera takes floor two", "SELECT floor, zone, installed FROM (SELECT floor, zone, installed, ROW_NUMBER() OVER (PARTITION BY floor ORDER BY installed DESC) AS rn FROM cameras) AS ranked WHERE rn = 1 ORDER BY floor", ordered=True,
+            extra="INSERT INTO cameras VALUES (99, 2, 'vault-roof', '2026-01-01');")
+check("four floors, four rows", lambda: len(learner()), 4)
+check("floor two is the one inside the vault", lambda: learner()[2][1], 'vault-inside')
+check("the floors come back 0, 1, 2, 3", lambda: [f for f, _, _ in learner()], [0, 1, 2, 3])`,
+
+reportsto: `check_cols("two columns, name then level", ['name', 'level'])
+check_query("everyone above Ana Petrov", "WITH RECURSIVE up(id, name, manager_id, level) AS (SELECT id, name, manager_id, 0 FROM staff WHERE id = 12 UNION ALL SELECT s.id, s.name, s.manager_id, up.level + 1 FROM staff s JOIN up ON s.id = up.manager_id) SELECT name, level FROM up WHERE level > 0 ORDER BY level", ordered=True)
+check_query("a new head of the firm adds a step at the top", "WITH RECURSIVE up(id, name, manager_id, level) AS (SELECT id, name, manager_id, 0 FROM staff WHERE id = 12 UNION ALL SELECT s.id, s.name, s.manager_id, up.level + 1 FROM staff s JOIN up ON s.id = up.manager_id) SELECT name, level FROM up WHERE level > 0 ORDER BY level", ordered=True,
+            extra="INSERT INTO staff VALUES (99, 'Vela Ord', 'board', '2000-01-01', NULL); UPDATE staff SET manager_id = 99 WHERE id = 1;")
+check("four people above her", lambda: len(learner()), 4)
+check("her own manager first", lambda: learner()[0], ('Ruth Ash', 1))
+check("Halden Voss at the top", lambda: learner()[-1][0], 'Halden Voss')
+check("she is not in her own chain", lambda: all(n != 'Ana Petrov' for n, _ in learner()), True)`,
+
+thebooks: `check_cols("four columns, payee then total then place then band", ['payee', 'total', 'place', 'band'])
+check_query("the Books, closed", "WITH totals AS (SELECT payee, SUM(amount) AS total FROM payments GROUP BY payee) SELECT payee, total, ROW_NUMBER() OVER (ORDER BY total DESC, payee) AS place, CASE WHEN total >= 100000 THEN 'big' WHEN total >= 25000 THEN 'middling' ELSE 'small' END AS band FROM totals ORDER BY place", ordered=True)
+check_query("one huge payment reorders the whole book", "WITH totals AS (SELECT payee, SUM(amount) AS total FROM payments GROUP BY payee) SELECT payee, total, ROW_NUMBER() OVER (ORDER BY total DESC, payee) AS place, CASE WHEN total >= 100000 THEN 'big' WHEN total >= 25000 THEN 'middling' ELSE 'small' END AS band FROM totals ORDER BY place", ordered=True,
+            extra="INSERT INTO payments VALUES (99, 'Sable Trust', 'Bo Lund', 900000, '2026-03-08', NULL);")
+check("seven payees", lambda: len(learner()), 7)
+check("Halden Voss takes first place with 650000", lambda: learner()[0][:2], ('Halden Voss', 650000))
+check("places run 1 to 7", lambda: [p for _, _, p, _ in learner()], [1, 2, 3, 4, 5, 6, 7])
+check("the tie at 120000 is broken alphabetically", lambda: [p for p, _, _, _ in learner()][2:4], ['Ines Marr', 'Otto Kline'])`,
 }
