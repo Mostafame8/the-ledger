@@ -34,4 +34,36 @@ check_query("one more personal account, one more in the count", "SELECT COUNT(*)
             extra="INSERT INTO accounts VALUES (99, 'New Face', 'personal', 'north', '2026-01-01');")
 check("one row", lambda: len(learner()), 1)
 check("it is a number", lambda: type(learner()[0][0]).__name__, 'int')`,
+
+badgeowners: `check_cols("three columns, name then door then at", ['name', 'door', 'at'])
+check_query("every swipe with its owner", "SELECT s.name, b.door, b.at FROM badges b JOIN staff s ON s.id = b.staff_id")
+check_query("a new swipe arrives, an orphan swipe does not", "SELECT s.name, b.door, b.at FROM badges b JOIN staff s ON s.id = b.staff_id",
+            extra="INSERT INTO badges VALUES (99, 4, 'stairs', '2026-03-08 10:00', 'in'); INSERT INTO badges VALUES (98, 77, 'roof', '2026-03-08 11:00', 'in');")
+check("seventeen swipes on the shipped dump", lambda: len(learner()), 17)
+check("names, not staff ids", lambda: all(isinstance(n, str) for n, _, _ in learner()), True)
+check("Ines Marr swiped the vault", lambda: ('Ines Marr', 'vault', '2026-03-02 08:55') in learner(), True)`,
+
+emptyaccounts: `check_cols("two columns, id then holder", ['id', 'holder'])
+check_query("the accounts nothing ever touched", "SELECT a.id, a.holder FROM accounts a LEFT JOIN transfers t ON a.id = t.from_acct OR a.id = t.to_acct WHERE t.id IS NULL")
+check_query("one penny in and the account is no longer dead", "SELECT a.id, a.holder FROM accounts a LEFT JOIN transfers t ON a.id = t.from_acct OR a.id = t.to_acct WHERE t.id IS NULL",
+            extra="INSERT INTO transfers VALUES (99, 5, 2, 1000, '2026-03-08 09:00');")
+check("three on the shipped dump", lambda: len(learner()), 3)
+check("Nadia Quill is one of them", lambda: (5, 'Nadia Quill') in learner(), True)
+check("Corvin Holdings is not", lambda: all(h != 'Corvin Holdings' for _, h in learner()), True)`,
+
+chainofcommand: `check_cols("two columns, name then manager", ['name', 'manager'])
+check_query("everyone beside their manager, alphabetical", "SELECT s.name, m.name AS manager FROM staff s JOIN staff m ON m.id = s.manager_id ORDER BY s.name", ordered=True)
+check_query("a new hire lands first", "SELECT s.name, m.name AS manager FROM staff s JOIN staff m ON m.id = s.manager_id ORDER BY s.name", ordered=True,
+            extra="INSERT INTO staff VALUES (99, 'Abe Zed', 'vault', '2026-03-08', 2);")
+check("eleven pairs on the shipped dump", lambda: len(learner()), 11)
+check("the one at the top never appears on the left", lambda: all(n != 'Halden Voss' for n, _ in learner()), True)
+check("Ana Petrov reports to Ruth Ash", lambda: ('Ana Petrov', 'Ruth Ash') in learner(), True)`,
+
+threeway: `check_cols("four columns, id then sender then receiver then amount", ['id', 'sender', 'receiver', 'amount'])
+check_query("both ends of every transfer", "SELECT t.id, f.holder AS sender, p.holder AS receiver, t.amount FROM transfers t JOIN accounts f ON f.id = t.from_acct JOIN accounts p ON p.id = t.to_acct ORDER BY t.id", ordered=True)
+check_query("a new account sends, and shows up named", "SELECT t.id, f.holder AS sender, p.holder AS receiver, t.amount FROM transfers t JOIN accounts f ON f.id = t.from_acct JOIN accounts p ON p.id = t.to_acct ORDER BY t.id", ordered=True,
+            extra="INSERT INTO accounts VALUES (99, 'Vela Ord', 'personal', 'north', '2026-01-01'); INSERT INTO transfers VALUES (99, 99, 1, 7000, '2026-03-08 09:00');")
+check("fourteen rows on the shipped dump", lambda: len(learner()), 14)
+check("the first is Corvin to Grey for 250000", lambda: learner()[0], (1, 'Corvin Holdings', 'Grey Import Co', 250000))
+check("no transfer has the same name at both ends", lambda: all(s != r for _, s, r, _ in learner()), True)`,
 }

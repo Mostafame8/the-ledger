@@ -37,5 +37,39 @@ const ARCS = [
     'Return one row with one column named n: how many accounts are of kind personal. Stretch: one row per kind, with its count.',
     'COUNT(*) counts the rows WHERE lets through. AS n names the column. One row comes back because there is one count.'),
 ]},
+{ name:'Arc II — Who talks to whom', sub:'Six tables that only mean something when you put two of them side by side.', gates:[
+  g('badgeowners','E',60,'join','Whose badge','INNER JOIN',
+    ['The badge log is honest and useless: a staff id, a door, a time. The fence does not know who staff id 5 is, and she is not going to learn.',
+     'Dax opens both sheets side by side and starts typing names into the badge rows by hand. Eleven rows in, he types the wrong one.',
+     '“Two tables, one wire between them,” Marguerite says. “The badge carries a staff id. The staff table is keyed by that id. Say so, once, and the names arrive.”'],
+    'Return every badge swipe with the staff member\'s name: three columns named name, door and at, any order. Stretch: keep only the swipes that went in.',
+    'JOIN staff ON staff.id = badges.staff_id. Give each table a short alias so you can say which id you mean; a swipe whose staff id matches nobody drops out, which is what INNER means.',
+`-- three of the seventeen rows
+('Ines Marr', 'vault', '2026-03-02 08:55')
+('Tomas Reed', 'lobby', '2026-03-02 07:30')
+('Otto Kline', 'server-room', '2026-03-02 23:15')`),
+  g('emptyaccounts','E',70,'join','Accounts nobody touched','LEFT JOIN … IS NULL',
+    ['“Three of these accounts have never moved a penny,” the fence says. “Those are the ones I want. Nobody watches a dead account.”',
+     'Dax looks for them by reading the transfer sheet and crossing account numbers off a list on the back of his hand. He crosses one off twice and misses another.',
+     '“Keep every account, wire the transfers on beside them, then keep the ones where nothing arrived,” Marguerite says. “The empty seat is the answer.”'],
+    'Return every account that has never sent and never received a transfer: two columns named id and holder, any order. Stretch: the same for accounts that have never sent but have received.',
+    'A LEFT JOIN keeps every row on the left even when the right side has nothing to offer, filling the gap with blanks. Then WHERE the right side IS NULL keeps only the gaps. Match on either end of the transfer.'),
+  g('chainofcommand','D',90,'join','Who reports to whom','Self join',
+    ['The staff table points at itself: every row carries the id of the person above it. One row points at nobody.',
+     'Dax draws the tree on the back of a takeaway menu, gets two branches crossed, and declares that the head of security reports to a teller.',
+     '“The table meets itself,” Marguerite says. “Two copies, two names, one wire between them. Call one of them the manager and the answer reads like a sentence.”'],
+    'Return every staff member who has a manager, beside that manager\'s name: two columns named name and manager, alphabetical by name. Order matters. Stretch: include the one with no manager, showing the word none instead.',
+    'JOIN staff m ON m.id = s.manager_id, with s and m two aliases for the same table. The person at the top has no manager id, so this join quietly leaves them out.',
+`-- the first three of eleven rows
+('Ana Petrov', 'Ruth Ash')
+('Bo Lund', 'Tomas Reed')
+('Ines Marr', 'Halden Voss')`),
+  g('threeway','D',100,'join','Both ends of the wire','Two joins with aliases',
+    ['A transfer row has two account numbers on it and no names at all. The fence wants both ends spelled out.',
+     'Dax says he will just look each number up as he goes. Fourteen rows, twenty-eight lookups, and he is already asking what account 9 was.',
+     '“Same table, twice, two different jobs,” Marguerite says. “One copy is the sender, one is the receiver. Name them that and stop thinking about it.”'],
+    'Return every transfer with both holders\' names: four columns named id, sender, receiver and amount, ordered by id. Order matters. Stretch: only the transfers where both ends sit in the same branch.',
+    'Join accounts twice under two aliases, one on from_acct and one on to_acct, and alias the two holder columns apart. Nothing is dropped: every transfer points at real accounts.'),
+]},
 ];
 export const ARCS_DATA = ARCS;
