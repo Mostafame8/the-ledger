@@ -53,7 +53,7 @@ const ARCS = [
      'Dax looks for them by reading the transfer sheet and crossing account numbers off a list on the back of his hand. He crosses one off twice and misses another.',
      '“Keep every account, wire the transfers on beside them, then keep the ones where nothing arrived,” Marguerite says. “The empty seat is the answer.”'],
     'Return every account that has never sent and never received a transfer: two columns named id and holder, any order. Stretch: the same for accounts that have never sent but have received.',
-    'A LEFT JOIN keeps every row on the left even when the right side has nothing to offer, filling the gap with blanks. Then WHERE the right side IS NULL keeps only the gaps. Match on either end of the transfer.'),
+    'A LEFT JOIN keeps every row on the left even when the right side has nothing to offer, filling the gap with blanks; then WHERE the right side IS NULL keeps only the gaps. Match on either end of the transfer.'),
   g('chainofcommand','D',90,'join','Who reports to whom','Self join',
     ['The staff table points at itself: every row carries the id of the person above it. One row points at nobody.',
      'Dax draws the tree on the back of a takeaway menu, gets two branches crossed, and declares that the head of security reports to a teller.',
