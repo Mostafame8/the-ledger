@@ -78,7 +78,7 @@ check("the counts add up to eleven", lambda: sum(n for _, n in learner()), 11)`,
 heavyhitters: `check_cols("two columns, from_acct then total", ['from_acct', 'total'])
 check_query("the accounts sending over half a million", "SELECT from_acct, SUM(amount) AS total FROM transfers GROUP BY from_acct HAVING SUM(amount) > 500000 ORDER BY total DESC", ordered=True)
 check_query("a big transfer out promotes an account", "SELECT from_acct, SUM(amount) AS total FROM transfers GROUP BY from_acct HAVING SUM(amount) > 500000 ORDER BY total DESC", ordered=True,
-            extra="INSERT INTO transfers VALUES (99, 9, 1, 600000, '2026-03-08 09:00');")
+            extra="INSERT INTO transfers VALUES (99, 9, 1, 600000, '2026-03-08 09:00'); INSERT INTO transfers VALUES (98, 7, 1, 470000, '2026-03-08 10:00');")
 check("three accounts on the shipped dump", lambda: len(learner()), 3)
 check("every total clears the bar", lambda: all(t > 500000 for _, t in learner()), True)
 check("account 1 leads with 3525000", lambda: learner()[0], (1, 3525000))`,
@@ -89,7 +89,7 @@ check_query("three more vault swipes and the vault takes it", "SELECT door, COUN
             extra="INSERT INTO badges VALUES (99, 4, 'vault', '2026-03-08 09:00', 'in'); INSERT INTO badges VALUES (98, 9, 'vault', '2026-03-08 10:00', 'in'); INSERT INTO badges VALUES (97, 2, 'vault', '2026-03-08 11:00', 'in');")
 check("exactly one row", lambda: len(learner()), 1)
 check("the lobby, six swipes", lambda: learner()[0], ('lobby', 6))
-check("two columns", lambda: len(learner()[0]), 2)`,
+check("no other door beats it", lambda: learner()[0][1] >= max(n for _, n in rows("SELECT door, COUNT(*) AS n FROM badges GROUP BY door")), True)`,
 
 byday: `check_cols("two columns, day then n", ['day', 'n'])
 check_query("transfers per day, earliest first", "SELECT date(at) AS day, COUNT(*) AS n FROM transfers GROUP BY date(at) ORDER BY day", ordered=True)
@@ -118,7 +118,7 @@ check("nobody who swiped is here", lambda: all(i not in (2, 3, 4, 5) for i, _ in
 bucket: `check_cols("three columns, id then amount then band", ['id', 'amount', 'band'])
 check_query("every transfer with its band", "SELECT id, amount, CASE WHEN amount < 50000 THEN 'small' WHEN amount < 500000 THEN 'medium' ELSE 'large' END AS band FROM transfers ORDER BY id", ordered=True)
 check_query("a transfer of exactly 50000 is medium", "SELECT id, amount, CASE WHEN amount < 50000 THEN 'small' WHEN amount < 500000 THEN 'medium' ELSE 'large' END AS band FROM transfers ORDER BY id", ordered=True,
-            extra="INSERT INTO transfers VALUES (99, 1, 2, 50000, '2026-03-08 09:00');")
+            extra="INSERT INTO transfers VALUES (99, 1, 2, 50000, '2026-03-08 09:00'); INSERT INTO transfers VALUES (98, 1, 2, 500000, '2026-03-08 10:00');")
 check("fourteen rows on the shipped dump", lambda: len(learner()), 14)
 check("two large moves", lambda: sum(1 for _, _, b in learner() if b == 'large'), 2)
 check("only the three words", lambda: set(b for _, _, b in learner()) <= {'small', 'medium', 'large'}, True)`,
@@ -159,7 +159,7 @@ check("she is not in her own chain", lambda: all(n != 'Ana Petrov' for n, _ in l
 thebooks: `check_cols("four columns, payee then total then place then band", ['payee', 'total', 'place', 'band'])
 check_query("the Books, closed", "WITH totals AS (SELECT payee, SUM(amount) AS total FROM payments GROUP BY payee) SELECT payee, total, ROW_NUMBER() OVER (ORDER BY total DESC, payee) AS place, CASE WHEN total >= 100000 THEN 'big' WHEN total >= 25000 THEN 'middling' ELSE 'small' END AS band FROM totals ORDER BY place", ordered=True)
 check_query("one huge payment reorders the whole book", "WITH totals AS (SELECT payee, SUM(amount) AS total FROM payments GROUP BY payee) SELECT payee, total, ROW_NUMBER() OVER (ORDER BY total DESC, payee) AS place, CASE WHEN total >= 100000 THEN 'big' WHEN total >= 25000 THEN 'middling' ELSE 'small' END AS band FROM totals ORDER BY place", ordered=True,
-            extra="INSERT INTO payments VALUES (99, 'Sable Trust', 'Bo Lund', 900000, '2026-03-08', NULL);")
+            extra="INSERT INTO payments VALUES (99, 'Sable Trust', 'Bo Lund', 900000, '2026-03-08', NULL); INSERT INTO payments VALUES (98, 'Sable Trust', 'Ana Petrov', 92000, '2026-03-09', NULL);")
 check("seven payees", lambda: len(learner()), 7)
 check("Halden Voss takes first place with 650000", lambda: learner()[0][:2], ('Halden Voss', 650000))
 check("places run 1 to 7", lambda: [p for _, _, p, _ in learner()], [1, 2, 3, 4, 5, 6, 7])
