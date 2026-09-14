@@ -15,6 +15,8 @@ import whoIsMissing from './who-is-missing.js'
 import nameTheResult from './name-the-result.js'
 import sortIntoBands from './sort-into-bands.js'
 import twoLists from './two-lists.js'
+import runningTotal from './running-total.js'
+import rankWithin from './rank-within.js'
 export { TIERS } from '../../../training/progress.js'
 export { TOOLS, TOOL_BY_ID } from './tools/index.js'
 
@@ -24,5 +26,6 @@ export const NODES = [
   pileThemUp, theCalendar,
   questionInside, whoIsMissing, nameTheResult,
   sortIntoBands, twoLists,
+  runningTotal, rankWithin,
 ]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
