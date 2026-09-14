@@ -10,6 +10,14 @@ import keepTheEmpty from './keep-the-empty.js'
 import tableMeetsItself from './table-meets-itself.js'
 import pileThemUp from './pile-them-up.js'
 import theCalendar from './the-calendar.js'
+import questionInside from './question-inside.js'
+import whoIsMissing from './who-is-missing.js'
+import nameTheResult from './name-the-result.js'
+import sortIntoBands from './sort-into-bands.js'
+import twoLists from './two-lists.js'
+import runningTotal from './running-total.js'
+import rankWithin from './rank-within.js'
+import climbTheChain from './climb-the-chain.js'
 export { TIERS } from '../../../training/progress.js'
 export { TOOLS, TOOL_BY_ID } from './tools/index.js'
 
@@ -17,5 +25,9 @@ export const NODES = [
   pickColumns, narrowItDown, lineThemUp, countWhatIsThere, nothingIsAValue,
   sideBySide, keepTheEmpty, tableMeetsItself,
   pileThemUp, theCalendar,
+  questionInside, whoIsMissing, nameTheResult,
+  sortIntoBands, twoLists,
+  runningTotal, rankWithin,
+  climbTheChain,
 ]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
