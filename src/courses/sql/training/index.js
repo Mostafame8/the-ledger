@@ -17,6 +17,7 @@ import sortIntoBands from './sort-into-bands.js'
 import twoLists from './two-lists.js'
 import runningTotal from './running-total.js'
 import rankWithin from './rank-within.js'
+import climbTheChain from './climb-the-chain.js'
 export { TIERS } from '../../../training/progress.js'
 export { TOOLS, TOOL_BY_ID } from './tools/index.js'
 
@@ -27,5 +28,6 @@ export const NODES = [
   questionInside, whoIsMissing, nameTheResult,
   sortIntoBands, twoLists,
   runningTotal, rankWithin,
+  climbTheChain,
 ]
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))

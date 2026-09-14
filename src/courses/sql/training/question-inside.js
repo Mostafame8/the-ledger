@@ -27,9 +27,9 @@ FROM transfers
 WHERE amount > (SELECT AVG(amount) FROM transfers)`,
       'the query above',
       [
-        { line: 3, state: { average: 426250.0 }, ask: 'average', note: 'The bracketed question runs first and once: fourteen amounts adding to 5,967,500, divided by fourteen.' },
-        { line: 2, state: { average: 426250.0, rows: 14 }, ask: 'rows', note: 'Then the outer query puts all fourteen transfers on the bench and compares each one with that single number.' },
-        { line: 1, state: { average: 426250.0, rows: 14, returns: { py: '[(3, 480000), (5, 1500000), (13, 3200000)]' } }, ask: 'returns', note: 'Three clear the average. Add a transfer tomorrow and the average moves with it, which is the whole point.' },
+        { line: 3, state: { average: { py: '426250.0' } }, ask: 'average', note: 'The bracketed question runs first and once: fourteen amounts adding to 5,967,500, divided by fourteen.' },
+        { line: 2, state: { average: { py: '426250.0' }, rows: 14 }, ask: 'rows', note: 'Then the outer query puts all fourteen transfers on the bench and compares each one with that single number.' },
+        { line: 1, state: { average: { py: '426250.0' }, rows: 14, returns: { py: '[(3, 480000), (5, 1500000), (13, 3200000)]' } }, ask: 'returns', note: 'Three clear the average. Add a transfer tomorrow and the average moves with it, which is the whole point.' },
       ]),
     spot('Dax writes WHERE amount > (SELECT amount FROM transfers WHERE from_acct = 1). Account 1 sent three transfers. What happens?',
       ['It compares against the first of the three',
